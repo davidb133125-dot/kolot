@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>קולות - טקסט לדיבור</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ef; --panel:#ffffff; --ink:#1d1b18; --muted:#6b665d; --line:#e4dfd5;
+  --accent:#1f5f5b; --accent-ink:#ffffff; --accent-soft:#e3efed; --danger:#a8322d; --shadow:0 1px 3px rgba(0,0,0,.06),0 6px 24px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151513; --panel:#1f1e1b; --ink:#efece6; --muted:#a39d92; --line:#34322d;
+    --accent:#5fb3ab; --accent-ink:#0e1c1b; --accent-soft:#1f3331; --danger:#e07a73; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151513; --panel:#1f1e1b; --ink:#efece6; --muted:#a39d92; --line:#34322d;
+  --accent:#5fb3ab; --accent-ink:#0e1c1b; --accent-soft:#1f3331; --danger:#e07a73; --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Assistant,system-ui,sans-serif;font-size:16px;line-height:1.55}
+header{max-width:1180px;margin:0 auto;padding:24px 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.01em}
+h1 small{display:block;font-size:15px;font-weight:400;color:var(--muted)}
+h2{margin:0 0 12px;font-size:19px}
+main{max-width:1180px;margin:0 auto;padding:8px 16px 140px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+.hint{color:var(--muted);font-size:13px;font-weight:400}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+textarea{min-height:260px;resize:vertical;line-height:1.7}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.row{grid-template-columns:1fr}}
+button{font:inherit;font-weight:600;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 14px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-size:17px;padding:12px 20px}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.icon{padding:6px 10px;font-size:14px}
+button.danger{color:var(--danger)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.status{font-size:14px;color:var(--muted);min-height:1.5em}
+.status.err{color:var(--danger)}
+.progress{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:10px;display:none}
+.progress>div{height:100%;width:0;background:var(--accent);transition:width .3s}
+.styles{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+details{margin-top:12px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+.lib-tools{display:flex;gap:8px;margin-bottom:12px}
+.lib{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:640px;overflow:auto}
+.item{border:1px solid var(--line);border-radius:11px;padding:10px 12px;cursor:pointer;background:var(--bg)}
+.item.active{border-color:var(--accent);background:var(--accent-soft)}
+.item .t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .m{font-size:13px;color:var(--muted)}
+.item .b{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.empty{color:var(--muted);text-align:center;padding:30px 10px}
+.player{position:fixed;bottom:0;inset-inline:0;background:var(--panel);border-top:1px solid var(--line);padding:10px 16px;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.player-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.player .now{flex:1 1 200px;min-width:0}
+.player .now b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.player .now span{font-size:13px;color:var(--muted)}
+.player audio{flex:2 1 300px;width:100%}
+.player .ctl{display:flex;gap:6px}
+.toggle{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;margin:0}
+.toggle input{width:auto}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);max-width:520px;width:calc(100% - 32px);padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+.small{font-size:13px;color:var(--muted)}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>קולות<small>הופכים טקסט כתוב להקלטה טבעית, עם אינטונציה שמתאימה לתוכן</small></h1>
+  <div style="display:flex;gap:8px">
+    <button id="themeBtn" class="icon" title="מצב תצוגה">🌓</button>
+    <button id="settingsBtn">⚙️ הגדרות ומפתחות</button>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>טקסט חדש</h2>
+    <label for="title">כותרת ההקלטה <span class="hint">(לא חובה)</span></label>
+    <input id="title" placeholder="למשל: פרק א׳ - הדרך הביתה">
+
+    <label for="text">הטקסט</label>
+    <textarea id="text" placeholder="הדביקו כאן סיפור, מאמר או כל קטע אחר..."></textarea>
+    <div class="small" id="count">0 תווים</div>
+
+    <div class="row">
+      <div>
+        <label for="engine">מנוע קול</label>
+        <select id="engine">
+          <option value="eleven">ElevenLabs (הכי טבעי)</option>
+          <option value="openai">OpenAI (עם הנחיות הקראה)</option>
+          <option value="browser">קול הדפדפן (חינמי, תצוגה מקדימה בלבד)</option>
+        </select>
+      </div>
+      <div>
+        <label for="voice">קול</label>
+        <select id="voice"></select>
+      </div>
+    </div>
+
+    <label>סגנון הקראה</label>
+    <div class="styles" id="styles"></div>
+
+    <details>
+      <summary>כוונון מתקדם</summary>
+      <label for="instr">הנחיות הקראה <span class="hint">(נשלחות ל-OpenAI; ב-ElevenLabs הסגנון משפיע על היציבות וההבעה)</span></label>
+      <textarea id="instr" style="min-height:90px"></textarea>
+      <div class="row">
+        <div>
+          <label for="speed">מהירות: <span id="speedVal">1.0</span></label>
+          <input type="range" id="speed" min="0.7" max="1.2" step="0.05" value="1">
+        </div>
+        <div>
+          <label for="expr">הבעה רגשית: <span id="exprVal">50</span>%</label>
+          <input type="range" id="expr" min="0" max="100" step="5" value="50">
+        </div>
+      </div>
+    </details>
+
+    <div class="actions">
+      <button class="primary" id="go">🎙️ צור הקלטה</button>
+      <button id="stopPreview" style="display:none">עצור</button>
+      <div class="status" id="status"></div>
+    </div>
+    <div class="progress" id="prog"><div></div></div>
+  </section>
+
+  <section class="card">
+    <h2>ההקלטות שלי</h2>
+    <div class="lib-tools">
+      <input id="search" placeholder="חיפוש בהקלטות...">
+    </div>
+    <ul class="lib" id="lib"></ul>
+  </section>
+</main>
+
+<div class="player">
+  <div class="player-in">
+    <div class="now"><b id="nowTitle">לא נבחרה הקלטה</b><span id="nowMeta"></span></div>
+    <div class="ctl">
+      <button class="icon" id="prevBtn" title="ההקלטה הקודמת">⏮ הקודמת</button>
+      <button class="icon" id="nextBtn" title="ההקלטה הבאה">הבאה ⏭</button>
+    </div>
+    <audio id="audio" controls></audio>
+    <label class="toggle"><input type="checkbox" id="autoNext" checked> מעבר אוטומטי לבאה</label>
+  </div>
+</div>
+
+<dialog id="settings">
+  <h2>הגדרות ומפתחות</h2>
+  <p class="small">המפתחות נשמרים רק בדפדפן שלך, ונשלחים ישירות לשירות הקול. הם לא עוברים דרך שום שרת אחר.</p>
+  <label for="elKey">מפתח ElevenLabs</label>
+  <input id="elKey" type="password" autocomplete="off" placeholder="sk_...">
+  <div class="small">מקבלים ב-elevenlabs.io ← Profile ← API Keys</div>
+  <label for="elModel">מודל ElevenLabs</label>
+  <select id="elModel">
+    <option value="eleven_v3">Eleven v3 (הכי הבעתי)</option>
+    <option value="eleven_multilingual_v2">Multilingual v2 (יציב)</option>
+  </select>
+  <label for="oaKey">מפתח OpenAI</label>
+  <input id="oaKey" type="password" autocomplete="off" placeholder="sk-...">
+  <div class="small">מקבלים ב-platform.openai.com ← API keys</div>
+  <div class="actions">
+    <button class="primary" id="saveSettings">שמירה</button>
+    <button id="closeSettings">סגירה</button>
+  </div>
+</dialog>
+
+<script>
+/* ---------- storage helpers ---------- */
+const ls = {
+  get(k, d=''){ try{ const v = localStorage.getItem(k); return v===null?d:v }catch(e){ return d } },
+  set(k, v){ try{ localStorage.setItem(k, v) }catch(e){} }
+};
+let dbP = null;
+function db(){
+  if(!dbP) dbP = new Promise((res, rej)=>{
+    const r = indexedDB.open('kolot', 1);
+    r.onupgradeneeded = ()=> r.result.createObjectStore('recs', {keyPath:'id'});
+    r.onsuccess = ()=> res(r.result);
+    r.onerror = ()=> rej(r.error);
+  });
+  return dbP;
+}
+async function tx(mode, fn){
+  const d = await db();
+  return new Promise((res, rej)=>{
+    const t = d.transaction('recs', mode); const s = t.objectStore('recs');
+    const out = fn(s); t.oncomplete = ()=> res(out && out.result); t.onerror = ()=> rej(t.error);
+  });
+}
+const saveRec = r => tx('readwrite', s=> s.put(r));
+const delRec = id => tx('readwrite', s=> s.delete(id));
+const allRecs = () => tx('readonly', s=> s.getAll());
+
+/* ---------- reading styles ---------- */
+const STYLES = [
+  {id:'story', name:'📖 מספר סיפורים', stab:0.35, instr:'Read like a warm, engaged audiobook narrator. Follow the emotional arc of the story: slow down and soften for tender or sad moments, build tension for suspense, lift the energy for joyful moments. Give dialogue a slightly different, lively character from the narration. Pause naturally at commas, between sentences and longer between paragraphs.'},
+  {id:'kids', name:'🧸 סיפור לילדים', stab:0.3, instr:'Read like a loving parent telling a bedtime story to a child: gentle, expressive, a little playful, with clear articulation, a calm pace, smiles in the voice and gentle pauses for anticipation.'},
+  {id:'drama', name:'🎭 דרמטי', stab:0.2, instr:'Read with strong dramatic expression, like a stage performer. Emphasise key words, use contrast between quiet intense moments and powerful moments, and take meaningful pauses before important lines.'},
+  {id:'calm', name:'🌿 רגוע ושקט', stab:0.6, instr:'Read slowly, softly and calmly, with a soothing, peaceful tone and long relaxed pauses between sentences.'},
+  {id:'news', name:'📰 קריין חדשות', stab:0.7, instr:'Read like a clear, confident, professional news anchor: neutral and authoritative, crisp articulation, steady pace, natural emphasis on facts and names.'},
+  {id:'lecture', name:'🎓 הרצאה / שיעור', stab:0.55, instr:'Read like an engaging teacher giving a lesson: clear, warm and explanatory, emphasise key ideas, slow down slightly on important points, and pause briefly to let ideas sink in.'},
+];
+let style = ls.get('style','story');
+
+/* ---------- voices ---------- */
+const OA_VOICES = [
+  ['marin','Marin - נשי חם'],['cedar','Cedar - גברי חם'],['nova','Nova - נשי צעיר'],['onyx','Onyx - גברי עמוק'],
+  ['coral','Coral - נשי חי'],['ash','Ash - גברי'],['sage','Sage - נשי רגוע'],['ballad','Ballad - גברי רך'],
+  ['verse','Verse - גברי הבעתי'],['echo','Echo - גברי'],['fable','Fable - מספר סיפורים'],['shimmer','Shimmer - נשי'],['alloy','Alloy - ניטרלי']
+];
+const EL_DEFAULT = [
+  ['JBFqnCBsd6RMkjVDRZzb','George - גברי מספר'],['pNInz6obpgDQGcFmaJgV','Adam - גברי עמוק'],['onwK4e9ZLuTAKqWW03F9','Daniel - גברי סמכותי'],
+  ['TX3LPaxmHKxFdv7VOQHJ','Liam - גברי צעיר'],['EXAVITQu4vr4xnSDxMaL','Sarah - נשי רך'],['XrExE9yKIg1WjnnlVkGX','Matilda - נשי חם'],
+  ['pFZP5JQG7iQjIQuC4Bku','Lily - נשי'],['N2lVS1w4EtoT3dr4eOWO','Callum - גברי'],
+];
+let elVoices = null;
+
+const $ = id => document.getElementById(id);
+const engineSel=$('engine'), voiceSel=$('voice'), statusEl=$('status'), prog=$('prog');
+
+async function loadElVoices(){
+  const key = ls.get('elKey'); if(!key) return null;
+  try{
+    const r = await fetch('https://api.elevenlabs.io/v1/voices', {headers:{'xi-api-key':key}});
+    if(!r.ok) return null;
+    const j = await r.json();
+    return j.voices.map(v=>[v.voice_id, v.name + (v.labels && v.labels.gender ? ' - ' + ({male:'גברי',female:'נשי'}[v.labels.gender]||v.labels.gender) : '')]);
+  }catch(e){ return null }
+}
+async function fillVoices(){
+  const eng = engineSel.value; let list = [];
+  if(eng==='openai') list = OA_VOICES;
+  else if(eng==='eleven'){ if(!elVoices) elVoices = await loadElVoices(); list = elVoices || EL_DEFAULT; }
+  else {
+    const vs = speechSynthesis.getVoices();
+    const he = vs.filter(v=>v.lang.startsWith('he')||v.lang.startsWith('iw'));
+    list = (he.length?he:vs).map(v=>[v.name, v.name+' ('+v.lang+')']);
+    if(!list.length) list=[['','ברירת מחדל']];
+  }
+  const saved = ls.get('voice_'+eng);
+  voiceSel.innerHTML = list.map(([v,n])=>`<option value="${esc(v)}">${esc(n)}</option>`).join('');
+  if(saved && list.some(x=>x[0]===saved)) voiceSel.value = saved;
+}
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged = ()=>{ if(engineSel.value==='browser') fillVoices() };
+
+/* ---------- UI setup ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+function renderStyles(){
+  $('styles').innerHTML = STYLES.map(s=>`<button class="chip" data-s="${s.id}" aria-pressed="${s.id===style}">${s.name}</button>`).join('');
+  const s = STYLES.find(x=>x.id===style) || STYLES[0];
+  $('instr').value = s.instr;
+}
+$('styles').onclick = e=>{ const b=e.target.closest('[data-s]'); if(!b) return; style=b.dataset.s; ls.set('style',style); renderStyles(); };
+engineSel.value = ls.get('engine','eleven');
+engineSel.onchange = ()=>{ ls.set('engine', engineSel.value); fillVoices(); };
+voiceSel.onchange = ()=> ls.set('voice_'+engineSel.value, voiceSel.value);
+$('text').value = ls.get('draft');
+$('text').oninput = ()=>{ ls.set('draft', $('text').value); $('count').textContent = $('text').value.length.toLocaleString('he-IL')+' תווים'; };
+$('text').oninput();
+$('speed').oninput = ()=> $('speedVal').textContent = (+$('speed').value).toFixed(2);
+$('expr').oninput = ()=> $('exprVal').textContent = $('expr').value;
+
+/* theme */
+$('themeBtn').onclick = ()=>{
+  const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  const nx = cur==='dark'?'light':'dark'; document.documentElement.dataset.theme = nx; ls.set('theme',nx);
+};
+if(ls.get('theme')) document.documentElement.dataset.theme = ls.get('theme');
+
+/* settings */
+const dlg = $('settings');
+$('settingsBtn').onclick = ()=>{ $('elKey').value=ls.get('elKey'); $('oaKey').value=ls.get('oaKey'); $('elModel').value=ls.get('elModel','eleven_v3'); dlg.showModal(); };
+$('closeSettings').onclick = ()=> dlg.close();
+$('saveSettings').onclick = ()=>{
+  ls.set('elKey',$('elKey').value.trim()); ls.set('oaKey',$('oaKey').value.trim()); ls.set('elModel',$('elModel').value);
+  elVoices = null; dlg.close(); fillVoices(); setStatus('ההגדרות נשמרו');
+};
+
+function setStatus(t, err){ statusEl.textContent=t; statusEl.className='status'+(err?' err':''); }
+function setProg(p){ prog.style.display = p==null?'none':'block'; prog.firstElementChild.style.width=((p||0)*100)+'%'; }
+
+/* ---------- chunking: split on paragraphs & sentences ---------- */
+function chunkText(text, max){
+  const paras = text.replace(/\r/g,'').split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
+  const out=[]; let cur='';
+  const push = ()=>{ if(cur.trim()) out.push(cur.trim()); cur=''; };
+  for(const p of paras){
+    if((cur+'\n\n'+p).length <= max){ cur = cur ? cur+'\n\n'+p : p; continue; }
+    push();
+    if(p.length <= max){ cur=p; continue; }
+    const sents = p.match(/[^.!?…:;\n]+[.!?…:;]*["'״׳”]*\s*/g) || [p];
+    for(const s of sents){
+      if((cur+s).length > max) push();
+      if(s.length > max){ for(let i=0;i<s.length;i+=max) out.push(s.slice(i,i+max)); }
+      else cur += s;
+    }
+  }
+  push();
+  return out;
+}
+
+/* ---------- engines ---------- */
+async function ttsOpenAI(chunk, voice, instr, speed){
+  const key = ls.get('oaKey'); if(!key) throw new Error('חסר מפתח OpenAI. פתחו את "הגדרות ומפתחות".');
+  let full = instr + ' The text is mostly in Hebrew: pronounce Hebrew naturally, like a native Israeli speaker.';
+  if(speed < 0.95) full += ' Speak at a slower than usual pace.';
+  if(speed > 1.05) full += ' Speak at a slightly brisker pace.';
+  const r = await fetch('https://api.openai.com/v1/audio/speech', {
+    method:'POST', headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    body: JSON.stringify({model:'gpt-4o-mini-tts', voice, input:chunk, instructions:full, response_format:'mp3'})
+  });
+  if(!r.ok) throw new Error('OpenAI: '+ await errText(r));
+  return r.blob();
+}
+async function ttsEleven(chunk, voice, prev, next, stab, expr, speed){
+  const key = ls.get('elKey'); if(!key) throw new Error('חסר מפתח ElevenLabs. פתחו את "הגדרות ומפתחות".');
+  const model = ls.get('elModel','eleven_v3');
+  const body = {text:chunk, model_id:model, language_code:'he',
+    voice_settings:{stability: model==='eleven_v3' ? (stab<0.4?0:stab<0.65?0.5:1) : stab,
+      similarity_boost:0.75, style: expr/100, use_speaker_boost:true, speed: Math.min(1.2, Math.max(0.7, speed))}};
+  if(model!=='eleven_v3'){ if(prev) body.previous_text=prev; if(next) body.next_text=next; }
+  const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}?output_format=mp3_44100_128`, {
+    method:'POST', headers:{'xi-api-key':key,'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('ElevenLabs: '+ await errText(r));
+  return r.blob();
+}
+async function errText(r){
+  try{ const j = await r.json(); const m = j.error?.message || j.detail?.message || j.detail || JSON.stringify(j);
+    if(r.status===401) return 'המפתח לא תקין ('+m+')'; if(r.status===429) return 'חרגתם ממכסת השימוש ('+m+')'; return m;
+  }catch(e){ return 'שגיאה '+r.status }
+}
+
+/* ---------- generate ---------- */
+let busy=false;
+$('go').onclick = async ()=>{
+  if(busy) return;
+  const text = $('text').value.trim(); if(!text) return setStatus('הכניסו טקסט קודם', true);
+  const eng = engineSel.value, voice = voiceSel.value, speed=+$('speed').value, expr=+$('expr').value;
+  const st = STYLES.find(x=>x.id===style)||STYLES[0], instr = $('instr').value.trim()||st.instr;
+
+  if(eng==='browser') return browserPreview(text, voice, speed);
+
+  busy=true; $('go').disabled=true;
+  try{
+    const max = eng==='openai' ? 1800 : (ls.get('elModel','eleven_v3')==='eleven_v3' ? 2500 : 4000);
+    const chunks = chunkText(text, max); const blobs=[];
+    for(let i=0;i<chunks.length;i++){
+      setStatus(`מקליט חלק ${i+1} מתוך ${chunks.length}...`); setProg(i/chunks.length);
+      blobs.push(eng==='openai'
+        ? await ttsOpenAI(chunks[i], voice, instr, speed)
+        : await ttsEleven(chunks[i], voice, chunks[i-1]?.slice(-500), chunks[i+1]?.slice(0,500), st.stab, expr, speed));
+    }
+    setProg(1);
+    const blob = new Blob(blobs, {type:'audio/mpeg'});
+    const rec = {
+      id: Date.now()+'-'+Math.random().toString(36).slice(2,7),
+      title: $('title').value.trim() || text.split('\n')[0].slice(0,50),
+      text, blob, created: Date.now(), engine: eng,
+      voiceName: voiceSel.options[voiceSel.selectedIndex]?.text || voice, style: st.name
+    };
+    await saveRec(rec);
+    $('title').value='';
+    setStatus('✅ ההקלטה מוכנה ונשמרה בספרייה');
+    await refresh(); playId(rec.id);
+  }catch(e){ setStatus(e.message||String(e), true); }
+  finally{ busy=false; $('go').disabled=false; setTimeout(()=>setProg(null),800); }
+};
+
+function browserPreview(text, voiceName, speed){
+  if(!('speechSynthesis' in window)) return setStatus('הדפדפן לא תומך בהקראה', true);
+  speechSynthesis.cancel();
+  const v = speechSynthesis.getVoices().find(x=>x.name===voiceName);
+  chunkText(text, 200).forEach(c=>{ const u=new SpeechSynthesisUtterance(c); if(v) u.voice=v; u.lang=v?.lang||'he-IL'; u.rate=speed; speechSynthesis.speak(u); });
+  $('stopPreview').style.display=''; setStatus('מקריא בקול הדפדפן (תצוגה מקדימה, לא נשמר)');
+}
+$('stopPreview').onclick = ()=>{ speechSynthesis.cancel(); $('stopPreview').style.display='none'; setStatus(''); };
+
+/* ---------- library & player ---------- */
+let recs=[], order=[], currentId=null, currentUrl=null;
+const audio = $('audio');
+async function refresh(){
+  recs = (await allRecs()).sort((a,b)=>b.created-a.created);
+  renderLib();
+}
+function fmtDate(t){ return new Date(t).toLocaleString('he-IL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) }
+function renderLib(){
+  const q = $('search').value.trim();
+  const list = q ? recs.filter(r=>r.title.includes(q)||r.text.includes(q)) : recs;
+  order = list.map(r=>r.id);
+  $('lib').innerHTML = list.length ? list.map(r=>`
+    <li class="item ${r.id===currentId?'active':''}" data-id="${r.id}">
+      <div class="t">${r.id===currentId?'▶ ':''}${esc(r.title)}</div>
+      <div class="m">${esc(r.voiceName)} · ${esc(r.style||'')} · ${fmtDate(r.created)}</div>
+      <div class="b">
+        <button class="icon" data-act="dl">⬇ הורדה</button>
+        <button class="icon" data-act="load">✎ טען טקסט</button>
+        <button class="icon" data-act="ren">שינוי שם</button>
+        <button class="icon danger" data-act="del">מחיקה</button>
+      </div>
+    </li>`).join('') : `<li class="empty">${q?'לא נמצאו הקלטות':'עוד אין הקלטות.<br>כתבו טקסט ולחצו "צור הקלטה".'}</li>`;
+}
+$('search').oninput = renderLib;
+$('lib').onclick = async e=>{
+  const li = e.target.closest('.item'); if(!li) return;
+  const r = recs.find(x=>x.id===li.dataset.id); const act = e.target.closest('[data-act]')?.dataset.act;
+  if(!act) return playId(r.id);
+  if(act==='dl'){ const a=document.createElement('a'); a.href=URL.createObjectURL(r.blob); a.download=(r.title||'recording').replace(/[\\/:*?"<>|]/g,'_')+'.mp3'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+  if(act==='load'){ $('text').value=r.text; $('text').oninput(); $('title').value=r.title; window.scrollTo({top:0,behavior:'smooth'}); }
+  if(act==='ren'){ const n=prompt('שם חדש:', r.title); if(n&&n.trim()){ r.title=n.trim(); await saveRec(r); renderLib(); if(r.id===currentId) $('nowTitle').textContent=r.title; } }
+  if(act==='del'){ if(!confirm('למחוק את "'+r.title+'"?')) return; await delRec(r.id); if(r.id===currentId){ audio.pause(); audio.removeAttribute('src'); currentId=null; $('nowTitle').textContent='לא נבחרה הקלטה'; $('nowMeta').textContent=''; } await refresh(); }
+};
+function playId(id, autoplay=true){
+  const r = recs.find(x=>x.id===id); if(!r) return;
+  if(currentUrl) URL.revokeObjectURL(currentUrl);
+  currentUrl = URL.createObjectURL(r.blob); audio.src = currentUrl; currentId = id;
+  $('nowTitle').textContent = r.title; $('nowMeta').textContent = r.voiceName+' · '+fmtDate(r.created);
+  if(autoplay) audio.play().catch(()=>{});
+  renderLib();
+}
+function step(d){
+  if(!order.length) return;
+  let i = order.indexOf(currentId); i = i<0 ? 0 : i+d;
+  if(i<0||i>=order.length) return;
+  playId(order[i]);
+}
+$('prevBtn').onclick = ()=> step(-1);
+$('nextBtn').onclick = ()=> step(1);
+audio.onended = ()=>{ if($('autoNext').checked) step(1); };
+
+/* ---------- init ---------- */
+renderStyles(); fillVoices(); refresh().catch(e=>setStatus('לא ניתן לפתוח את ספריית ההקלטות בדפדפן הזה',true));
+if(!ls.get('elKey') && !ls.get('oaKey')) setStatus('כדי להתחיל, הכניסו מפתח של ElevenLabs או OpenAI ב"הגדרות ומפתחות".');
+</script>
+</body>
+</html>
