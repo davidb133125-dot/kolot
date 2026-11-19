@@ -761,7 +761,7 @@ let C=null;
 function openCase(id,from){
   const l=L(id);if(!l)return;closeDlg();
   const lv=P.level[id]||1;
-  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,answered:[],used:new Set(),cur:null,state:null,score:0,count:0,practiceN:6,confirmX:false};
+  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,used:new Set(),cur:null,state:null,score:0,count:0,practiceN:6,newServed:0,pending:[],fails:{},confirmX:false};
   $("#case").hidden=false;document.body.style.overflow="hidden";renderCase();
 }
 function openReview(){
@@ -798,7 +798,7 @@ function bindCase(){
   const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
   on("cx",()=>{if(C.phase==="cover"||C.phase==="result"||C.readOnly){closeCase();return;}C.confirmX=true;renderCase();window.scrollTo(0,0);$("#case").scrollTop=0;});
   on("cxYes",closeCase);on("cxNo",()=>{C.confirmX=false;renderCase();});
-  on("go1",()=>{C.phase="exp";C.cur=C.l.experience[0];C.state=null;renderCase();});
+  on("go1",()=>{C.phase="exp";serve(C.l.experience[0]);});
   on("goTeach",()=>{C.readOnly=true;C.phase="teach";C.teachIdx=0;renderCase();});
   on("tPrev",()=>{C.teachIdx--;renderCase();});
   on("tNext",()=>{if(C.teachIdx<C.l.teach.length-1){C.teachIdx++;renderCase();}else if(C.readOnly){closeCase();}else{C.phase="practice";nextPractice();}});
@@ -812,7 +812,8 @@ function itemHTML(){
   if(C.phase==="exp"){tab="התנסות";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עוד לא למדנו את הכלל. נסו לפי מה שאתם חושבים.</div></div>`;}
   else if(C.phase==="judge"){tab="משימת שיפוט";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עכשיו אתם השופטים. בלש טוב הוא קודם כל חבר טוב: מוצאים את הטעות כדי לעזור.</div></div>`;}
   else if(C.phase==="review"){tab=`חזרה · ${C.idx}/${C.list.length}`;}
-  else{tab=`שאלה ${C.count+1} מתוך ${C.practiceN}`;}
+  else{tab=it._retry==="similar"?"ניסיון נוסף · שאלה דומה":it._retry==="again"?"ניסיון נוסף · השאלה חוזרת":`שאלה ${C.newServed} מתוך ${C.practiceN}`;}
+  if(it._retry&&C.phase!=="review")lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> ${it._retry==="similar"?"קודם זה לא הצליח. הנה שאלה דומה, על אותה מיומנות.":"בואו ננסה שוב את השאלה הזאת. קראו לאט והשתמשו בכלי הבלשי."}</div></div>`;
   const lvl=C.phase==="practice"?`<span class="lvl">רמה ${["א","ב","ג"][it.lv-1]}</span>`:"";
   let inner="";
   if(it.type==="choice"){inner=`<div class="opts">${it.opts.map((o,i)=>{let cls="";if(checked){if(i===it.a)cls="right";else if(st.sel===i)cls="wrong";}return `<button class="opt ${cls}" data-o="${i}" aria-pressed="${st.sel===i}" ${checked?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>`;}
@@ -823,7 +824,7 @@ function itemHTML(){
   let fb="";
   if(checked){const ok=st.score>=.999;const part=!ok&&st.score>0;
     if(C.phase==="exp")fb=`<div class="fb ok"><b>${ok?"יפה מאוד!":"ניסיון טוב!"}</b>${esc(it.why||"")}</div>`;
-    else fb=`<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}</div>`;}
+    else fb=`<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}${!ok&&C.retryNote==="soon"?"<br><small>עוד מעט תקבלו שאלה דומה, כדי לתרגל שוב.</small>":""}${!ok&&C.retryNote==="later"?"<br><small>נחזור לזה ב״תיקים פתוחים״, ואפשר לשאול את המורה.</small>":""}${!ok&&C.phase==="judge"&&C.judgeAgain?"<br><small>קראו שוב את ההסבר, ותקבלו ניסיון נוסף.</small>":""}</div>`;}
   const showHint=!checked&&it.hint&&(st.hint||(C.phase==="practice"&&C.level===1));
   const canCheck=it.type==="choice"?st.sel!==undefined:it.type==="tap"?(st.sel||[]).length>0:(st.placed||[]).length>=it.items.length;
   const actions=checked?`<button class="btn primary" id="nextQ">${C.phase==="exp"?"לכלי הבלשי ▶":"הבא ▶"}</button>`:
@@ -852,23 +853,48 @@ function afterCheck(it,sc){
   if(C.phase==="practice"||C.phase==="judge"){C.score+=sc;C.count++;P.points+=Math.round(sc*10*(it.lv||2));
     if(sc<.999&&it.k&&!P.review.some(r=>r.k===it.k))P.review.push({l:C.l.id,k:it.k});
     if(sc>=.999&&it.k)P.review=P.review.filter(r=>r.k!==it.k);
-    if(C.phase==="practice"){if(sc>=.999){C.streak++;if(C.streak>=2&&C.level<3){C.level++;C.streak=0;C.lvlMsg="up";}}else{C.streak=0;if(sc<.5&&C.level>1){C.level--;C.lvlMsg="down";}}}
+    if(C.phase==="practice"){if(sc>=.999){C.streak++;if(C.streak>=2&&C.level<3){C.level++;C.streak=0;C.lvlMsg="up";}}else{C.streak=0;if(sc<.5&&C.level>1){C.level--;C.lvlMsg="down";}
+      const sk=skill(it);C.fails[sk]=(C.fails[sk]||0)+1;
+      if(C.fails[sk]<=3){C.pending.push({sk,k:it.k,due:C.count+2});C.retryNote="soon";}else C.retryNote="later";}}
+    if(C.phase==="judge"&&sc<.999&&!C.judgeRetried){C.judgeRetried=true;C.judgeAgain=true;}
     save();}
   if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);else P.points+=0;save();}
 }
 function advance(){
   if(C.phase==="exp"){C.phase="teach";C.teachIdx=0;C.cur=null;renderCase();return;}
-  if(C.phase==="practice"){if(C.count>=C.practiceN){C.phase="judge";C.cur=C.l.judge[0];C.state=null;renderCase();return;}nextPractice();return;}
-  if(C.phase==="judge"){finish();return;}
+  if(C.phase==="practice"){C.retryNote=null;nextPractice();return;}
+  if(C.phase==="judge"){if(C.judgeAgain){C.judgeAgain=false;serve(C.l.judge[0],"again");return;}finish();return;}
   if(C.phase==="review"){nextReview();return;}
 }
+/* skills: a wrong answer brings back a similar question (same skill), or the same one reshuffled */
+const SK={a3:"agree",a6:"agree",a7:"agree",a8:"agree",a13:"agree",a10:"trait",a14:"trait",a15:"trait",a5:"rule",a16:"rule"};
+const skill=it=>SK[it.k]||it.type;
+function shuffleArr(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuf(it){
+  const c={...it};
+  if(it.type==="choice"){const idx=shuffleArr(it.opts.map((_,i)=>i));c.opts=idx.map(i=>it.opts[i]);c.a=idx.indexOf(it.a);}
+  else if(it.type==="sort"){let items;for(let t=0;t<8;t++){items=shuffleArr(it.items);if(items.map(x=>x[0]).join()!==it.items.map(x=>x[0]).join())break;}c.items=items;}
+  else if(it.type==="tap"&&it.grid){const idx=shuffleArr(it.words.map((_,i)=>i));c.words=idx.map(i=>it.words[i]);c.targets=it.targets.map(t=>idx.indexOf(t));}
+  return c;
+}
+function serve(it,retry){C.cur=shuf(it);C.cur._retry=retry||"";C.state=null;renderCase();$("#case").scrollTop=0;}
 function nextPractice(){
+  if(C.lvlMsg){const m=C.lvlMsg;C.lvlMsg=null;flash(m==="up"?`עליתם לרמה ${["א","ב","ג"][C.level-1]}!`:`עוברים לרמה ${["א","ב","ג"][C.level-1]}, עם עוד רמזים`);}
+  // a pending retry that is due (or the queue of new questions is over)
+  let pi=C.pending.findIndex(p=>p.due<=C.count);
+  if(pi<0&&C.newServed>=C.practiceN&&C.pending.length)pi=0;
+  if(pi>=0){const p=C.pending.splice(pi,1)[0];
+    const sim=C.l.pool.filter(i=>!C.used.has(i.k)&&skill(i)===p.sk);
+    let pick=sim.filter(i=>i.lv<=C.level);if(!pick.length)pick=sim;
+    if(pick.length){const it=pick[Math.floor(Math.random()*pick.length)];C.used.add(it.k);serve(it,"similar");}
+    else serve(C.l.pool.find(i=>i.k===p.k),"again");
+    return;}
+  if(C.newServed>=C.practiceN){C.phase="judge";serve(C.l.judge[0]);return;}
   const pool=C.l.pool.filter(i=>!C.used.has(i.k));
   let cand=pool.filter(i=>i.lv===C.level);if(!cand.length)cand=pool.filter(i=>Math.abs(i.lv-C.level)===1);if(!cand.length)cand=pool;
-  const it=cand[Math.floor(Math.random()*cand.length)];C.used.add(it.k);C.cur=it;C.state=null;renderCase();$("#case").scrollTop=0;
-  if(C.lvlMsg){const m=C.lvlMsg;C.lvlMsg=null;flash(m==="up"?`עליתם לרמה ${["א","ב","ג"][C.level-1]}!`:`עוברים לרמה ${["א","ב","ג"][C.level-1]}, עם עוד רמזים`);}
+  const it=cand[Math.floor(Math.random()*cand.length)];C.used.add(it.k);C.newServed++;serve(it);
 }
-function nextReview(){if(C.idx>=C.list.length){C.phase="result";C.reviewDone=true;renderCase();return;}const it=C.list[C.idx++];C.cur=it;C.state=null;renderCase();}
+function nextReview(){if(C.idx>=C.list.length){C.phase="result";C.reviewDone=true;renderCase();return;}const it=C.list[C.idx++];serve(it);}
 function flash(t){const d=document.createElement("div");d.className="toast";d.style.position="fixed";d.style.zIndex=50;d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
 function finish(){
   const pct=Math.round(C.score/C.count*100);const l=C.l;const prev=P.solved[l.id];const wasDone=prev&&prev.done;
