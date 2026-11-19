@@ -108,6 +108,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .goal .bar{flex:1;height:7px}
 .compass{position:absolute;top:calc(env(safe-area-inset-top,0px) + 96px);right:max(14px,env(safe-area-inset-right,0px));width:52px;height:52px;border-radius:50%;background:rgba(25,32,44,.85);border:2px solid #6fc7b5;display:grid;place-items:center}
 .compass svg{width:26px;height:26px;transition:transform .15s linear}
+.compass{padding:0;color:#fff}.compass span{position:absolute;top:100%;margin-top:3px;font-size:12px;font-weight:800;background:rgba(25,32,44,.85);border-radius:6px;padding:0 6px;white-space:nowrap}
 .joy{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);width:140px;height:140px;border-radius:50%;background:rgba(25,32,44,.35);border:2px solid rgba(255,255,255,.25)}
 .joy.left{left:max(18px,env(safe-area-inset-left,0px))}
 .joy.right{right:max(18px,env(safe-area-inset-right,0px))}
@@ -122,7 +123,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .dlg p{margin:6px 0 12px;font-size:18px}
 .dlg .row{justify-content:flex-start}
 .mapov{position:absolute;inset:0;background:rgba(15,20,28,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);z-index:5}
-.mapov canvas{max-width:100%;max-height:72vh;image-rendering:pixelated;border:4px solid #f3ead6;border-radius:8px}
+.mapov{overflow-y:auto;justify-content:flex-start}
+.maplist{width:100%;max-width:560px;display:flex;flex-direction:column;gap:8px;direction:rtl}
+.mlhint{color:#dfe7f3;margin:0;font-size:14px;text-align:center}
+.mlrow{display:flex;align-items:center;gap:10px;background:var(--card);border:0;border-radius:12px;padding:10px 12px;text-align:right;width:100%}
+.mlrow.locked{opacity:.65}
+.mln{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:#7a6f5c;color:#fff;flex:0 0 auto}
+.mln.u{background:var(--navy)}.mln.d{background:var(--good)}
+.mlt{flex:1;min-width:0}.mlt b{display:block}.mlt small{color:var(--muted)}
+.mapov canvas{max-width:100%;max-height:42vh;image-rendering:pixelated;border:4px solid #f3ead6;border-radius:8px}
 .mapov h3{color:#fff}
 .nbov{justify-content:flex-start;overflow-y:auto}
 .nbbox{background:var(--paper);border-radius:16px;padding:16px;width:100%;max-width:560px;direction:rtl}
@@ -237,6 +246,21 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .passpop b{display:block;font-family:var(--display);font-weight:400;font-size:21px;color:#1d5233}
 .perfect{background:#fff3cf;border:2px solid var(--brass);border-radius:14px;padding:12px;margin:8px 0;font-size:17px}
 .perfect b{display:block;font-family:var(--display);font-weight:400;font-size:21px;color:#6b4a12}
+.topics{display:flex;flex-wrap:wrap;gap:8px}
+.topic{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-weight:700}
+.topic[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.topic[aria-pressed="true"]::before{content:"✓ "}
+.trow{display:flex;align-items:center;gap:10px;text-align:right}
+.trow b{flex:0 0 110px}.trow .bar{flex:1}.trow span{flex:0 0 44px;font-weight:800;font-variant-numeric:tabular-nums}
+.chap{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.chap summary{display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer;list-style:none}
+.chap summary::-webkit-details-marker{display:none}
+.chap[open]{padding-bottom:12px}.chap>*:not(summary){margin-inline:12px}
+.note.tease{background:#f6f1e3;border-style:dashed}.note small{display:block;color:var(--muted);margin-top:4px;font-size:13px}
+.notecard{background:#fff8dc;border:1px solid #ecd9a0;border-radius:4px 4px 16px 4px;padding:14px 16px;box-shadow:0 2px 0 #ecd9a0}
+.notecard small{display:block;color:#8a6a1e;font-weight:800;font-size:13px}
+.notecard b{display:block;font-family:var(--display);font-weight:400;font-size:24px;color:var(--navy)}
+.notecard p{margin:6px 0 0;font-size:18px}.notecard .noteex{background:rgba(255,255,255,.6);border-radius:8px;padding:6px 10px;font-weight:700}
 .confirm{margin-top:10px;background:var(--bad-soft);border-radius:12px;padding:12px}
 
 /* onboarding */
@@ -263,10 +287,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <button class="avatar" id="avatarBtn" aria-label="הפרופיל שלי">ב</button>
   </div></header>
   <main id="screen"></main>
-  <nav class="nav" aria-label="ניווט ראשי"><div class="nav-in">
+  <nav class="nav" aria-label="ניווט ראשי"><div class="nav-in" style="grid-template-columns:repeat(5,1fr)">
     <button data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>היום</button>
     <button data-go="world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>העולם</button>
     <button data-go="cases"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7l2 2h9v11H3z"/></svg>תיקים</button>
+    <button data-go="exam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4h6v3H9zM6 6h12v15H6z"/><path d="m9 13 2 2 4-4"/></svg>מבחן</button>
     <button data-go="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>אני</button>
   </div></nav>
 </div>
@@ -279,23 +304,24 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="gl"><span id="goalCases">0/5 תיקים</span><div class="bar"><i id="goalBar" style="width:0%"></i></div><span id="goalClues">0/8 רמזים</span></div></div>
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><button class="hbtn" id="mapBtn">מפה</button><button class="hbtn" id="nbBtn">מחברת</button></div>
   </div>
-  <div class="compass" id="compass" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 19 20 12 16 5 20z" fill="#6fc7b5"/></svg></div>
+  <button class="compass" id="compass" aria-label="החץ מראה את הדרך ליעד הבא"><svg viewBox="0 0 24 24"><path d="M12 2 19 20 12 16 5 20z" fill="#6fc7b5"/></svg><span>ליעד</span></button>
   <div class="joy left" id="joy"><i id="knob"></i></div>
   <button class="act right" id="actBtn" hidden>כניסה</button>
   <div class="toast" id="toast" hidden></div>
   <div class="dlg" id="dlg" hidden><div class="who" id="dlgWho"></div><p id="dlgText"></p><div class="row" id="dlgBtns"></div></div>
   <div class="mapov nbov" id="nbov" hidden><div class="nbbox"><h3>מחברת הבלש</h3><div id="nbBody"></div><button class="btn soft" id="nbClose" style="width:100%;margin-top:12px">סגירה</button></div></div>
-  <div class="mapov" id="mapov" hidden><h3>מפת רובע המילים</h3><canvas id="mapcv"></canvas><button class="btn soft" id="mapClose" style="flex:0 0 auto">סגירה</button></div>
+  <div class="mapov" id="mapov" hidden><h3>מפת רובע המילים</h3><canvas id="mapcv"></canvas><div class="maplist" id="mapList"></div><button class="btn soft" id="mapClose" style="flex:0 0 auto;min-width:160px">סגירה</button></div>
 </div>
 
 <div id="case" hidden></div>
 <div id="onb" hidden></div>
 
+<script src="bank.js"></script>
 <script>
 "use strict";
 /* ============ storage ============ */
 const KEY="sochnut-v1";
-const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,settings:{side:"left",big:false},pos:null,teacher:{gate:"auto",unlockAll:false}});
+const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],settings:{side:"left",big:false},pos:null,teacher:{gate:"auto",unlockAll:false}});
 let P=fresh();
 function load(){try{const s=localStorage.getItem(KEY);if(s)P=Object.assign(fresh(),JSON.parse(s));}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
@@ -505,19 +531,40 @@ const EXTRA={
   {k:"k9b",lv:2,type:"choice",q:"______ את הכלב לטיול בפארק.",opts:["לָקַחְנוּ","לֶקַח"],a:0,why:"לָקַחְנוּ — פעולה. לֶקַח — מה שלומדים."},
   {k:"k13b",lv:3,type:"choice",q:"בסוף הסיפור למדנו ______ חשוב: לא לוותר.",opts:["לֶקַח","לָקַח","לִקֵּחַ"],a:0,why:"לֶקַח — מה שלומדים מסיפור."}]
 };
-LESSONS.forEach(l=>l.pool.push(...(EXTRA[l.id]||[])));
+LESSONS.forEach(l=>l.pool.push(...(EXTRA[l.id]||[]),...((window.BANK&&window.BANK[l.id])||[])));
 Object.assign(SK0,{a13b:"agree",a5b:"rule",a16b:"rule"});
 
 
+const CLUEX={
+ c1:{ex:"מי נבח? הכלב. מה נפל? הכוס.",q:"״הכוס נפלה מהשולחן.״ על איזו שאלה עונה המילה ״הכוס״?",opts:["מה?","איך?","מתי?"],why:"מה נפל? הכוס. שם עצם עונה על מי? מה?"},
+ c2:{ex:"השמחה, הפחד, האומץ — אפשר לפתוח איתם משפט: הפחד עבר.",q:"איזו מילה היא שם עצם של רגש?",opts:["געגועים","מתגעגע","התגעגעו"],why:"הגעגועים היו גדולים. ✓"},
+ c3:{ex:"כלבי = הכלב שלי · ביתו = הבית שלו · גינתנו = הגינה שלנו.",q:"״תיקי״ פירושו...",opts:["התיק שלי","התיק שלו","התיקים שלהם"],why:"י בסוף = שלי."},
+ c4:{ex:"איזה כובע? חם. איזה ים? כחול.",q:"״קנינו כובע חם.״ איזו מילה עונה על ״איזה כובע?״",opts:["חם","קנינו","כובע"],why:"איזה כובע? חם — שם תואר."},
+ c5:{ex:"ספרים חדשים · מחברות חדשות · ספר חדש · מחברת חדשה.",q:"מחברות ______",opts:["חדשות","חדשים","חדש"],why:"מחברות — נקבה, רבות ← חדשות."},
+ c6:{ex:"נטייל: פעולה — טיול · גוף — אנחנו · זמן — עתיד.",q:"״נטייל״ — מי יטייל?",opts:["אנחנו","הם","אתם"],why:"נ בהתחלה ← אנחנו."},
+ c7:{ex:"1. עוצרים ומנסים קריאה אחרת · 2. מנסים שוב, עד 3 פעמים · 3. לא הצליח? מסמנים וממשיכים.",q:"קראתם ״הַדּוֹר הביא חבילה״, וזה לא הגיוני. מה עושים קודם?",opts:["מנסים לקרוא אחרת: הַדַּוָּר","מדלגים על כל הסיפור","מפסיקים לקרוא"],why:"עוצרים ומנסים קריאה אחרת. הַדַּוָּר מביא חבילות."},
+ c8:{ex:"כששופטים עבודה של חבר, מחפשים מה לשפר כדי לעזור, ולא כדי לצחוק.",q:"החבר שלכם טעה בתרגיל. מה בלש טוב עושה?",opts:["מסביר לו בנחמדות איך לתקן","צוחק עליו","לא אומר כלום"],why:"בלש טוב הוא קודם כל חבר טוב."}
+};
+const clueReady=c=>!c.l||isDone(L(c.l));
+const STARS=[
+ {id:"st1",x:14,y:11,req:["noun"],pts:20,tier:1,title:"אתגר ★: שמות עצם מוסתרים",items:[{k:"x1",type:"tap",q:"סמנו את כל שמות העצם במשפט (4).",words:["בבוקר","הקר","יצאו","הדייגים","עם","סירותיהם","אל","הים","הסוער."],targets:[0,3,5,7],why:"בוקר, דייגים, סירותיהם, ים — גם עם תוספות בהתחלה ובסוף."}]},
+ {id:"st2",x:31,y:7,req:["noun","adj"],pts:30,tier:1,title:"אתגר ★: התאמה כפולה",items:[{k:"x2",type:"choice",q:"העוגיות ______ והעוגה ______ חיכו על השולחן. (טרי, טרי)",opts:["הטריות · הטרייה","הטריים · הטרי","טריות · טרייה","הטרייה · הטריות"],a:0,why:"העוגיות — נקבה, רבות, עם ה ← הטריות. העוגה — נקבה, יחידה, עם ה ← הטרייה."}]},
+ {id:"st3",x:3,y:19,req:["noun","adj","verb"],pts:50,tier:2,title:"אתגר ★★: שלוש משפחות",items:[{k:"x3",type:"sort",q:"מילים מאותה משפחה, בתפקידים שונים. מיינו.",bins:["שם עצם","פועל","שם תואר"],items:[["שירה",0],["שרו",1],["מוזיקלי",2],["כתיבה",0],["כתבו",1],["כתוב",2],["זהירות",0],["נזהרו",1],["זהיר",2]],why:"שם עצם — מי/מה. פועל — פג״ז. שם תואר — איזה."}]},
+ {id:"st4",x:41,y:22,req:["noun","adj","verb","sort3"],pts:60,tier:2,title:"אתגר ★★: תאומות מבלבלות",items:[{k:"x4",type:"choice",q:"״ההתרגשות של הילדים הנרגשים גברה כשהתרגשו מהמתנה.״ מה התפקיד של: ההתרגשות, הנרגשים, התרגשו — לפי הסדר?",opts:["שם עצם · שם תואר · פועל","פועל · שם עצם · שם תואר","שם תואר · פועל · שם עצם","שם עצם · פועל · שם תואר"],a:0,why:"ההתרגשות — מה? · הנרגשים — אילו ילדים? · התרגשו — פג״ז."}]},
+ {id:"st5",x:31,y:29,req:["noun","adj","verb","sort3","nikud"],pts:100,tier:3,title:"אתגר ★★★: התיק הגדול של הרובע",items:[
+  {k:"x5",type:"choice",q:"ה______ ______ לנו על ה______ החדש שקרא.",opts:["סַפָּר · סִפֵּר · סֵפֶר","סֵפֶר · סִפֵּר · סַפָּר","סַפָּר · סֵפֶר · סִפֵּר","סִפֵּר · סַפָּר · סֵפֶר"],a:0,why:"הסַפָּר (האיש) סִפֵּר (פעולה) על הסֵפֶר (שקוראים)."},
+  {k:"x6",type:"tap",q:"סמנו את כל שמות התואר (3).",words:["השכנים","הנדיבים","חילקו","עוגות","טעימות","לכל","הילדים","הרעבים."],targets:[1,4,7],why:"אילו שכנים? נדיבים. אילו עוגות? טעימות. אילו ילדים? רעבים."},
+  {k:"x7",type:"choice",q:"הבלש המתלמד כתב: ״הספרים החדשה של הספרייה נקראו בהתלהבות.״ מה צריך לתקן?",opts:["החדשה ← החדשים","נקראו ← נקרא","בהתלהבות ← התלהבות","אין מה לתקן"],a:0,why:"הספרים — זכר, רבים ← החדשים."}]}
+];
 const CLUES=[
- {id:"c1",x:17,y:7,h:"מי? מה?",t:"שם עצם עונה על מי? מה?"},
- {id:"c2",x:31,y:5,h:"רגש",t:"גם רגש הוא שם עצם: שמחה, אומץ."},
- {id:"c3",x:4,y:21,h:"שייכות",t:"כלבי = הכלב שלי. גם זה שם עצם."},
- {id:"c4",x:41,y:16,h:"איזה?",t:"שם תואר עונה על איך? איזה?"},
- {id:"c5",x:28,y:22,h:"התאמה",t:"מחברות חדשות, ספרים חדשים."},
- {id:"c6",x:16,y:23,h:"פג״ז",t:"פעולה, גוף, זמן — זה פועל."},
- {id:"c7",x:3,y:30,h:"3 ניסיונות",t:"נתקעתם במילה? עד 3 ניסיונות, ואז ממשיכים."},
- {id:"c8",x:40,y:32,h:"חבר טוב",t:"בלש טוב הוא קודם כל חבר טוב."}
+ {id:"c1",l:"noun",x:17,y:7,h:"מי? מה?",t:"שם עצם עונה על מי? מה?"},
+ {id:"c2",l:"noun",x:31,y:5,h:"רגש",t:"גם רגש הוא שם עצם: שמחה, אומץ."},
+ {id:"c3",l:"noun",x:4,y:21,h:"שייכות",t:"כלבי = הכלב שלי. גם זה שם עצם."},
+ {id:"c4",l:"adj",x:41,y:16,h:"איזה?",t:"שם תואר עונה על איך? איזה?"},
+ {id:"c5",l:"adj",x:28,y:22,h:"התאמה",t:"מחברות חדשות, ספרים חדשים."},
+ {id:"c6",l:"verb",x:16,y:23,h:"פג״ז",t:"פעולה, גוף, זמן — זה פועל."},
+ {id:"c7",l:"nikud",x:4,y:28,h:"3 ניסיונות",t:"נתקעתם במילה? עד 3 ניסיונות, ואז ממשיכים."},
+ {id:"c8",l:"",x:40,y:32,h:"חבר טוב",t:"בלש טוב הוא קודם כל חבר טוב."}
 ];
 const PLANKS=[
  {q:"איזו מילה היא שם עצם?",o:["קפץ","גשר","רטוב"],a:1},
@@ -549,6 +596,7 @@ function render(){
   const el=$("#screen");
   if(screen==="home")el.innerHTML=homeHTML();
   else if(screen==="cases")el.innerHTML=casesHTML();
+  else if(screen==="exam")el.innerHTML=examHTML();
   else el.innerHTML=meHTML();
   bindScreen();
 }
@@ -567,7 +615,7 @@ function homeHTML(){
   <div class="card"><div class="section-title">תיקים פתוחים</div>
    ${rev?`<p style="margin:6px 0 10px">${rev} שאלות שכדאי לחזור אליהן. כמה דקות ביום, כדי לא לשכוח.</p><button class="btn soft" data-act="review" style="width:100%">לחזור עליהן עכשיו</button>`:`<p class="muted" style="margin:6px 0 0">אין כרגע שאלות לחזרה. שאלות שטועים בהן מחכות כאן.</p>`}</div>
   <div class="card"><div class="section-title">ההתקדמות שלי</div><div class="stats" style="margin-top:10px">
-   <div class="stat"><b>${sc}/${LESSONS.length}</b><span>תיקים</span></div><div class="stat"><b>${P.clues.length}/${CLUES.length}</b><span>רמזים</span></div><div class="stat"><b>${P.planks}/5</b><span>קרשים בגשר</span></div></div></div>
+   <div class="stat"><b>${sc}/${LESSONS.length}</b><span>תיקים</span></div><div class="stat"><b>${P.clues.length}/${CLUES.length}</b><span>רמזים</span></div><div class="stat"><b>${P.stars.length}/${STARS.length}</b><span>כוכבי אתגר</span></div></div></div>
   <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
 }
 function lessonPill(l){const s=P.solved[l.id];if(s&&s.done)return `<span class="pill ok">${s.perfect?"★ ":""}פוענח · ${s.best}%</span>`;if(s)return `<span class="pill todo">${s.best}% · עוד לא ${PASS}%</span>`;return `<span class="pill todo">פתוח</span>`;}
@@ -577,6 +625,22 @@ function casesHTML(){
   ${LESSONS.map((l,i)=>unlocked(l)?`<button class="li" data-open="${l.id}"><span class="ic">${i+1}</span><span class="tx"><b>${l.building}</b><small>${l.title}</small></span>${lessonPill(l)}</button>`:`<button class="li locked" data-open="${l.id}"><span class="ic">🔒</span><span class="tx"><b>${i+1}. ${l.building}</b><small>${l.title} · נפתח אחרי ${LESSONS[i-1].building}</small></span><span class="pill lock">נעול</span></button>`).join("")}</div>
   ${ZONES.slice(1).map(z=>`<div class="section-title">אזור ${z.n} · ${z.name}</div><div class="li locked"><span class="ic">🔒</span><span class="tx"><b>${z.topic}</b><small>ייפתח בהמשך</small></span><span class="pill lock">נעול</span></div>`).join("")}
   </div>`;
+}
+let examSel=null,examLen=10;
+function examHTML(){
+  if(!examSel)examSel=new Set(LESSONS.map(l=>l.id));
+  return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">לקראת מבחן</h2>
+  <p style="margin:0">חזרה בשני שלבים: קודם קוראים את הסיכומים ונזכרים בכלים, ואחר כך מתרגלים שאלות מכל הנושאים יחד. התרגול כאן לא משנה את הציונים בתיקים.</p>
+  <div class="section-title">שלב 1 · לקרוא ולהיזכר</div>
+  ${LESSONS.map((l,i)=>`<div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800;flex:0 0 auto">${i+1}</span><div style="flex:1"><b style="font-family:var(--display);font-weight:400;font-size:20px;color:var(--navy)">${l.title}</b><div class="muted" style="font-size:14px">${l.building}</div></div></div>
+    <div class="sum" style="margin-top:0">${Object.entries(l.sum).map(([k,v])=>`<div><b>${k}?</b>${esc(v)}</div>`).join("")}</div>
+    <div class="row" style="margin-top:10px"><button class="btn soft" data-learn="${l.id}">לקרוא את השיעור המלא</button></div></div>`).join("")}
+  <div class="section-title">שלב 2 · לתרגל לקראת המבחן</div>
+  <div class="card stack" style="padding-top:12px"><b>על אילו נושאים לתרגל?</b>
+   <div class="topics">${LESSONS.map(l=>`<button class="topic" data-topic="${l.id}" aria-pressed="${examSel.has(l.id)}">${l.title.split(":")[0]}</button>`).join("")}</div>
+   <b>כמה שאלות?</b><div class="seg"><button id="len10" aria-pressed="${examLen===10}">10 שאלות</button><button id="len20" aria-pressed="${examLen===20}">20 שאלות</button></div>
+   <button class="btn primary" id="examGo" ${examSel.size?"":"disabled"}>להתחיל תרגול ←</button>
+   <p class="muted" style="margin:0;font-size:14px">השאלות מכל הרמות ובסדר מעורב, כמו במבחן. מי שטועה מקבל בהמשך שאלה דומה, ובסוף רואים באיזה נושא כדאי להתחזק.</p></div></div>`;
 }
 function meHTML(){
   const r=rank();const pct=r.next?Math.round((P.points-r.from)/(r.next[0]-r.from)*100):100;
@@ -590,7 +654,7 @@ function meHTML(){
    <div style="background:var(--brass-soft);border-radius:12px;padding:12px;text-align:right"><div style="display:flex;justify-content:space-between;font-weight:800"><span style="font-family:var(--display);font-weight:400;font-size:20px;color:#6b4a12">${r.name}</span><span>${P.points} נקודות</span></div>
    <div class="bar" style="margin:8px 0"><i style="width:${pct}%"></i></div><small class="muted">${r.next?`עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:"הדרגה הגבוהה ביותר!"} · נקודות על תשובות נכונות, תיקים שפוענחו ורמזים</small></div></div>
   <div class="section-title">מחברת הבלש</div>
-  <div class="notes">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.src)} · ${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<CLUES.length+LESSONS.length?`<div class="note empty">כרטיסי תזכורת: דפי רמז שמוצאים בעולם, וכרטיס על כל תיק שמפענחים. נאספו ${notes.length} מתוך ${CLUES.length+LESSONS.length}.</div>`:""}</div>
+  ${notebookHTML()}<div style="display:none">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.src)} · ${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<CLUES.length+LESSONS.length?`<div class="note empty">כרטיסי תזכורת: דפי רמז שמוצאים בעולם, וכרטיס על כל תיק שמפענחים. נאספו ${notes.length} מתוך ${CLUES.length+LESSONS.length}.</div>`:""}</div>
   <div class="section-title">הגדרות</div>
   <div class="card stack" style="padding-top:12px"><div><b>הג׳ויסטיק בצד</b><div class="seg" style="margin-top:6px"><button id="sideL" aria-pressed="${s.side==="left"}">שמאל</button><button id="sideR" aria-pressed="${s.side==="right"}">ימין</button></div></div>
    <div><b>גודל</b><div class="seg" style="margin-top:6px"><button id="sizeN" aria-pressed="${!s.big}">רגיל</button><button id="sizeB" aria-pressed="${s.big}">גדול</button></div></div>
@@ -601,6 +665,10 @@ function meHTML(){
   <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
 }
 function bindScreen(){
+  document.querySelectorAll("[data-nblearn]").forEach(b=>b.addEventListener("click",()=>openLearn(b.dataset.nblearn)));
+  document.querySelectorAll("[data-learn]").forEach(b=>b.addEventListener("click",()=>openLearn(b.dataset.learn)));
+  document.querySelectorAll("[data-topic]").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.topic;examSel.has(id)?examSel.delete(id):examSel.add(id);render();}));
+  if($("#len10")){$("#len10").onclick=()=>{examLen=10;render();};$("#len20").onclick=()=>{examLen=20;render();};$("#examGo").onclick=()=>openExam([...examSel],examLen);}
   document.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>openCase(b.dataset.open,"screen")));
   document.querySelectorAll("[data-act=world]").forEach(b=>b.addEventListener("click",()=>go("world")));
   document.querySelectorAll("[data-act=review]").forEach(b=>b.addEventListener("click",()=>openReview()));
@@ -663,7 +731,7 @@ function buildMap(){
     const near=(dx,dy)=>{const v=(map[y+dy]||[])[x+dx];return v&&v!=="g"&&v!=="t";};
     let block=false;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(near(dx,dy))block=true;
     if(!block&&hash(x,y,3)>.86)map[y][x]="t";}
-  CLUES.forEach(c=>{map[c.y][c.x]="g";});
+  CLUES.forEach(c=>{map[c.y][c.x]="g";});STARS.forEach(c=>{map[c.y][c.x]="g";});
   setT(12,21,"s");setT(11,29,"s");setT(36,24,"g");setT(33,24,"s");
   npcs=[
    {id:"chief",name:"המפקד",x:21,y:10.2,colors:["#22344f","#16243a"]},
@@ -732,7 +800,7 @@ const cv=$("#cv"),ctx=cv.getContext("2d");
 let W=0,H=0,S=3,DPR=1,running=false,last=0,t0=0;
 const pl={x:22.5,y:11.2,f:0,moving:false,anim:0};
 const input={x:0,y:0};const keys={};
-let dlgOpen=false,nearObj=null,toastT=0,mapOpen=false;
+let dlgAt=0,dlgOpen=false,nearObj=null,toastT=0,mapOpen=false;
 
 function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
   const base=Math.min(W,H);S=Math.max(2,Math.min(4,Math.round(base/(T*11))));if(P.settings.big)S+=1;}
@@ -752,6 +820,7 @@ $("#exitBtn").addEventListener("click",closeWorld);
 function solid(tx,ty){const v=(map[ty]||[])[tx];if(v===undefined)return true;
   if(v==="G")return !gateOpen();return "wtBFkf".includes(v)||v==="s";}
 function missingList(){return LESSONS.filter(l=>!(P.solved[l.id]&&P.solved[l.id].done)).map(l=>l.building).join(", ");}
+function starReady(st){return st.req.every(id=>isDone(L(id)));}
 function gateOpen(){const g=P.teacher.gate;if(g==="open")return true;if(g==="locked")return false;return solvedCount()>=LESSONS.length;}
 function blocked(x,y){const r=.28;for(const[dx,dy]of[[-r,-.05],[r,-.05],[-r,.3],[r,.3]]){if(solid(Math.floor(x+dx),Math.floor(y+dy)))return true;}
   for(const n of npcs){if(Math.abs(n.x-x)<.5&&Math.abs(n.y-y)<.35)return true;}return false;}
@@ -771,9 +840,10 @@ function interactables(){
   const arr=[];
   buildings.forEach(b=>arr.push({kind:"door",x:b.door.x+.5,y:b.door.y+1.2,b,label:"כניסה"}));
   npcs.forEach(n=>arr.push({kind:"npc",x:n.x,y:n.y,n,label:"לדבר"}));
-  CLUES.forEach(c=>{if(!P.clues.includes(c.id))arr.push({kind:"clue",x:c.x+.5,y:c.y+.5,c,label:"לאסוף"});});
+  CLUES.forEach(c=>{if(!P.clues.includes(c.id))arr.push({kind:"clue",x:c.x+.5,y:c.y+.5,c,label:clueReady(c)?"לקרוא":"🔒 רמז"});});
   if(P.planks<5)arr.push({kind:"bridge",x:35,y:24.4,label:"לתקן"});
   arr.push({kind:"gate",x:10,y:29.3,label:gateOpen()?"לעבור":"לבדוק"});
+  STARS.forEach(st=>{if(!P.stars.includes(st.id))arr.push({kind:"star",x:st.x+.5,y:st.y+.6,st,label:starReady(st)?"אתגר ★":"🔒 ★"});});
   if(!P.chest)arr.push({kind:"chest",x:37.5,y:29.9,label:"לפתוח"});
   [[12,21,"רובע המילים · דרום: הנהר והגשרים · צפון: מטה הסוכנות"],[11,29,"גן השורשים · אזור 2"],[33,24,"גשר המילים · כל קרש הוא תשובה נכונה"]].forEach(s=>arr.push({kind:"sign",x:s[0]+.5,y:s[1]+1.1,text:s[2],label:"לקרוא"}));
   return arr;
@@ -782,7 +852,6 @@ function checkNear(){
   if(dlgOpen||mapOpen){$("#actBtn").hidden=true;nearObj=null;return;}
   let best=null,bd=1.15;
   for(const o of interactables()){const d=Math.hypot(o.x-pl.x,o.y-pl.y);if(d<bd){bd=d;best=o;}}
-  if(best&&best.kind==="clue"){collectClue(best.c);return;}
   nearObj=best;const ab=$("#actBtn");if(best){ab.hidden=false;if(ab.dataset.l!==best.label){ab.dataset.l=best.label;ab.innerHTML=esc(best.label)+(matchMedia("(pointer:fine)").matches?'<small style="display:block;font-family:var(--body);font-size:12px;opacity:.85">Enter</small>':"");}}else ab.hidden=true;
 }
 function act(){const o=nearObj;if(!o||dlgOpen)return;
@@ -790,12 +859,15 @@ function act(){const o=nearObj;if(!o||dlgOpen)return;
   else if(o.kind==="npc")talk(o.n);
   else if(o.kind==="bridge")bridgePuzzle();
   else if(o.kind==="gate"){if(P.teacher.gate==="locked")say("שומר השער","המורה נעל את השער לזמן מה, כדי שכל הכיתה תתקדם יחד. בינתיים אפשר לחזור על התיקים ולאסוף דפי רמז.");else if(gateOpen())say("שומר השער","השער פתוח! גן השורשים עדיין בבנייה. בקרוב תוכלו להיכנס ולגלות את סוד עץ המילים.");else say("שומר השער",`השער לגן השורשים נפתח רק אחרי שמפענחים את כל ${LESSONS.length} התיקים ברובע המילים, כל אחד מ־${PASS}%. פוענחו עד עכשיו: ${solvedCount()}. עוד חסרים: ${missingList()}.`);}
+  else if(o.kind==="clue"){const c=o.c;if(!clueReady(c))say("דף רמז נעול",`הדף הזה שייך לנושא ״${L(c.l).title}״. הוא ייפתח אחרי שתלמדו ותפענחו את ${L(c.l).building}, כי רק אז הוא יעזור לכם באמת.`);else openClue(c);}
   else if(o.kind==="chest")openChest();
+  else if(o.kind==="star"){const st=o.st;if(!starReady(st))say("כוכב אתגר נעול",`${st.title}\nשווה ${st.pts} נקודות. הכוכב נפתח אחרי שמפענחים: ${st.req.map(id=>L(id).building).join(", ")}.\nעוד חסרים: ${st.req.filter(id=>!isDone(L(id))).map(id=>L(id).building).join(", ")}.`);
+    else say("כוכב אתגר!",`${st.title}\nשאלת אתגר על מה שכבר למדתם, ששווה ${st.pts} נקודות. צריך לענות נכון על הכול כדי לאסוף את הכוכב. אם לא הצלחתם, אפשר לחזור ולנסות שוב.`,[{t:"לנסות את האתגר",f:()=>openChallenge(st)},{t:"אחר כך"}]);}
   else if(o.kind==="sign")say("שלט",o.text);
 }
 $("#actBtn").addEventListener("click",act);
 window.addEventListener("keydown",e=>{if(!$("#case").hidden){caseKey(e);return;}if(!$("#onb").hidden||$("#world").hidden)return;const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=true;
-  if(k===" "||k==="Enter"){e.preventDefault();if(dlgOpen){const b=$("#dlgBtns button");if(b)b.click();}else act();}
+  if(k===" "||k==="Enter"){e.preventDefault();if(e.repeat)return;if(dlgOpen){if(performance.now()-dlgAt<700)return;const b=$("#dlgBtns button");if(b)b.click();}else act();}
   if(k==="m"||k==="M")toggleMap();if(k==="Escape"&&mapOpen)toggleMap();
   if(k.startsWith("Arrow"))e.preventDefault();});
 window.addEventListener("keyup",e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false;});
@@ -828,9 +900,14 @@ function draw(){
   // gate
   if(!gateOpen()){ctx.fillStyle="#6a4327";for(let i=0;i<2;i++){const X=sx(9+i),Y=sy(30);ctx.fillRect(X+S,Y+3*S,14*S,3*S);ctx.fillRect(X+S,Y+9*S,14*S,3*S);ctx.fillRect(X+2*S,Y+S,2*S,14*S);ctx.fillRect(X+12*S,Y+S,2*S,14*S);}ctx.fillStyle="#f4c26b";ctx.fillRect(sx(10)-2*S,sy(30)+6*S,4*S,4*S);}
   // clues
-  CLUES.forEach(c=>{if(P.clues.includes(c.id))return;const bob=Math.sin(t0*3+c.x)*2*S;const X=sx(c.x)+3*S,Y=sy(c.y)+2*S+bob;
+  CLUES.forEach(c=>{if(P.clues.includes(c.id))return;const rd=clueReady(c);ctx.globalAlpha=rd?1:.45;const bob=rd?Math.sin(t0*3+c.x)*2*S:0;const X=sx(c.x)+3*S,Y=sy(c.y)+2*S+bob;
     ctx.fillStyle="rgba(0,0,0,.2)";ctx.fillRect(X+S,sy(c.y)+14*S,9*S,2*S);ctx.fillStyle="#fff8dc";ctx.fillRect(X,Y,10*S,12*S);ctx.fillStyle="#c9a26b";ctx.fillRect(X+2*S,Y+3*S,6*S,S);ctx.fillRect(X+2*S,Y+6*S,5*S,S);ctx.fillStyle="#b8322a";ctx.fillRect(X+6*S,Y+8*S,2*S,2*S);
-    if(Math.sin(t0*5+c.y)>.6){ctx.fillStyle="#fff";ctx.fillRect(X+10*S,Y-2*S,2*S,2*S);}});
+    if(rd&&Math.sin(t0*5+c.y)>.6){ctx.fillStyle="#fff";ctx.fillRect(X+10*S,Y-2*S,2*S,2*S);}ctx.globalAlpha=1;});
+  // challenge stars
+  STARS.forEach(st=>{if(P.stars.includes(st.id))return;const ready=starReady(st);const X=sx(st.x)+8*S,Y=sy(st.y)+7*S+(ready?Math.sin(t0*3+st.x)*1.5*S:0);
+    ctx.save();ctx.translate(X,Y);const R=(5+st.tier)*S;ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?R*.45:R;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();
+    ctx.fillStyle=ready?"#f4c26b":"#8a8f99";ctx.fill();ctx.lineWidth=S;ctx.strokeStyle=ready?"#8a5a10":"#4a4f59";ctx.stroke();
+    if(ready&&Math.sin(t0*4+st.y)>.5){ctx.fillStyle="#fff";ctx.fillRect(R*.6,-R,2*S,2*S);}ctx.restore();});
   // entities sorted by y
   const ents=npcs.map(n=>({y:n.y,d:()=>{drawShadow(sx(n.x),sy(n.y));drawChar(ctx,sx(n.x)-6*S,sy(n.y)-15*S,npcCol(n),0,S);}}));
   ents.push({y:pl.y,d:()=>{drawShadow(sx(pl.x),sy(pl.y));drawChar(ctx,sx(pl.x)-6*S,sy(pl.y)-15*S,coatOf(P.coat),pl.moving&&Math.floor(pl.anim)%2,S);}});
@@ -849,6 +926,7 @@ function draw(){
 function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function drawShadow(X,Y){ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.ellipse(X,Y+S,5*S,2*S,0,0,7);ctx.fill();}
 function target(){
+  if(P.navTo){const l=L(P.navTo);if(l&&!isDone(l)&&unlocked(l)){const b=buildings.find(b=>b.lesson===l.id);return{x:b.door.x+.5,y:b.door.y+1.2,name:b.name};}P.navTo=null;}
   if(!P.tutorial){const c=npcs.find(n=>n.id==="chief");return{x:c.x,y:c.y,name:"המפקד בכיכר"};}
   const nl=nextLesson();if(nl){const b=buildings.find(b=>b.lesson===nl.id);return{x:b.door.x+.5,y:b.door.y+1.2,name:b.name};}
   if(P.planks<5)return{x:35,y:24.4,name:"גשר המילים"};
@@ -856,19 +934,19 @@ function target(){
   return{x:10,y:29.3,name:"השער לגן השורשים"};
 }
 function updateHud(){
-  const sc=solvedCount(),nl=nextLesson();$("#goalTop").textContent=nl?`אזור 1 · היעד: תיק ${LESSONS.indexOf(nl)+1} מתוך ${LESSONS.length}`:"אזור 1 · היעד";$("#goalName").textContent=target().name;$("#goalCases").textContent=`${sc}/${LESSONS.length} תיקים`;$("#goalClues").textContent=`${P.clues.length}/${CLUES.length} רמזים`;$("#goalBar").style.width=(sc/LESSONS.length*100)+"%";
+  const sc=solvedCount(),nl=nextLesson();$("#goalTop").textContent=nl?`אזור 1 · היעד: תיק ${LESSONS.indexOf(nl)+1} מתוך ${LESSONS.length}`:"אזור 1 · היעד";$("#goalName").textContent=target().name;$("#goalCases").textContent=`${sc}/${LESSONS.length} תיקים`;$("#goalClues").textContent=`${P.clues.length}/${CLUES.length} רמזים · ★${P.stars.length}/${STARS.length}`;$("#goalBar").style.width=(sc/LESSONS.length*100)+"%";
 }
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;toastT=2.6;}
 
 /* dialog */
-function say(who,text,btns){dlgOpen=true;$("#dlg").hidden=false;$("#dlgWho").textContent=who;$("#dlgText").textContent=text;$("#dlgText").style.whiteSpace="pre-line";
+function say(who,text,btns){dlgOpen=true;dlgAt=performance.now();$("#dlg").hidden=false;$("#dlgWho").textContent=who;$("#dlgText").textContent=text;$("#dlgText").style.whiteSpace="pre-line";
   const bx=$("#dlgBtns");bx.innerHTML="";(btns||[{t:"סגור"}]).forEach((b,i)=>{const e=document.createElement("button");e.className="btn "+(i===0?"primary":"soft");e.style.flex="0 1 auto";e.textContent=b.t;e.onclick=()=>{closeDlg();b.f&&b.f();};bx.appendChild(e);});
   setTimeout(()=>{const f=bx.querySelector("button");f&&f.focus();},30);}
 function closeDlg(){dlgOpen=false;$("#dlg").hidden=true;}
-function chain(who,lines,end){let i=0;const nx=()=>{if(i>=lines.length){end&&end();return;}const l=lines[i++];say(who,l,[{t:i<lines.length?"המשך":"סגור",f:nx}]);};nx();}
+function chain(who,lines,end){let i=0;const show=()=>{const l=lines[i];const btns=[{t:i<lines.length-1?"המשך ←":"סגור",f:()=>{i++;if(i>=lines.length){end&&end();return;}show();}}];if(i>0)btns.push({t:"→ הקודם",f:()=>{i--;show();}});say(who+(lines.length>1?` · ${i+1}/${lines.length}`:""),l,btns);};show();}
 function talk(n){
   if(n.id==="chief"){
-    if(!P.tutorial){chain("המפקד",[`ברוכים הבאים לסוכנות הבלשים, בלש ${P.name}!`,"זה רובע המילים. בכל בניין כאן מחכה תיק חקירה, ובכל תיק לומדים כלי בלשי חדש.","בשטח פזורים 8 דפי רמז: כרטיסי תזכורת קטנים על מה שלומדים. מספיק לעבור עליהם, והם נשמרים במחברת הבלש. את המחברת פותחים בכפתור ״מחברת״ למעלה.","החץ הירוק מראה לאן ללכת. התיק הראשון מחכה בבית החפצים. בהצלחה!"],()=>{P.tutorial=true;save();updateHud();});return;}
+    if(!P.tutorial){chain("המפקד",[`ברוכים הבאים לסוכנות הבלשים, בלש ${P.name}!`,"זה רובע המילים. בכל בניין כאן מחכה תיק חקירה, ובכל תיק לומדים כלי בלשי חדש.","בשטח פזורים 8 דפי רמז. כל דף שייך לנושא, והוא נפתח רק אחרי שלומדים את הבית שלו. קוראים את הדף, עונים על שאלה קטנה, והדף נשמר במחברת הבלש (הכפתור ״מחברת״ למעלה).","החץ הירוק מראה לאן ללכת. התיק הראשון מחכה בבית החפצים. בהצלחה!"],()=>{P.tutorial=true;save();updateHud();});return;}
     const sc=solvedCount();
     if(sc<LESSONS.length)say("המפקד",`פוענחו ${sc} מתוך ${LESSONS.length} תיקים. התיק הבא: ${target().name}. תיק נחשב פוענח מ־${PASS}%. כדי לפתוח את השער לאזור הבא צריך לפענח את כל התיקים ברובע.`);
     else say("המפקד","כל התיקים ברובע המילים פוענחו! קיבלתם את חותמת א׳. השער לגן השורשים פתוח.");return;}
@@ -879,12 +957,23 @@ function talk(n){
     say(l.npc,s&&s.done?`התיק ״${l.title}״ פוענח (${s.best}%). רוצים לחזור עליו ולשפר?`:l.intro,[{t:"לפתוח את התיק",f:()=>openCase(l.id,"world")},{t:"אחר כך"}]);}
 }
 function collectClue(c){P.clues.push(c.id);P.points+=10;const first=!P.clueTip;P.clueTip=true;save();updateHud();
-  const head=`״${c.h}״ — ${c.t}`;
+  const head=`״${c.h}״ — ${c.t}${c.l?`\nהדף נכנס לפרק ״${L(c.l).title}״ במחברת.`:""}`;
   if(first)chain("מצאתם דף רמז!",[head,"דף רמז הוא כרטיס תזכורת קטן על מה שלומדים. כל דף שמוצאים נשמר במחברת הבלש שלכם, כדי שתוכלו לחזור אליו כשאתם פותרים תיקים.",`את המחברת פותחים בכפתור ״מחברת״ למעלה, או במסך ״אני״. על כל דף מקבלים 10 נקודות, ונקודות מעלות אתכם בדרגה: מבלש מתלמד לבלש. נמצאו ${P.clues.length} מתוך ${CLUES.length} דפים.`]);
   else say("מצאתם דף רמז!",`${head}\nהדף נשמר במחברת הבלש (+10 נקודות). נמצאו ${P.clues.length} מתוך ${CLUES.length}.`,[{t:"להמשיך לחקור"},{t:"לפתוח את המחברת",f:openNotebook}]);}
 function notesList(){return [...LESSONS.filter(l=>P.solved[l.id]&&P.solved[l.id].done).map(l=>({...l.clue,src:"תיק "+l.num})),...CLUES.filter(c=>P.clues.includes(c.id)).map(c=>({...c,src:"דף רמז"}))];}
-function openNotebook(){closeDlg();mapOpen=true;const n=notesList(),r=rank();
-  $("#nbBody").innerHTML=`<p class="nbintro">כאן נשמרים כרטיסי התזכורת שאספתם: דפי רמז מהעולם, וכרטיס אחד על כל תיק שפוענח.<br><b>${r.name}</b> · ${P.points} נקודות${r.next?` · עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:""}</p>
+function notebookHTML(){const r=rank();
+  const clueCard=(c,teaser)=>`<div class="note ${teaser?"tease":""}"><b>דף רמז · ${esc(c.h)}</b>${esc(c.t)}${teaser?`<small>תבינו את הרמז הזה עד הסוף אחרי שתלמדו את הבית.</small>`:""}</div>`;
+  const chap=LESSONS.map((l,i)=>{const d=isDone(l),cl=CLUES.filter(c=>c.l===l.id&&P.clues.includes(c.id)),ex=(l.teach.find(t=>t.html.includes('class="ex"'))||l.teach[0]).html.match(/<div class="ex">[\s\S]*?<\/div>/);
+    return `<details class="chap" ${d?"":""}><summary><span class="mln ${d?"d":unlocked(l)?"u":""}">${d?"✓":i+1}</span><span class="mlt"><b>פרק ${i+1} · ${l.title}</b><small>${d?"נלמד ופוענח":unlocked(l)?"עוד לא פוענח":"נעול"} · ${cl.length} דפי רמז</small></span></summary>
+    ${d?`<div class="sum" style="margin-top:6px">${Object.entries(l.sum).map(([k,v])=>`<div><b>${k}?</b>${esc(v)}</div>`).join("")}</div>${ex?`<p style="margin:10px 0 0;font-weight:700">דוגמאות:</p>${ex[0]}`:""}<div class="notes" style="margin-top:8px"><div class="note"><b>כרטיס הפענוח · ${esc(l.clue.h)}</b>${esc(l.clue.t)}</div>${cl.map(c=>clueCard(c,false)).join("")}</div><button class="btn soft" data-nblearn="${l.id}" style="width:100%;margin-top:10px">לקרוא את השיעור המלא</button>`
+      :`<p style="margin:8px 0">הפרק ייפתח במלואו אחרי שתפענחו את ${l.building}: סיכום, דוגמאות, והקישור לשיעור.</p>${cl.length?`<div class="notes">${cl.map(c=>clueCard(c,true)).join("")}</div>`:""}`}</details>`;}).join("");
+  const gen=CLUES.filter(c=>!c.l&&P.clues.includes(c.id));
+  return `<p class="nbintro">המחברת מסודרת לפי נושאים. כל פרק נפתח במלואו אחרי שמפענחים את הבית שלו, ואז יש בו סיכום, דוגמאות ושיעור מלא לקריאה. דפי רמז שמוצאים בעולם נכנסים לפרק המתאים.<br><b>${r.name}</b> · ${P.points} נקודות · דפי רמז ${P.clues.length}/${CLUES.length} · כוכבים ${P.stars.length}/${STARS.length}</p>
+  <div class="stack" style="padding-top:0">${chap}${gen.length?`<div class="chap" style="padding:12px"><b>כללי בלש</b><div class="notes" style="margin-top:8px">${gen.map(c=>clueCard(c,false)).join("")}</div></div>`:""}</div>`;}
+function openNotebook(){closeDlg();mapOpen=true;
+  $("#nbBody").innerHTML=notebookHTML();document.querySelectorAll("#nbBody [data-nblearn]").forEach(b=>b.onclick=()=>{closeNotebook();openLearn(b.dataset.nblearn);});
+  $("#nbov").hidden=false;}
+function _oldNotebook(){const n=notesList(),r=rank();$("#nbBody").innerHTML=`<p class="nbintro">כאן נשמרים כרטיסי התזכורת שאספתם: דפי רמז מהעולם, וכרטיס אחד על כל תיק שפוענח.<br><b>${r.name}</b> · ${P.points} נקודות${r.next?` · עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:""}</p>
   <div class="notes">${n.map(x=>`<div class="note"><b>${esc(x.src)} · ${esc(x.h)}</b>${esc(x.t)}</div>`).join("")}${n.length<CLUES.length+LESSONS.length?`<div class="note empty">עוד ${CLUES.length-P.clues.length} דפי רמז מחכים ברובע. הנקודות הצהובות במפה מראות איפה.</div>`:""}</div>`;
   $("#nbov").hidden=false;}
 function closeNotebook(){mapOpen=false;$("#nbov").hidden=true;}
@@ -906,9 +995,19 @@ function openChest(){P.chest=true;P.points+=50;save();buildMap();updateHud();
 /* map overlay */
 function toggleMap(){mapOpen=!mapOpen;$("#mapov").hidden=!mapOpen;if(mapOpen){const m=$("#mapcv");m.width=MW*T;m.height=MH*T;const c=m.getContext("2d");c.drawImage(mapCv,0,0);
   c.font="bold 13px Assistant, sans-serif";c.textAlign="center";c.direction="rtl";
-  buildings.forEach(b=>{c.fillStyle="rgba(255,250,240,.92)";const w=c.measureText(b.name).width+10;c.fillRect((b.x+b.w/2)*T-w/2,(b.y+b.h/2)*T-9,w,18);c.fillStyle="#22344f";c.fillText(b.name,(b.x+b.w/2)*T,(b.y+b.h/2)*T+5);});
+  buildings.forEach(b=>{const cx=(b.x+b.w/2)*T,cy=(b.y+b.h/2)*T;
+    if(!b.lesson){c.fillStyle="rgba(255,250,240,.92)";c.fillRect(cx-34,cy-11,68,22);c.fillStyle="#22344f";c.font="bold 13px Assistant, sans-serif";c.fillText("המטה",cx,cy+5);return;}
+    const l=L(b.lesson),i=LESSONS.indexOf(l),d=isDone(l),u=unlocked(l);
+    if(!u){c.fillStyle="rgba(20,25,35,.5)";c.fillRect(b.x*T,b.y*T,b.w*T,b.h*T);}
+    c.beginPath();c.arc(cx,cy,20,0,7);c.fillStyle=d?"#2f7d4f":u?"#22344f":"#7a6f5c";c.fill();c.lineWidth=3;c.strokeStyle="#fff";c.stroke();
+    c.fillStyle="#fff";c.font="bold 22px Assistant, sans-serif";c.fillText(d?"✓":u?String(i+1):"🔒",cx,cy+8);});
   CLUES.forEach(cl=>{if(!P.clues.includes(cl.id)){c.fillStyle="#f4c26b";c.fillRect(cl.x*T+4,cl.y*T+4,8,8);}});
-  c.fillStyle="#d9534f";c.beginPath();c.arc(pl.x*T,pl.y*T,6,0,7);c.fill();c.strokeStyle="#fff";c.lineWidth=2;c.stroke();}}
+  c.fillStyle="#d9534f";c.beginPath();c.arc(pl.x*T,pl.y*T,7,0,7);c.fill();c.strokeStyle="#fff";c.lineWidth=2;c.stroke();
+  $("#mapList").innerHTML=`<p class="mlhint">הנקודה האדומה — אתם. ריבועים צהובים — דפי רמז. לחצו על בית כדי שהחץ יוביל אליו.</p>`+LESSONS.map((l,i)=>{const d=isDone(l),u=unlocked(l),s=P.solved[l.id];
+    const st=d?`<span class="pill ok">${s.perfect?"★ ":""}פוענח · ${s.best}%</span>`:u?(s?`<span class="pill todo">${s.best}% · עוד לא ${PASS}%</span>`:`<span class="pill todo">פתוח · התיק הבא</span>`):`<span class="pill lock">🔒 נעול</span>`;
+    return `<button class="mlrow ${u?"":"locked"}" data-nav="${l.id}" ${u?"":"disabled"}><span class="mln ${d?"d":u?"u":""}">${d?"✓":i+1}</span><span class="mlt"><b>${l.building}</b><small>${l.title.split(":")[0]}</small></span>${st}</button>`;}).join("");
+  document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>{P.navTo=b.dataset.nav;save();toggleMap();updateHud();toast(`החץ מוביל עכשיו אל ${L(b.dataset.nav).building}`);});}}
+$("#compass").addEventListener("click",()=>toast(`החץ הירוק מצביע אל: ${target().name}. לכו בכיוון שלו.`));
 $("#mapBtn").addEventListener("click",toggleMap);$("#nbBtn").addEventListener("click",openNotebook);$("#nbClose").addEventListener("click",closeNotebook);$("#mapClose").addEventListener("click",toggleMap);
 
 /* ============ case file (lesson engine) ============ */
@@ -922,12 +1021,33 @@ function caseKey(e){
 }
 let C=null;
 function openCase(id,from){
-  const l=L(id);if(!l)return;closeDlg();
+  const l=L(id);if(!l)return;closeDlg();if(P.navTo===id)P.navTo=null;
   if(!unlocked(l)){if(from==="world"&&running)say("🔒 "+l.building,lockMsg(l));else flash(`${l.building} נפתח אחרי ${LESSONS[LESSONS.indexOf(l)-1].building}`);return;}
   const lv=P.level[id]||1;
-  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,used:new Set(),cur:null,state:null,score:0,count:0,practiceN:6,newServed:0,queue:[],fails:{},hist:[],view:-1,confirmX:false};
+  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,used:new Set(),cur:null,state:null,score:0,count:0,practiceN:8,newServed:0,queue:[],fails:{},hist:[],view:-1,confirmX:false};
   $("#case").hidden=false;document.body.style.overflow="hidden";renderCase();
 }
+function openLearn(id){const l=L(id);if(!l)return;
+  C={l,from:running?"world":"screen",phase:"teach",readOnly:true,teachIdx:0,stepShown:null,tcheck:null,level:1,used:new Set(),cur:null,state:null,score:0,count:0,hist:[],view:-1,queue:[],fails:{},confirmX:false};
+  $("#case").hidden=false;document.body.style.overflow="hidden";renderCase();}
+function openExam(ids,n){
+  const per=Math.ceil(n/ids.length);let list=[];
+  ids.forEach(id=>{const p=shuffleArr(L(id).pool).map(it=>({...it,_l:id}));
+    const byLv=[1,2,3].map(v=>p.filter(i=>i.lv===v));const pick=[];let v=0;while(pick.length<per&&byLv.some(a=>a.length)){const a=byLv[v%3];if(a.length)pick.push(a.shift());v++;}list.push(...pick);});
+  list=shuffleArr(list).slice(0,n);
+  C={l:{id:"exam",num:"מבחן",title:"תרגול מעורב",building:"לקראת מבחן",npc:"המפקד",npcColors:["#22344f","#16243a"]},from:"screen",phase:"exam",idx:0,list,n,per:{},usedK:new Set(list.map(i=>i.k)),extra:0,cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
+  $("#case").hidden=false;document.body.style.overflow="hidden";nextExam();}
+function nextExam(){if(C.idx>=C.list.length){C.phase="result";C.examDone=true;renderCase();$("#case").scrollTop=0;return;}serve(C.list[C.idx++]);}
+function openClue(c){closeDlg();const x=CLUEX[c.id]||{};
+  C={l:{id:"clue",num:"רמז",title:c.h,building:"דף רמז",npc:"המפקד",npcColors:["#22344f","#16243a"]},clue:c,from:running?"world":"screen",phase:"clue",cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
+  C.list=[{k:"q_"+c.id,type:"choice",q:x.q,opts:x.opts,a:0,why:x.why}];C.idx=0;
+  $("#case").hidden=false;document.body.style.overflow="hidden";serve(C.list[0]);}
+function openChallenge(st){closeDlg();
+  C={l:{id:"star",num:"★",title:st.title,building:"כוכב אתגר",npc:"המפקד",npcColors:["#22344f","#16243a"]},star:st,from:running?"world":"screen",phase:"challenge",idx:0,list:st.items.map(i=>({...i})),cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
+  $("#case").hidden=false;document.body.style.overflow="hidden";nextChallenge();}
+function nextChallenge(){if(C.idx>=C.list.length){const ok=C.score>=C.list.length-.001;C.chalOk=ok;
+    if(ok&&!P.stars.includes(C.star.id)){P.stars.push(C.star.id);P.points+=C.star.pts;save();}
+    C.phase="result";C.chalDone=true;renderCase();$("#case").scrollTop=0;return;}serve(C.list[C.idx++]);}
 function openReview(){
   const items=[];P.review.slice(0,5).forEach(r=>{const l=L(r.l);if(!l)return;const it=[...l.pool,...l.judge].find(i=>i.k===r.k);if(it)items.push({...it,_l:l.id});});
   if(!items.length)return;
@@ -936,10 +1056,10 @@ function openReview(){
 }
 function closeCase(){$("#case").hidden=true;$("#case").innerHTML="";const from=C&&C.from;C=null;
   if(from==="world"&&running){document.body.style.overflow="hidden";updateHud();}else{document.body.style.overflow="";render();}}
-function meterHTML(){if(!["practice","judge"].includes(C.phase))return "";const has=C.count>0;const pct=has?Math.round(C.score/C.count*100):0;const ok=pct>=PASS;
+function meterHTML(){if(!["practice","judge","exam"].includes(C.phase))return "";const has=C.count>0;const pct=has?Math.round(C.score/C.count*100):0;const ok=pct>=PASS;
   return `<div class="meter ${has?(ok?"ok":"low"):""}"><div class="mtop"><span>ההצלחה שלכם בתיק</span><b>${has?pct+"%":"—"}</b><small>יעד: ${PASS}% · בונוס: 100%</small></div><div class="mbar"><i style="width:${pct}%"></i><em style="right:${PASS}%"></em></div></div>`;}
 function stepsBar(){const ph=["cover","exp","teach","practice","judge","result"];if(C.phase==="review")return "";const i=ph.indexOf(C.phase);return `<div class="steps">${ph.slice(1).map((p,k)=>`<i class="${k<i?"on":""}"></i>`).join("")}</div>`;}
-function phaseName(){return{cover:"תדריך",exp:"קודם מנסים לבד",teach:"לומדים את הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
+function phaseName(){return{clue:"קוראים דף רמז",challenge:"כוכב אתגר",exam:"לקראת מבחן · תרגול מעורב",cover:"תדריך",exp:"קודם מנסים לבד",teach:"לומדים את הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
 function npcCanvas(){return `<canvas class="npcc" width="12" height="16"></canvas>`;}
 function paintNpc(){document.querySelectorAll("#case .npcc").forEach(c=>{const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,npcCol({colors:C.l.npcColors}),0,1);});}
 function renderCase(){
@@ -958,7 +1078,7 @@ function renderCase(){
     </ol>
     <div class="case-actions"><button class="btn primary" id="go1">יוצאים לחקירה ←</button><button class="btn soft" id="goTeach">רק ללמוד, בלי תרגול</button></div></div>`;
   }else if(C.phase==="teach"){
-    const t=l.teach[C.teachIdx],lc=(LEARN[l.id].cards||[])[C.teachIdx]||{};
+    const t=l.teach[C.teachIdx],lc=((LEARN[l.id]||{}).cards||[])[C.teachIdx]||{};
     const tw=document.createElement("div");tw.innerHTML=t.html;const steps=[...tw.querySelectorAll(".flow div")];
     if(C.stepShown==null)C.stepShown=1;
     steps.forEach((d,i)=>{if(i>=C.stepShown)d.classList.add("hide");});
@@ -989,7 +1109,8 @@ function bindCase(){
   document.querySelectorAll("#case [data-tc]").forEach(b=>b.onclick=()=>{const ck=C.tcheck;ck.sel=+b.dataset.tc;ck.tries++;if(ck.sel===ck.it.a){ck.done=true;C.tdone=C.tdone||{};C.tdone[C.teachIdx]=true;}renderCase();});
   on("tPrev",()=>{C.teachIdx--;tReset();C.stepShown=99;C.tcheck=null;renderCase();});
   on("tNext",()=>{if(C.teachIdx<C.l.teach.length-1){C.teachIdx++;tReset();renderCase();}else if(C.readOnly){closeCase();}else{C.phase="practice";nextPractice();}});
-  on("again",()=>openCase(C.l.id,C.from));on("done",closeCase);
+  on("again",()=>openCase(C.l.id,C.from));on("chalAgain",()=>openChallenge(C.star));on("examAgain",()=>openExam([...examSel],examLen));
+  document.querySelectorAll("[data-learn2]").forEach(b=>b.onclick=()=>openLearn(b.dataset.learn2));on("done",closeCase);
   bindItem();
 }
 /* item rendering */
@@ -1001,8 +1122,9 @@ function innerHTML_(it,st,checked){
     ${!done?`<p class="muted" style="margin:0;font-size:15px;text-align:center">לאיזה תא שייכת המילה? (${curI+1}/${it.items.length})</p>`:""}</div>`;
 }
 function fbHTML(it,st,phase,live){const ok=st.score>=.999;const part=!ok&&st.score>0;
+  if(phase==="clue")return ok?`<div class="fb ok"><b>נכון! הרמז נשמר במחברת הבלש.</b>${esc(it.why||"")} (+10 נקודות)</div>`:`<div class="fb no"><b>עוד לא.</b>קראו שוב את דף הרמז שלמעלה, ונסו שוב.</div>`;
   if(phase==="exp")return `<div class="fb ok"><b>${ok?"יפה מאוד!":"ניסיון טוב!"}</b>${esc(it.why||"")}</div>`;
-  return `<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}${live&&!ok&&C.retryNote==="soon"?"<br><small>עכשיו נתרגל את זה: שאלה קלה יותר, הסבר קצר, ושאלה נוספת באותה רמה.</small>":""}${live&&!ok&&C.retryNote==="later"?"<br><small>נחזור לזה ב״תיקים פתוחים״, ואפשר לשאול את המורה.</small>":""}${live&&!ok&&phase==="judge"&&C.judgeAgain?"<br><small>קראו שוב את ההסבר, ותקבלו ניסיון נוסף.</small>":""}</div>`;}
+  return `<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}${live&&!ok&&C.retryNote==="soon"?"<br><small>עכשיו נתרגל את זה: שאלה קלה יותר, הסבר קצר, ושאלה נוספת באותה רמה.</small>":""}${live&&!ok&&C.retryNote==="exam"?"<br><small>בסוף התרגול תקבלו עוד שאלה דומה על אותו כלל.</small>":""}${live&&!ok&&C.retryNote==="later"?"<br><small>נחזור לזה ב״תיקים פתוחים״, ואפשר לשאול את המורה.</small>":""}${live&&!ok&&phase==="judge"&&C.judgeAgain?"<br><small>קראו שוב את ההסבר, ותקבלו ניסיון נוסף.</small>":""}</div>`;}
 function pastHTML(){
   const h=C.hist[C.view];const last=C.view>=C.hist.length-1;
   return `<div class="folder" data-tab="${h.tab}"><div class="pastnote">צפייה בשאלה שכבר עניתם עליה · שאלה ${C.view+1} מתוך ${C.hist.length} ששאלתם עד עכשיו</div><div class="q">${esc(h.it.q)}</div>${innerHTML_(h.it,h.st,true)}${fbHTML(h.it,h.st,h.phase,false)}
@@ -1017,17 +1139,21 @@ function itemHTML(){
   if(C.phase==="exp"){tab="התנסות";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עוד לא למדנו את הכלל, וזה בסדר. נסו לפי מה שנראה לכם, ואחר כך נלמד יחד.</div></div>`;}
   else if(C.phase==="judge"){tab="משימת שיפוט";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עכשיו אתם השופטים. בלש טוב הוא קודם כל חבר טוב: מוצאים את הטעות כדי לעזור.</div></div>`;}
   else if(C.phase==="review"){tab=`חזרה · ${C.idx}/${C.list.length}`;}
+  else if(C.phase==="clue"){const c=C.clue,x=CLUEX[c.id]||{};tab="דף רמז";lead=`<div class="notecard"><small>${c.l?`דף רמז · נושא: ${L(c.l).title}`:"דף רמז · כללי בלש"}</small><b>${esc(c.h)}</b><p>${esc(c.t)}</p>${x.ex?`<p class="noteex">${esc(x.ex)}</p>`:""}</div><p style="margin:12px 0 4px;font-weight:800;color:var(--navy)">קראתם? עכשיו השתמשו ברמז:</p>`;}
+  else if(C.phase==="challenge"){tab=`כוכב אתגר · שאלה ${C.idx} מתוך ${C.list.length}`;lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>המפקד:</b> שאלת אתגר: היא משלבת כמה דברים שלמדתם. קראו לאט.</div></div>`;}
+  else if(C.phase==="exam"){tab=`${it._again?"שאלה דומה":"שאלה"} ${C.idx} מתוך ${C.list.length} · ${L(it._l).title.split(":")[0]}`;}
   else{tab=it._retry==="easier"?"חיזוק · שאלה קלה יותר":it._retry==="again"?"חיזוק · שאלה באותה רמה":`שאלה ${C.newServed} מתוך ${C.practiceN}`;}
   if(it._retry&&C.phase==="practice")lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> ${it._retry==="easier"?"קודם זה לא הצליח, וזה בסדר. נתחיל משאלה קלה יותר על אותו כלל.":"ועכשיו שאלה באותה רמה כמו קודם, בניסוח אחר. השתמשו בכלי הבלשי."}</div></div>`;
   if(it._retry&&C.phase==="judge")lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> בואו ננסה שוב את משימת השיפוט. קראו לאט את הדו״ח.</div></div>`;
   C._tab=tab;
-  const lvl=C.phase==="practice"?`<span class="lvl">רמה ${["א","ב","ג"][it.lv-1]}</span>`:"";
+  const lvl=(C.phase==="practice"||C.phase==="exam")?`<span class="lvl">רמה ${["א","ב","ג"][it.lv-1]}</span>`:"";
   const inner=innerHTML_(it,st,checked);
   const fb=checked?fbHTML(it,st,C.phase,true):"";
   const showHint=!checked&&it.hint&&(st.hint||(C.phase==="practice"&&C.level===1));
   const canCheck=it.type==="choice"?st.sel!==undefined:it.type==="tap"?(st.sel||[]).length>0:(st.placed||[]).length>=it.items.length;
   const back=C.hist.length?`<button class="btn soft" id="histBack">→ לשאלה הקודמת</button>`:"";
-  const actions=checked?`${back}<button class="btn primary" id="nextQ">${C.phase==="exp"?"לכלי הבלשי ←":"לשאלה הבאה ←"}</button>`:
+  const nextLabel=C.phase==="exp"?"לכלי הבלשי ←":C.phase==="clue"?(st.score>=.999?"נשמר במחברת · חזרה לעולם ←":"לנסות שוב"):"לשאלה הבאה ←";
+  const actions=checked?`${back}<button class="btn primary" id="nextQ">${nextLabel}</button>`:
     `${back}${it.type==="sort"&&(st.placed||[]).length?`<button class="btn soft" id="undo">ביטול אחרון</button>`:""}${it.hint&&!showHint?`<button class="btn soft" id="hintB">רמז</button>`:""}<button class="btn primary" id="check" ${canCheck?"":"disabled"}>בדיקה</button>`;
   return `<div class="folder" data-tab="${tab}">${lead}<div class="q">${esc(it.q)}${lvl}</div>${inner}${showHint?`<div class="hint">💡 ${esc(it.hint)}</div>`:""}${fb}<div class="case-actions">${actions}</div><p class="kbd">במחשב: Enter לבדיקה ולמעבר לשאלה הבאה</p></div>`;
 }
@@ -1064,6 +1190,12 @@ function afterCheck(it,sc){
       else if(!inChain)C.retryNote="later";}}
     if(C.phase==="judge"&&sc<.999&&!C.judgeRetried){C.judgeRetried=true;C.judgeAgain=true;}
     save();}
+  if(C.phase==="exam"){C.score+=sc;C.count++;const r=C.per[it._l]||(C.per[it._l]={s:0,c:0});r.s+=sc;r.c++;P.points+=Math.round(sc*5);
+    if(sc<.999){if(it.k&&!P.review.some(x=>x.k===it.k))P.review.push({l:it._l,k:it.k});
+      if(!it._again&&C.extra<6){const sim=shuffleArr(L(it._l).pool.filter(i=>!C.usedK.has(i.k)&&skill(i)===skill(it)));if(sim.length){C.usedK.add(sim[0].k);C.list.push({...sim[0],_l:it._l,_again:true});C.extra++;C.retryNote="exam";}}}
+    save();}
+  if(C.phase==="challenge"){C.score+=sc;C.count++;}
+  if(C.phase==="clue"&&sc>=.999&&!P.clues.includes(C.clue.id)){P.clues.push(C.clue.id);P.points+=10;save();}
   if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);else P.points+=0;save();}
 }
 function advance(){
@@ -1071,10 +1203,13 @@ function advance(){
   if(C.phase==="practice"){C.retryNote=null;nextPractice();return;}
   if(C.phase==="judge"){if(C.judgeAgain){C.judgeAgain=false;serve(C.l.judge[0],"again");return;}finish();return;}
   if(C.phase==="review"){nextReview();return;}
+  if(C.phase==="exam"){C.retryNote=null;nextExam();return;}
+  if(C.phase==="challenge"){nextChallenge();return;}
+  if(C.phase==="clue"){if(C.state&&C.state.score>=.999){closeCase();}else serve(C.list[0]);return;}
 }
 /* skills: a wrong answer brings back a similar question (same skill), or the same one reshuffled */
 const SK=Object.assign(SK0,{a18:"trait",a19:"trait",v16:"body",v5:"time",v6:"time",v15:"time",v7:"body",v11:"body",a3:"agree",a6:"agree",a7:"agree",a8:"agree",a13:"agree",a10:"trait",a14:"trait",a15:"trait",a5:"rule",a16:"rule"});
-const skill=it=>SK[it.k]||it.type;
+const skill=it=>it.sk||SK[it.k]||it.type;
 const TIPS={noun:{_:1},adj:{_:3,agree:2,rule:1,tap:0,trait:"trait"},verb:{_:1,time:2,body:1},sort3:{_:0},nikud:{_:1}};
 const TRAIT={h:"תכונות אופי",html:`<p>תכונת אופי היא שם תואר שמתאר <b>איך אדם מתנהג בדרך כלל</b>.</p><div class="flow"><div><i>1</i>קוראים מה הדמות עושה שוב ושוב.</div><div><i>2</i>שואלים: איזה הוא? איך הוא מתנהג?</div><div><i>3</i>בוחרים את התכונה שמתאימה: לומד הרבה ← שקדן · מחזיר הכול למקום ← מסודר.</div></div>`};
 function tipFor(lid,sk){const m=TIPS[lid]||{_:0};const v=m[sk]!==undefined?m[sk]:m._;if(v==="trait")return TRAIT;return L(lid).teach[v]||L(lid).teach[0];}
@@ -1113,6 +1248,15 @@ function finish(){
   if(done&&!wasDone)P.points+=50;C.newPerfect=perfect&&!wasPerfect;if(C.newPerfect)P.points+=PERFECT_BONUS;P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;C.phase="result";renderCase();$("#case").scrollTop=0;
 }
 function resultHTML(){
+  if(C.chalDone){const st=C.star;return `<div class="folder result" data-tab="כוכב אתגר"><div class="bigstamp ${C.chalOk?"":"retry"}" style="font-size:44px">${C.chalOk?"★ נאסף!":"עוד לא"}</div>
+    <p>${C.chalOk?`אספתם את הכוכב ״${esc(st.title)}״ וקיבלתם ${st.pts} נקודות!`:`כדי לאסוף את הכוכב צריך לענות נכון על כל השאלות. אפשר לחזור לשיעורים במחברת הבלש, ולנסות שוב מתי שרוצים.`}</p>
+    <p class="muted">כוכבים שנאספו: ${P.stars.length} מתוך ${STARS.length}</p>
+    <div class="case-actions">${C.chalOk?"":`<button class="btn soft" id="chalAgain">לנסות שוב</button>`}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;}
+  if(C.examDone){const pct=C.count?Math.round(C.score/C.count*100):0;const rows=Object.entries(C.per).map(([id,r])=>({l:L(id),p:Math.round(r.s/r.c*100)})).sort((a,b)=>a.p-b.p);const weak=rows.filter(r=>r.p<PASS);
+    return `<div class="folder result" data-tab="סיכום התרגול"><div class="score">${pct}%</div><p>${pct>=PASS?"מוכנים למבחן! כל הכבוד.":"עוד קצת חזרה ואתם שם."}</p>
+    <div class="stack" style="text-align:right;margin-top:8px">${rows.map(r=>`<div class="trow"><b>${r.l.title.split(":")[0]}</b><div class="bar"><i style="width:${r.p}%;background:${r.p>=PASS?"var(--good)":"var(--stamp)"}"></i></div><span>${r.p}%</span></div>`).join("")}</div>
+    ${weak.length?`<div class="perfect" style="text-align:right;margin-top:14px"><b>כדאי לחזור על:</b>${weak.map(r=>`<button class="btn soft" style="margin-top:8px;width:100%" data-learn2="${r.l.id}">לקרוא שוב: ${r.l.title.split(":")[0]}</button>`).join("")}</div>`:""}
+    <div class="case-actions"><button class="btn soft" id="examAgain">תרגול נוסף</button><button class="btn primary" id="done">סיום</button></div></div>`;}
   if(C.reviewDone){return `<div class="folder result" data-tab="חזרה"><div class="score">${Math.round(C.score)}/${C.list.length}</div><p>תשובות נכונות בחזרה. שאלות שענית עליהן נכון יצאו מהרשימה.</p><div class="case-actions"><button class="btn primary" id="done">סיום</button></div></div>`;}
   const l=C.l,ok=C.pct>=PASS;const i=LESSONS.indexOf(l),nx=LESSONS[i+1];
   const pass=ok?`<div class="passpop"><b>✓ עברתם את ה־${PASS}%!</b>${nx?(C.newDone?`הבית הבא נפתח: ${i+2}. ${nx.building} (${nx.title.split(":")[0]}). אפשר לעבור למשימה הבאה.`:`אפשר לעבור למשימה הבאה: ${nx.building}.`):`זה היה הבית האחרון ברובע. ${gateOpen()?"השער לאזור 2 נפתח!":""}`}</div>`:"";
