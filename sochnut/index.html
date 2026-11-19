@@ -275,15 +275,23 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .htable tr>th:first-child{position:sticky;right:0;background:var(--paper);z-index:1;text-align:right}
 .htable tr.me>th:first-child{background:#dfe7f3}
 .hc{font-weight:800;font-variant-numeric:tabular-nums}.hc.g{background:#cfe9d8;color:#1d5233}.hc.y{background:#fbeccb;color:#6b4a12}.hc.r{background:#f6d4cf;color:#7a1f19}.hc.none{color:var(--muted)}
+.staffbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px}
+.admform{display:flex;flex-direction:column;gap:8px;background:var(--paper);border-radius:12px;padding:12px}
+.admform input,.admform textarea,select{font:inherit;font-size:17px;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.admform .btn,.card.stack>form .btn{flex:0 0 auto}
+.btn.mini{min-height:38px;padding:6px 12px;font-size:15px;flex:0 0 auto}
+.staffback{position:fixed;z-index:70;top:calc(env(safe-area-inset-top,0px) + 8px);left:max(8px,env(safe-area-inset-left,0px));min-height:40px;padding:6px 14px}
+@media print{body *{visibility:hidden}#printArea,#printArea *{visibility:visible}#printArea{position:absolute;inset:0;border:0}.noprint{display:none!important}}
 .confirm{margin-top:10px;background:var(--bad-soft);border-radius:12px;padding:12px}
 
 /* onboarding */
-#onb{position:fixed;inset:0;z-index:60;background:var(--navy);overflow-y:auto;direction:rtl;color:#fff}
-#onb .wrap{min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:16px;padding-block:calc(env(safe-area-inset-top,0px) + 24px) calc(env(safe-area-inset-bottom,0px) + 24px)}
-#onb h2{font-size:38px;color:#f4c26b}
-#onb .card{color:var(--ink)}
-#onb label{font-weight:800;display:block;margin-bottom:6px}
-#onb input{width:100%;font:inherit;font-size:20px;padding:12px;border-radius:10px;border:2px solid var(--line);background:#fff;direction:rtl}
+#onb,#login{position:fixed;inset:0;z-index:60;background:var(--navy);overflow-y:auto;direction:rtl;color:#fff}
+#onb .wrap,#login .wrap{min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:16px;padding-block:calc(env(safe-area-inset-top,0px) + 24px) calc(env(safe-area-inset-bottom,0px) + 24px)}
+#onb h2,#login h2{font-size:38px;color:#f4c26b}
+#onb .card,#login .card{color:var(--ink)}
+#onb label,#login label{font-weight:800;display:block;margin-bottom:6px}
+#onb input,#login input{width:100%;font:inherit;font-size:20px;padding:12px;border-radius:10px;border:2px solid var(--line);background:#fff;direction:rtl}
 .coats{display:flex;gap:10px;flex-wrap:wrap}
 .coat{width:64px;height:84px;border-radius:12px;border:3px solid transparent;background:var(--paper)}
 .coat[aria-pressed="true"]{border-color:var(--navy)}
@@ -330,11 +338,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <div id="case" hidden></div>
 <div id="onb" hidden></div>
 
+<script src="config.js"></script>
 <script src="bank.js"></script>
 <script>
 "use strict";
 /* ============ storage ============ */
 const KEY="sochnut-v1";
+const ONLINE_MODE=!!window.SOCHNUT_CONFIG;
+const demoNote=()=>ONLINE_MODE?(window.ONLINE_ME?"":"מצב ניסיון: ההתקדמות נשמרת רק בדפדפן הזה."):"גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.";
 const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},settings:{side:"left",big:false},pos:null,teacher:{gate:"auto",unlockAll:false}});
 let P=fresh();
 function load(){try{const s=localStorage.getItem(KEY);if(s)P=Object.assign(fresh(),JSON.parse(s));}catch(e){}}
@@ -643,7 +654,7 @@ function homeHTML(){
    ${rev?`<p style="margin:6px 0 10px">${rev} שאלות שכדאי לחזור אליהן. כמה דקות ביום, כדי לא לשכוח.</p><button class="btn soft" data-act="review" style="width:100%">לחזור עליהן עכשיו</button>`:`<p class="muted" style="margin:6px 0 0">אין כרגע שאלות לחזרה. שאלות שטועים בהן מחכות כאן.</p>`}</div>
   <div class="card"><div class="section-title">ההתקדמות שלי</div><div class="stats" style="margin-top:10px">
    <div class="stat"><b>${sc}/${LESSONS.length}</b><span>תיקים</span></div><div class="stat"><b>${P.clues.length}/${CLUES.length}</b><span>רמזים</span></div><div class="stat"><b>${P.stars.length}/${STARS.length}</b><span>כוכבי אתגר</span></div></div></div>
-  <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
+  <p class="demo">${demoNote()}</p></div>`;
 }
 function lessonPill(l){const s=P.solved[l.id];if(s&&s.done)return `<span class="pill ok">${s.perfect?"★ ":""}פוענח · ${s.best}%</span>`;if(s)return `<span class="pill todo">${s.best}% · עוד לא ${PASS}%</span>`;return `<span class="pill todo">פתוח</span>`;}
 function casesHTML(){
@@ -701,16 +712,17 @@ function meHTML(){
    <div class="bar" style="margin:8px 0"><i style="width:${pct}%"></i></div><small class="muted">${r.next?`עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:"הדרגה הגבוהה ביותר!"} · נקודות על תשובות נכונות, תיקים שפוענחו ורמזים</small></div></div>
   <div class="section-title">מחברת הבלש</div>
   ${notebookHTML()}<div style="display:none">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.src)} · ${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<CLUES.length+LESSONS.length?`<div class="note empty">כרטיסי תזכורת: דפי רמז שמוצאים בעולם, וכרטיס על כל תיק שמפענחים. נאספו ${notes.length} מתוך ${CLUES.length+LESSONS.length}.</div>`:""}</div>
+  ${window.onlineMeExtra?onlineMeExtra():""}
   <div class="section-title">הגדרות</div>
   <div class="card stack" style="padding-top:12px"><div><b>הג׳ויסטיק בצד</b><div class="seg" style="margin-top:6px"><button id="sideL" aria-pressed="${s.side==="left"}">שמאל</button><button id="sideR" aria-pressed="${s.side==="right"}">ימין</button></div></div>
    <div><b>גודל</b><div class="seg" style="margin-top:6px"><button id="sizeN" aria-pressed="${!s.big}">רגיל</button><button id="sizeB" aria-pressed="${s.big}">גדול</button></div></div>
-   <div class="teachbox"><b>לוח המורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">מפת מיומנויות, התקדמות בתיקים ו״במילים שלי״, עם תלמידים לדוגמה ועם הנתונים שלכם.</p><button class="btn primary" id="tDash" style="width:100%">לפתוח את לוח המורה</button>
+${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">מפת מיומנויות, התקדמות בתיקים ו״במילים שלי״, עם תלמידים לדוגמה ועם הנתונים שלכם.</p><button class="btn primary" id="tDash" style="width:100%">לפתוח את לוח המורה</button>
     <button class="btn ghost" id="spNow" style="width:100%;margin-top:8px">להקדים את ״תעלומת היום״ להיום (לבדיקה)</button></div>
    <div class="teachbox"><b>מצב מורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">במשחק האמיתי זה יופיע בלוח המורה, לכל הכיתה או לתלמיד מסוים. כאן אפשר לנסות את זה בדפדפן הזה.</p>
     <div style="font-weight:700">השער לאזור 2</div><div class="seg" style="margin:6px 0 10px"><button id="gAuto" aria-pressed="${P.teacher.gate==="auto"}">אוטומטי</button><button id="gOpen" aria-pressed="${P.teacher.gate==="open"}">פתוח עכשיו</button><button id="gLock" aria-pressed="${P.teacher.gate==="locked"}">נעול</button></div>
     <div style="font-weight:700">סדר הבתים</div><div class="seg" style="margin-top:6px"><button id="oSeq" aria-pressed="${!P.teacher.unlockAll}">לפי הסדר</button><button id="oAll" aria-pressed="${P.teacher.unlockAll}">כל הבתים פתוחים</button></div></div>
-   <div><button class="btn ghost" id="resetBtn" style="width:100%">לאפס את ההתקדמות</button><div id="resetBox"></div></div></div>
-  <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
+   <div><button class="btn ghost" id="resetBtn" style="width:100%">לאפס את ההתקדמות</button><div id="resetBox"></div></div>`}</div>
+  <p class="demo">${demoNote()}</p></div>`;
 }
 function bindScreen(){
   document.querySelectorAll("[data-go2]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go2)));
@@ -728,7 +740,7 @@ function bindScreen(){
   const set=(k,v)=>{P.settings[k]=v;save();render();};
   if($("#gAuto")){const tset=(k,v)=>{P.teacher[k]=v;save();render();};$("#gAuto").onclick=()=>tset("gate","auto");$("#gOpen").onclick=()=>tset("gate","open");$("#gLock").onclick=()=>tset("gate","locked");$("#oSeq").onclick=()=>tset("unlockAll",false);$("#oAll").onclick=()=>tset("unlockAll",true);}
   if($("#sideL")){$("#sideL").onclick=()=>set("side","left");$("#sideR").onclick=()=>set("side","right");$("#sizeN").onclick=()=>set("big",false);$("#sizeB").onclick=()=>set("big",true);
-   $("#resetBtn").onclick=()=>{$("#resetBox").innerHTML=`<div class="confirm"><b>למחוק את כל ההתקדמות?</b><div class="row" style="margin-top:8px"><button class="btn primary" id="resetYes" style="background:var(--stamp)">כן, למחוק</button><button class="btn soft" id="resetNo">ביטול</button></div></div>`;
+   if($("#resetBtn"))$("#resetBtn").onclick=()=>{$("#resetBox").innerHTML=`<div class="confirm"><b>למחוק את כל ההתקדמות?</b><div class="row" style="margin-top:8px"><button class="btn primary" id="resetYes" style="background:var(--stamp)">כן, למחוק</button><button class="btn soft" id="resetNo">ביטול</button></div></div>`;
     $("#resetYes").onclick=()=>{P=fresh();save();buildMap();startOnboarding();};$("#resetNo").onclick=()=>{$("#resetBox").innerHTML="";};};}
 }
 function coatOf(i){const c=COATS[i]||COATS[0];return{hat:"#2b2320",band:"#7a2a22",skin:"#f1c9a0",coat:c[0],coatD:c[1],pants:"#2f3440",boots:"#1c1c1c"};}
@@ -1365,6 +1377,6 @@ function startOnboarding(){
 
 /* ============ boot ============ */
 buildMap();
-if(!P.name)startOnboarding();
-render();
+if(!ONLINE_MODE){if(!P.name)startOnboarding();render();}
 </script>
+<script src="online.js"></script>
