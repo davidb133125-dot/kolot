@@ -154,9 +154,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .tok{border:2px dashed transparent;background:var(--paper);border-radius:10px;padding:6px 10px;font-weight:600;font-size:21px}
 .sent.grid .tok{border:2px solid var(--line);background:var(--card);min-width:84px}
 .tok[aria-pressed="true"]{border:2px solid var(--navy);background:#dfe7f3}
-.tok.right{border:2px solid var(--good);background:var(--good-soft)}
-.tok.wrong{border:2px solid var(--bad);background:var(--bad-soft)}
-.tok.missed{border:2px dashed var(--good)}
+.sent .tok.right{border:2px solid var(--good);background:var(--good-soft)}
+.sent .tok.wrong{border:2px solid var(--bad);background:var(--bad-soft)}
+.sent .tok.missed{border:2px dashed var(--good);background:var(--card)}
 .sortw{display:flex;flex-direction:column;gap:12px}
 .sortw .cur{align-self:center;font-size:30px;font-weight:800;background:#fff8dc;border:2px solid #ecd9a0;border-radius:12px;padding:10px 26px;min-width:150px;text-align:center}
 .bins{display:grid;gap:10px}
@@ -193,6 +193,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:right;margin-top:10px}
 .sum div{background:var(--paper);border-radius:10px;padding:8px 10px;font-size:15px}
 .sum b{color:var(--brass);display:block;font-family:var(--display);font-weight:400}
+.pastnote{background:var(--paper-2);border-radius:10px;padding:8px 12px;font-weight:700;font-size:15px;color:var(--navy);margin-bottom:10px}
+.kbd{display:none;margin:12px 0 0;font-size:13px;color:var(--muted);text-align:center}
+@media (hover:hover) and (pointer:fine){.kbd{display:block}}
 .confirm{margin-top:10px;background:var(--bad-soft);border-radius:12px;padding:12px}
 
 /* onboarding */
@@ -668,7 +671,7 @@ function checkNear(){
   let best=null,bd=1.15;
   for(const o of interactables()){const d=Math.hypot(o.x-pl.x,o.y-pl.y);if(d<bd){bd=d;best=o;}}
   if(best&&best.kind==="clue"){collectClue(best.c);return;}
-  nearObj=best;const ab=$("#actBtn");if(best){ab.hidden=false;ab.textContent=best.label;}else ab.hidden=true;
+  nearObj=best;const ab=$("#actBtn");if(best){ab.hidden=false;if(ab.dataset.l!==best.label){ab.dataset.l=best.label;ab.innerHTML=esc(best.label)+(matchMedia("(pointer:fine)").matches?'<small style="display:block;font-family:var(--body);font-size:12px;opacity:.85">Enter</small>':"");}}else ab.hidden=true;
 }
 function act(){const o=nearObj;if(!o||dlgOpen)return;
   if(o.kind==="door"){if(o.b.hq)say("המפקד","המטה סגור כרגע לשיפוצים. המפקד מחכה לכם בכיכר.");else openCase(o.b.lesson,"world");}
@@ -679,7 +682,7 @@ function act(){const o=nearObj;if(!o||dlgOpen)return;
   else if(o.kind==="sign")say("שלט",o.text);
 }
 $("#actBtn").addEventListener("click",act);
-window.addEventListener("keydown",e=>{if($("#world").hidden)return;const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=true;
+window.addEventListener("keydown",e=>{if(!$("#case").hidden){caseKey(e);return;}if(!$("#onb").hidden||$("#world").hidden)return;const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=true;
   if(k===" "||k==="Enter"){e.preventDefault();if(dlgOpen){const b=$("#dlgBtns button");if(b)b.click();}else act();}
   if(k==="m"||k==="M")toggleMap();if(k==="Escape"&&mapOpen)toggleMap();
   if(k.startsWith("Arrow"))e.preventDefault();});
@@ -786,17 +789,25 @@ function toggleMap(){mapOpen=!mapOpen;$("#mapov").hidden=!mapOpen;if(mapOpen){co
 $("#mapBtn").addEventListener("click",toggleMap);$("#mapClose").addEventListener("click",toggleMap);
 
 /* ============ case file (lesson engine) ============ */
+function caseKey(e){
+  const k=e.key;if(k!=="Enter"&&k!=="ArrowRight"&&k!=="ArrowLeft")return;
+  const a=document.activeElement;if(k==="Enter"&&a&&a.tagName==="BUTTON"&&a.closest("#case"))return;
+  const click=id=>{const b=document.getElementById(id);if(b&&!b.disabled){e.preventDefault();b.click();return true;}return false;};
+  if(k==="Enter"){["check","nextQ","histNext","tNext","go1","done"].some(click);return;}
+  if(k==="ArrowRight"){click("histBack")||click("histPrev");return;}
+  if(k==="ArrowLeft"){click("histNext")||click("tNext");}
+}
 let C=null;
 function openCase(id,from){
   const l=L(id);if(!l)return;closeDlg();
   const lv=P.level[id]||1;
-  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,used:new Set(),cur:null,state:null,score:0,count:0,practiceN:6,newServed:0,pending:[],fails:{},confirmX:false};
+  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,used:new Set(),cur:null,state:null,score:0,count:0,practiceN:6,newServed:0,pending:[],fails:{},hist:[],view:-1,confirmX:false};
   $("#case").hidden=false;document.body.style.overflow="hidden";renderCase();
 }
 function openReview(){
   const items=[];P.review.slice(0,5).forEach(r=>{const l=L(r.l);if(!l)return;const it=[...l.pool,...l.judge].find(i=>i.k===r.k);if(it)items.push({...it,_l:l.id});});
   if(!items.length)return;
-  C={l:{id:"review",num:"חזרה",title:"תיקים פתוחים",building:"חזרה יומית",npc:"המפקד",npcColors:["#22344f","#16243a"]},from:"screen",phase:"review",idx:0,list:items,cur:null,state:null,score:0,count:0,confirmX:false};
+  C={l:{id:"review",num:"חזרה",title:"תיקים פתוחים",building:"חזרה יומית",npc:"המפקד",npcColors:["#22344f","#16243a"]},from:"screen",phase:"review",idx:0,list:items,cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
   $("#case").hidden=false;document.body.style.overflow="hidden";nextReview();
 }
 function closeCase(){$("#case").hidden=true;$("#case").innerHTML="";const from=C&&C.from;C=null;
@@ -835,7 +846,23 @@ function bindCase(){
   bindItem();
 }
 /* item rendering */
+function innerHTML_(it,st,checked){
+  if(it.type==="choice")return `<div class="opts">${it.opts.map((o,i)=>{let cls="";if(checked){if(i===it.a)cls="right";else if(st.sel===i)cls="wrong";}return `<button class="opt ${cls}" data-o="${i}" aria-pressed="${st.sel===i}" ${checked?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>`;
+  if(it.type==="tap"){const sel=st.sel||[];return `<div class="sent ${it.grid?"grid":""}">${it.words.map((w,i)=>{let cls="";if(checked){const t=it.targets.includes(i),s=sel.includes(i);cls=t&&s?"right":(!t&&s?"wrong":(t?"missed":""));}return `<button class="tok ${cls}" data-t="${i}" aria-pressed="${sel.includes(i)}" ${checked?"disabled":""}>${esc(w)}</button>`;}).join("")}</div>${checked?"":`<p class="muted" style="margin:6px 0 0;font-size:15px">לחצו על מילה כדי לסמן אותה. לחיצה נוספת מבטלת.</p>`}`;}
+  const pl_=st.placed||[];const curI=pl_.length;const done=curI>=it.items.length;
+  return `<div class="sortw">${done?"":`<div class="cur">${esc(it.items[curI][0])}</div>`}<div class="bins ${it.bins.length===3?"three":"two"}">${it.bins.map((b,bi)=>`<button class="bin" data-b="${bi}" ${done||checked?"disabled":""}><b>${b}</b><span class="chips">${pl_.map((p,pi)=>p===bi?`<span class="chip ${checked?(it.items[pi][1]===bi?"right":"wrong"):""}">${esc(it.items[pi][0])}</span>`:"").join("")}</span></button>`).join("")}</div>
+    ${!done?`<p class="muted" style="margin:0;font-size:15px;text-align:center">לאיזה תא שייכת המילה? (${curI+1}/${it.items.length})</p>`:""}</div>`;
+}
+function fbHTML(it,st,phase,live){const ok=st.score>=.999;const part=!ok&&st.score>0;
+  if(phase==="exp")return `<div class="fb ok"><b>${ok?"יפה מאוד!":"ניסיון טוב!"}</b>${esc(it.why||"")}</div>`;
+  return `<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}${live&&!ok&&C.retryNote==="soon"?"<br><small>עוד מעט תקבלו שאלה דומה, כדי לתרגל שוב.</small>":""}${live&&!ok&&C.retryNote==="later"?"<br><small>נחזור לזה ב״תיקים פתוחים״, ואפשר לשאול את המורה.</small>":""}${live&&!ok&&phase==="judge"&&C.judgeAgain?"<br><small>קראו שוב את ההסבר, ותקבלו ניסיון נוסף.</small>":""}</div>`;}
+function pastHTML(){
+  const h=C.hist[C.view];const last=C.view>=C.hist.length-1;
+  return `<div class="folder" data-tab="${h.tab}"><div class="pastnote">צפייה בשאלה שכבר עניתם עליה · שאלה ${C.view+1} מתוך ${C.hist.length} ששאלתם עד עכשיו</div><div class="q">${esc(h.it.q)}</div>${innerHTML_(h.it,h.st,true)}${fbHTML(h.it,h.st,h.phase,false)}
+  <div class="case-actions">${C.view>0?`<button class="btn soft" id="histPrev">→ לשאלה הקודמת</button>`:""}<button class="btn primary" id="histNext">${last?"חזרה לשאלה הנוכחית ←":"לשאלה הבאה ←"}</button></div></div>`;
+}
 function itemHTML(){
+  if(C.view>=0&&C.hist[C.view])return pastHTML();
   const it=C.cur,st=C.state||{};const checked=!!st.checked;
   let tab="",lead="";
   if(C.phase==="exp"){tab="התנסות";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עוד לא למדנו את הכלל. נסו לפי מה שאתם חושבים.</div></div>`;}
@@ -843,25 +870,23 @@ function itemHTML(){
   else if(C.phase==="review"){tab=`חזרה · ${C.idx}/${C.list.length}`;}
   else{tab=it._retry==="similar"?"ניסיון נוסף · שאלה דומה":it._retry==="again"?"ניסיון נוסף · השאלה חוזרת":`שאלה ${C.newServed} מתוך ${C.practiceN}`;}
   if(it._retry&&C.phase!=="review")lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> ${it._retry==="similar"?"קודם זה לא הצליח. הנה שאלה דומה, על אותה מיומנות.":"בואו ננסה שוב את השאלה הזאת. קראו לאט והשתמשו בכלי הבלשי."}</div></div>`;
+  C._tab=tab;
   const lvl=C.phase==="practice"?`<span class="lvl">רמה ${["א","ב","ג"][it.lv-1]}</span>`:"";
-  let inner="";
-  if(it.type==="choice"){inner=`<div class="opts">${it.opts.map((o,i)=>{let cls="";if(checked){if(i===it.a)cls="right";else if(st.sel===i)cls="wrong";}return `<button class="opt ${cls}" data-o="${i}" aria-pressed="${st.sel===i}" ${checked?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>`;}
-  else if(it.type==="tap"){const sel=st.sel||[];inner=`<div class="sent ${it.grid?"grid":""}">${it.words.map((w,i)=>{let cls="";if(checked){const t=it.targets.includes(i),s=sel.includes(i);cls=t&&s?"right":(!t&&s?"wrong":(t?"missed":""));}return `<button class="tok ${cls}" data-t="${i}" aria-pressed="${sel.includes(i)}" ${checked?"disabled":""}>${esc(w)}</button>`;}).join("")}</div><p class="muted" style="margin:6px 0 0;font-size:15px">לחצו על מילה כדי לסמן אותה. לחיצה נוספת מבטלת.</p>`;}
-  else if(it.type==="sort"){const pl_=st.placed||[];const curI=pl_.length;const done=curI>=it.items.length;
-    inner=`<div class="sortw">${done?"":`<div class="cur">${esc(it.items[curI][0])}</div>`}<div class="bins ${it.bins.length===3?"three":"two"}">${it.bins.map((b,bi)=>`<button class="bin" data-b="${bi}" ${done||checked?"disabled":""}><b>${b}</b><span class="chips">${pl_.map((p,pi)=>p===bi?`<span class="chip ${checked?(it.items[pi][1]===bi?"right":"wrong"):""}">${esc(it.items[pi][0])}</span>`:"").join("")}</span></button>`).join("")}</div>
-    ${!done?`<p class="muted" style="margin:0;font-size:15px;text-align:center">לאיזה תא שייכת המילה? (${curI+1}/${it.items.length})</p>`:""}</div>`;}
-  let fb="";
-  if(checked){const ok=st.score>=.999;const part=!ok&&st.score>0;
-    if(C.phase==="exp")fb=`<div class="fb ok"><b>${ok?"יפה מאוד!":"ניסיון טוב!"}</b>${esc(it.why||"")}</div>`;
-    else fb=`<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}${!ok&&C.retryNote==="soon"?"<br><small>עוד מעט תקבלו שאלה דומה, כדי לתרגל שוב.</small>":""}${!ok&&C.retryNote==="later"?"<br><small>נחזור לזה ב״תיקים פתוחים״, ואפשר לשאול את המורה.</small>":""}${!ok&&C.phase==="judge"&&C.judgeAgain?"<br><small>קראו שוב את ההסבר, ותקבלו ניסיון נוסף.</small>":""}</div>`;}
+  const inner=innerHTML_(it,st,checked);
+  const fb=checked?fbHTML(it,st,C.phase,true):"";
   const showHint=!checked&&it.hint&&(st.hint||(C.phase==="practice"&&C.level===1));
   const canCheck=it.type==="choice"?st.sel!==undefined:it.type==="tap"?(st.sel||[]).length>0:(st.placed||[]).length>=it.items.length;
-  const actions=checked?`<button class="btn primary" id="nextQ">${C.phase==="exp"?"לכלי הבלשי ▶":"הבא ▶"}</button>`:
-    `${it.type==="sort"&&(st.placed||[]).length?`<button class="btn soft" id="undo">ביטול אחרון</button>`:""}${it.hint&&!showHint?`<button class="btn soft" id="hintB">רמז</button>`:""}<button class="btn primary" id="check" ${canCheck?"":"disabled"}>בדיקה</button>`;
-  return `<div class="folder" data-tab="${tab}">${lead}<div class="q">${esc(it.q)}${lvl}</div>${inner}${showHint?`<div class="hint">💡 ${esc(it.hint)}</div>`:""}${fb}<div class="case-actions">${actions}</div></div>`;
+  const back=C.hist.length?`<button class="btn soft" id="histBack">→ לשאלה הקודמת</button>`:"";
+  const actions=checked?`${back}<button class="btn primary" id="nextQ">${C.phase==="exp"?"לכלי הבלשי ←":"לשאלה הבאה ←"}</button>`:
+    `${back}${it.type==="sort"&&(st.placed||[]).length?`<button class="btn soft" id="undo">ביטול אחרון</button>`:""}${it.hint&&!showHint?`<button class="btn soft" id="hintB">רמז</button>`:""}<button class="btn primary" id="check" ${canCheck?"":"disabled"}>בדיקה</button>`;
+  return `<div class="folder" data-tab="${tab}">${lead}<div class="q">${esc(it.q)}${lvl}</div>${inner}${showHint?`<div class="hint">💡 ${esc(it.hint)}</div>`:""}${fb}<div class="case-actions">${actions}</div><p class="kbd">במחשב: Enter לבדיקה ולמעבר לשאלה הבאה</p></div>`;
 }
 function bindItem(){
   if(!C||!C.cur||C.phase==="result"||C.phase==="cover"||C.phase==="teach")return;
+  const go_=v=>{C.view=v;renderCase();$("#case").scrollTop=0;};
+  const on0=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+  on0("histBack",()=>go_(C.hist.length-1));on0("histPrev",()=>go_(C.view-1));on0("histNext",()=>go_(C.view>=C.hist.length-1?-1:C.view+1));
+  if(C.view>=0)return;
   const it=C.cur;C.state=C.state||{};const st=C.state;
   document.querySelectorAll("#case [data-o]").forEach(b=>b.onclick=()=>{st.sel=+b.dataset.o;renderCase();});
   document.querySelectorAll("#case [data-t]").forEach(b=>b.onclick=()=>{const i=+b.dataset.t;st.sel=st.sel||[];st.sel=st.sel.includes(i)?st.sel.filter(x=>x!==i):[...st.sel,i];renderCase();});
@@ -890,7 +915,7 @@ function afterCheck(it,sc){
   if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);else P.points+=0;save();}
 }
 function advance(){
-  if(C.phase==="exp"){C.phase="teach";C.teachIdx=0;C.cur=null;renderCase();return;}
+  if(C.phase==="exp"){C.phase="teach";C.teachIdx=0;renderCase();return;}
   if(C.phase==="practice"){C.retryNote=null;nextPractice();return;}
   if(C.phase==="judge"){if(C.judgeAgain){C.judgeAgain=false;serve(C.l.judge[0],"again");return;}finish();return;}
   if(C.phase==="review"){nextReview();return;}
@@ -906,7 +931,7 @@ function shuf(it){
   else if(it.type==="tap"&&it.grid){const idx=shuffleArr(it.words.map((_,i)=>i));c.words=idx.map(i=>it.words[i]);c.targets=it.targets.map(t=>idx.indexOf(t));}
   return c;
 }
-function serve(it,retry){C.cur=shuf(it);C.cur._retry=retry||"";C.state=null;renderCase();$("#case").scrollTop=0;}
+function serve(it,retry){if(C.cur&&C.state&&C.state.checked)C.hist.push({it:C.cur,st:C.state,tab:C._tab||"",phase:C.cur._phase||C.phase});C.view=-1;C.cur=shuf(it);C.cur._phase=C.phase;C.cur._retry=retry||"";C.state=null;renderCase();$("#case").scrollTop=0;}
 function nextPractice(){
   if(C.lvlMsg){const m=C.lvlMsg;C.lvlMsg=null;flash(m==="up"?`עליתם לרמה ${["א","ב","ג"][C.level-1]}!`:`עוברים לרמה ${["א","ב","ג"][C.level-1]}, עם עוד רמזים`);}
   // a pending retry that is due (or the queue of new questions is over)
@@ -924,7 +949,7 @@ function nextPractice(){
   const it=cand[Math.floor(Math.random()*cand.length)];C.used.add(it.k);C.newServed++;serve(it);
 }
 function nextReview(){if(C.idx>=C.list.length){C.phase="result";C.reviewDone=true;renderCase();return;}const it=C.list[C.idx++];serve(it);}
-function flash(t){const d=document.createElement("div");d.className="toast";d.style.position="fixed";d.style.zIndex=50;d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
+function flash(t){const d=document.createElement("div");d.className="toast";d.style.position="fixed";d.style.zIndex=50;d.style.top="auto";d.style.bottom="calc(env(safe-area-inset-bottom,0px) + 24px)";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
 function finish(){
   const pct=Math.round(C.score/C.count*100);const l=C.l;const prev=P.solved[l.id];const wasDone=prev&&prev.done;
   const done=pct>=70;P.solved[l.id]={best:Math.max(pct,prev?prev.best:0),done:done||!!wasDone};
