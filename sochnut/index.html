@@ -232,7 +232,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <div class="hud">
     <button class="hbtn" id="exitBtn">יציאה ←</button>
     <div class="goal" id="goal"><small id="goalTop">אזור 1 מתוך 6 · היעד</small><b id="goalName">מטה הסוכנות</b>
-      <div class="gl"><span id="goalCases">0/4 תיקים</span><div class="bar"><i id="goalBar" style="width:0%"></i></div><span id="goalClues">0/8 רמזים</span></div></div>
+      <div class="gl"><span id="goalCases">0/5 תיקים</span><div class="bar"><i id="goalBar" style="width:0%"></i></div><span id="goalClues">0/8 רמזים</span></div></div>
     <button class="hbtn" id="mapBtn">מפה</button>
   </div>
   <div class="compass" id="compass" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 19 20 12 16 5 20z" fill="#6fc7b5"/></svg></div>
@@ -302,7 +302,7 @@ const LESSONS=[
  sum:{מה:"מילה שאומרת מי או מה: אדם, חיה, חפץ, מקום, רגש.",מתי:"בכל משפט: הוא אומר על מי או על מה מדברים.",איך:"מוסיפים ה ופותחים משפט: הילד רץ. ✓",למה:"כדי להבין את המשפט ולכתוב נכון."},
  clue:{h:"שם עצם",t:"ה___ ופותחים משפט. גם רגש הוא שם עצם!"}},
 
-{id:"adj",num:"1/ב",title:"שם תואר",building:"סדנת הצבעים",npc:"הצבע",npcColors:["#c0702d","#9a561f"],
+{id:"adj",num:"1/ב",title:"שם תואר ותכונות אופי",building:"סדנת הצבעים",npc:"הצבע",npcColors:["#c0702d","#9a561f"],
  intro:"בסדנת הצבעים צובעים מילים. אבל בלי מילים שמתארות, אף אחד לא יודע באיזה צבע לצבוע.",
  experience:[{type:"choice",q:"הצבע צריך לצבוע כדור, אבל לא יודע איזה. איזו מילה תעזור לו?",opts:["כדור","אדום","זרק","מגרש"],a:1,why:"״אדום״ מתארת את הכדור. מילה כזאת נקראת שם תואר."}],
  teach:[
@@ -332,7 +332,35 @@ const LESSONS=[
  sum:{מה:"מילה שמתארת שם עצם: איך? איזה?",מתי:"כשרוצים לספר איך משהו נראה, מרגיש או מתנהג.",איך:"אחרי שם העצם, ומתאים לו: הכלב הקטן.",למה:"כדי לתאר בבירור ולהבין מה שקוראים."},
  clue:{h:"שם תואר",t:"בא אחרי שם העצם ומתאים לו: ספרים חדשים."}},
 
-{id:"sort3",num:"1/ג",title:"שם עצם, פועל, שם תואר",building:"תחנת המיון",npc:"הסדרן",npcColors:["#6b4f8a","#4f3a68"],
+{id:"verb",num:"1/ג",title:"פועל",building:"אולם הפעולות",npc:"המאמן",npcColors:["#3f7a45","#2f5e35"],
+ intro:"באולם הפעולות כולם עושים משהו: רצים, קופצים, כותבים. כל מילה שמספרת מה עושים היא פועל.",
+ experience:[{type:"tap",grid:true,q:"סמנו את המילים שמספרות מה עושים.",words:["רץ","כדור","קפצנו","ירוק","כותבים","שולחן","נשחק","שמח"],targets:[0,2,4,6],why:"רץ, קפצנו, כותבים, נשחק: כולן מספרות על פעולה. עכשיו נלמד איך בודקים בדיוק."}],
+ teach:[
+  {h:"מה זה פועל?",html:`<p>פועל הוא מילה שמספרת <b>מה עושים</b> או מה קורה.</p><div class="ex"><span>רץ</span><span>קפצנו</span><span>כותבים</span><span>נשחק</span></div><p>שואלים: מה עושים? מה עשו? מה יעשו?</p>`},
+  {h:"הכלי הבלשי: פג״ז",html:`<div class="flow"><div><i>פ</i>פעולה: יש כאן משהו שעושים?</div><div><i>ג</i>גוף: מי עושה? אני, אתה, הוא, אנחנו, הם…</div><div><i>ז</i>זמן: עבר, הווה או עתיד?</div></div><p>״קפצנו״: פעולה — קפיצה · גוף — אנחנו · זמן — עבר. זה פועל!</p>`},
+  {h:"שלושה זמנים",html:`<table class="tbl"><tr><th>עבר</th><th>הווה</th><th>עתיד</th></tr><tr><td>אכלתי</td><td>אוכלים</td><td>נאכל</td></tr><tr><td>כתב</td><td>כותב</td><td>יכתוב</td></tr></table><p>אתמול? עבר. עכשיו? הווה. מחר? עתיד.</p>`},
+  {h:"פועל או שם עצם?",html:`<p>יש מילים שנראות דומות, אבל תפקידן שונה:</p><div class="ex"><span>התנהג — פועל</span><span>התנהגות — שם עצם</span></div><p>הוא <b>התנהג</b> יפה, ו<b>ההתנהגות</b> שלו הייתה יפה.</p>`}],
+ pool:[
+  {k:"v1",lv:1,type:"tap",q:"סמנו את הפועל.",words:["הכלב","רץ","בחצר."],targets:[1],why:"מה הכלב עושה? רץ.",hint:"שאלו: מה עושים?"},
+  {k:"v2",lv:1,type:"tap",q:"סמנו את הפועל.",words:["הילדים","שיחקו","בכדור."],targets:[1],why:"מה הילדים עשו? שיחקו."},
+  {k:"v3",lv:1,type:"choice",q:"איזו מילה היא פועל?",opts:["כתבנו","מחברת","כחול","שולחן"],a:0,why:"כתבנו: פעולה (כתיבה), גוף (אנחנו), זמן (עבר).",hint:"חפשו מילה שמספרת מה עושים."},
+  {k:"v4",lv:1,type:"sort",q:"פועל או לא?",bins:["פועל","לא פועל"],items:[["קפץ",0],["כדור",1],["אכלו",0],["גדול",1],["שרים",0],["עץ",1]],why:"פעלים: קפץ, אכלו, שרים."},
+  {k:"v5",lv:1,type:"choice",q:"באיזה זמן הפועל ״אכלתי״?",opts:["עבר","הווה","עתיד"],a:0,why:"אכלתי — כבר קרה, בעבר."},
+  {k:"v6",lv:2,type:"choice",q:"״מחר נשחק בפארק.״ באיזה זמן הפועל ״נשחק״?",opts:["עתיד","עבר","הווה"],a:0,why:"מחר — עתיד."},
+  {k:"v7",lv:2,type:"choice",q:"מי עושה את הפעולה במילה ״קפצנו״?",opts:["אנחנו","אני","הם","אתה"],a:0,why:"קפצ־נו: אנחנו."},
+  {k:"v8",lv:2,type:"tap",q:"סמנו את הפועל.",words:["מחר","נטייל","עם","המשפחה","בהרים."],targets:[1],why:"נטייל: פעולה, אנחנו, עתיד."},
+  {k:"v9",lv:2,type:"sort",q:"פועל או לא?",bins:["פועל","לא פועל"],items:[["מתרגשים",0],["התרגשות",1],["צחקו",0],["צחוק",1],["נכתוב",0],["מכתב",1]],why:"פעלים: מתרגשים, צחקו, נכתוב."},
+  {k:"v10",lv:2,type:"choice",q:"״השכן הנחמד קטף תפוח אדום.״ מה הפועל?",opts:["קטף","הנחמד","תפוח","אדום"],a:0,why:"מה השכן עשה? קטף."},
+  {k:"v11",lv:3,type:"choice",q:"מה מגלה פג״ז על ״תכתבו״?",opts:["פעולה: כתיבה · גוף: אתם · זמן: עתיד","פעולה: כתיבה · גוף: אנחנו · זמן: עבר","פעולה: כתיבה · גוף: הוא · זמן: הווה","זו מילה שאינה פועל"],a:0,why:"תכתבו — אתם, בעתיד."},
+  {k:"v12",lv:3,type:"tap",q:"סמנו את שני הפעלים.",words:["התלמידים","חזרו","מהטיול","וסיפרו","לכולם","על","החוויות."],targets:[1,3],why:"חזרו, סיפרו. גם עם ו בהתחלה."},
+  {k:"v13",lv:3,type:"choice",q:"איזו מילה איננה פועל?",opts:["התנהגות","התנהג","מתנהגים","יתנהגו"],a:0,why:"התנהגות היא שם עצם: ההתנהגות הייתה יפה."},
+  {k:"v14",lv:3,type:"sort",q:"מילים דומות — פועל או לא?",bins:["פועל","לא פועל"],items:[["התפתח",0],["התפתחות",1],["מתאמנים",0],["אימון",1],["התרגשו",0],["נרגשים",1]],why:"פעלים: התפתח, מתאמנים, התרגשו."},
+  {k:"v15",lv:3,type:"choice",q:"״הילדים ______ מחר במגרש.״ (התאמן)",opts:["יתאמנו","התאמנו","מתאמנים"],a:0,why:"מחר — עתיד: יתאמנו."}],
+ judge:[{k:"vj",type:"choice",judge:true,q:"הבלש המתלמד כתב: ״המילה ההתנהגות היא פועל, כי יש בה פעולה.״ מה הטעות?",opts:["״ההתנהגות״ היא שם עצם: אפשר לפתוח איתה משפט, ואין בה גוף וזמן. הפועל הוא ״התנהג״","אין טעות","זו מילת תיאור, שם תואר","היה צריך לשאול איזה?"],a:0,why:"פג״ז: לפועל יש גוף וזמן. להתנהגות אין."}],
+ sum:{מה:"מילה שמספרת מה עושים או מה קורה.",מתי:"בכל משפט שמספר על פעולה.",איך:"פג״ז: פעולה, גוף וזמן.",למה:"כדי לדעת מי עשה, מה עשה ומתי."},
+ clue:{h:"פועל",t:"פג״ז: קפצנו = אנחנו, בעבר."}},
+
+{id:"sort3",num:"1/ד",title:"מיון משולב: עצם, פועל, תואר",building:"תחנת המיון",npc:"הסדרן",npcColors:["#6b4f8a","#4f3a68"],
  intro:"בתחנת המיון מגיעות מילים בלי תווית. התפקיד שלכם: לשים כל מילה בתא הנכון.",
  experience:[{type:"sort",q:"נסו למיין לפי מה שאתם יודעים.",bins:["שם עצם","פועל","שם תואר"],items:[["הכלב",0],["קופץ",1],["השמח",2]],why:"הכלב — מי? קופץ — מה עושה? השמח — איזה? עכשיו נלמד שלוש בדיקות."}],
  teach:[{h:"שלוש בדיקות",html:`<table class="tbl"><tr><th>שם עצם</th><th>פועל</th><th>שם תואר</th></tr><tr><td>מי? מה?</td><td>מה עושים?</td><td>איך? איזה?</td></tr><tr><td>פותח משפט עם ה: הילדים…</td><td>פג״ז: פעולה, גוף וזמן</td><td>מתאר שם עצם ובא אחריו</td></tr></table><div class="ex"><span>הכלב</span><span>השמח</span><span>קופץ</span></div>`},
@@ -350,10 +378,10 @@ const LESSONS=[
   {k:"s10",lv:3,type:"choice",q:"במשפט ״מחר נטייל בהרים״, מה מגלה פג״ז על ״נטייל״?",opts:["פעולה: טיול · גוף: אנחנו · זמן: עתיד","פעולה: טיול · גוף: הוא · זמן: עבר","זה בכלל שם עצם","זה שם תואר"],a:0,why:"נטייל = אנחנו, בעתיד."}],
  judge:[{k:"sj",type:"choice",judge:true,q:"הבלש המתלמד מיין: שם עצם — שולחן, ירוק. פועל — קפץ, צוחקת. שם תואר — עצובה, רך. איזו מילה בתא הלא נכון?",opts:["ירוק","קפץ","עצובה","שולחן"],a:0,why:"ירוק עונה על ״איזה?״ — שם תואר."}],
  sum:{מה:"שם עצם, פועל ושם תואר — סוגי מילים.",מתי:"בכל משפט שקוראים או כותבים.",איך:"ה + משפט? פג״ז? איזה?",למה:"כדי להבין את המשפט ולכתוב נכון."},
- clue:{h:"פג״ז",t:"פועל = פעולה, גוף וזמן."}},
+ clue:{h:"מיון",t:"מי? מה? · מה עושים? · איזה? — שלוש שאלות, שלוש קבוצות."}},
 
-{id:"nikud",num:"1/ד",title:"ניקוד מתאים",building:"בית הדפוס",npc:"המדפיס",npcColors:["#3d5a5a","#2b4242"],
- intro:"במכונת הדפוס התערבבו הנקודות. אותן אותיות יכולות להיות מילים שונות לגמרי, והניקוד מגלה איזו.",
+{id:"nikud",num:"1/ה",title:"ניקוד מתאים",building:"בית הניקוד",npc:"המנקד",npcColors:["#3d5a5a","#2b4242"],
+ intro:"בבית הניקוד התערבבו הנקודות. אותן אותיות יכולות להיות מילים שונות לגמרי, והניקוד מגלה איזו.",
  experience:[{type:"choice",q:"״דני יצא לטייל עם ה___ שלו בפארק, והוא נבח על כל עובר אורח.״ איזו מילה מתאימה?",opts:["חָלָב","כֶּלֶב"],a:1,why:"חלב לא נובח! הבלש עוצר, קורא שוב, ובודק מה הגיוני."}],
  teach:[{h:"אותן אותיות, מילים שונות",html:`<div class="ex"><span>סֵפֶר — קוראים בו</span><span>סַפָּר — גוזר שיער</span><span>סִפֵּר — סיפור</span></div><p>הניקוד מגלה איזו מילה כתובה.</p>`},
   {h:"הכלי הבלשי",html:`<div class="flow"><div><i>1</i>קוראים את כל המשפט.</div><div><i>2</i>מנסים כל אחת מהקריאות.</div><div><i>3</i>בוחרים את מה שהגיוני במשפט.</div></div>`}],
@@ -378,7 +406,7 @@ const LESSONS=[
 const L=id=>LESSONS.find(l=>l.id===id);
 
 const CLUES=[
- {id:"c1",x:14,y:6,h:"מי? מה?",t:"שם עצם עונה על מי? מה?"},
+ {id:"c1",x:17,y:7,h:"מי? מה?",t:"שם עצם עונה על מי? מה?"},
  {id:"c2",x:31,y:5,h:"רגש",t:"גם רגש הוא שם עצם: שמחה, אומץ."},
  {id:"c3",x:4,y:21,h:"שייכות",t:"כלבי = הכלב שלי. גם זה שם עצם."},
  {id:"c4",x:41,y:16,h:"איזה?",t:"שם תואר עונה על איך? איזה?"},
@@ -425,11 +453,11 @@ function homeHTML(){
    <div class="body">${nl?`<span class="case-tab">התיק הבא · ${nl.num}</span><h3>${nl.building}</h3><div class="muted">נושא: ${nl.title}</div>`:`<span class="case-tab">כל התיקים פוענחו</span><h3>רובע המילים פוענח!</h3><div class="muted">הגשר לגן השורשים פתוח. אזור 2 בבנייה.</div>`}
    <div class="row"><button class="btn primary" data-act="world">להיכנס לעולם ▶</button>${nl?`<button class="btn soft" data-open="${nl.id}">לפתוח את התיק</button>`:""}</div></div></div>
   <div class="card"><div class="section-title">המסע</div><p class="muted" style="margin:4px 0 10px">שבעה אזורים. כל אזור נפתח כשמסיימים את הקודם.</p>
-   <div class="zones">${ZONES.map((z,i)=>`<div class="zone ${i===0?"on":""}"><span class="n">${z.n}</span><b>${z.name}</b><small>${i===0?`${sc}/4 תיקים`:"נעול"}</small></div>`).join("")}</div></div>
+   <div class="zones">${ZONES.map((z,i)=>`<div class="zone ${i===0?"on":""}"><span class="n">${z.n}</span><b>${z.name}</b><small>${i===0?`${sc}/${LESSONS.length} תיקים`:"נעול"}</small></div>`).join("")}</div></div>
   <div class="card"><div class="section-title">תיקים פתוחים</div>
    ${rev?`<p style="margin:6px 0 10px">${rev} שאלות שכדאי לחזור אליהן. כמה דקות ביום, כדי לא לשכוח.</p><button class="btn soft" data-act="review" style="width:100%">לחזור עליהן עכשיו</button>`:`<p class="muted" style="margin:6px 0 0">אין כרגע שאלות לחזרה. שאלות שטועים בהן מחכות כאן.</p>`}</div>
   <div class="card"><div class="section-title">ההתקדמות שלי</div><div class="stats" style="margin-top:10px">
-   <div class="stat"><b>${sc}/4</b><span>תיקים</span></div><div class="stat"><b>${P.clues.length}/${CLUES.length}</b><span>רמזים</span></div><div class="stat"><b>${P.planks}/5</b><span>קרשים בגשר</span></div></div></div>
+   <div class="stat"><b>${sc}/${LESSONS.length}</b><span>תיקים</span></div><div class="stat"><b>${P.clues.length}/${CLUES.length}</b><span>רמזים</span></div><div class="stat"><b>${P.planks}/5</b><span>קרשים בגשר</span></div></div></div>
   <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
 }
 function lessonPill(l){const s=P.solved[l.id];if(s&&s.done)return `<span class="pill ok">פוענח · ${s.best}%</span>`;if(s)return `<span class="pill todo">${s.best}% · עוד לא 70%</span>`;return `<span class="pill todo">פתוח</span>`;}
@@ -504,15 +532,16 @@ function buildMap(){
   // plaza
   rect(16,10,29,17,"c");rect(22,13,23,14,"f");
   // building doors paths
-  rect(8,13,15,13,"p");rect(30,13,37,13,"p");rect(8,19,8,19,"p");rect(37,19,37,19,"p");
+  rect(8,13,15,13,"p");rect(30,13,37,13,"p");rect(8,19,8,19,"p");rect(13,7,13,9,"p");rect(13,9,17,9,"p");rect(37,19,37,19,"p");
   // zone-2 fence with gate
   rect(2,30,22,30,"F");rect(9,30,10,30,"G");rect(2,31,22,33,"z");
   buildings=[
    {x:19,y:4,w:8,h:5,name:"מטה הסוכנות",roof:"#7a2a22",hq:true,door:{x:22,y:8}},
    {x:5,y:8,w:7,h:5,name:"בית החפצים",roof:"#3d5f8a",lesson:"noun",door:{x:8,y:12}},
    {x:34,y:8,w:7,h:5,name:"סדנת הצבעים",roof:"#b8642a",lesson:"adj",door:{x:37,y:12}},
+   {x:10,y:2,w:7,h:5,name:"אולם הפעולות",roof:"#3f7a45",lesson:"verb",door:{x:13,y:6}},
    {x:5,y:14,w:7,h:5,name:"תחנת המיון",roof:"#5e4a7a",lesson:"sort3",door:{x:8,y:18}},
-   {x:34,y:14,w:7,h:5,name:"בית הדפוס",roof:"#2f6b63",lesson:"nikud",door:{x:37,y:18}}];
+   {x:34,y:14,w:7,h:5,name:"בית הניקוד",roof:"#2f6b63",lesson:"nikud",door:{x:37,y:18}}];
   buildings.forEach(b=>rect(b.x,b.y,b.x+b.w-1,b.y+b.h-1,"B"));
   setT(22,9,"p");setT(23,9,"p");
   // trees
@@ -694,7 +723,7 @@ function draw(){
   // labels
   const fs=Math.max(13,Math.round(5.2*S));ctx.font=`700 ${fs}px Assistant, sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.direction="rtl";
   const pill=(text,X,Y,dark)=>{const w=ctx.measureText(text).width+fs*1.1,h=fs*1.6;ctx.fillStyle=dark?"rgba(25,32,44,.85)":"rgba(255,250,240,.92)";rr(X-w/2,Y-h/2,w,h,h/2);ctx.fill();ctx.fillStyle=dark?"#fff":"#22344f";ctx.fillText(text,X,Y+1);};
-  buildings.forEach(b=>{const s=P.solved[b.lesson];pill((s&&s.done?"✓ ":"")+b.name,sx(b.x+b.w/2),sy(b.y+b.h)-fs*1.3,false);});
+  buildings.forEach(b=>{const s=P.solved[b.lesson];pill((s&&s.done?"✓ ":"")+b.name+(b.lesson?" · "+L(b.lesson).title.split(":")[0]:""),sx(b.x+b.w/2),sy(b.y+1),false);});
   npcs.forEach(n=>{if(Math.hypot(n.x-pl.x,n.y-pl.y)<5)pill(n.name,sx(n.x),sy(n.y)-18*S,true);});
   // compass
   const tg=target();const ang=Math.atan2(tg.y-pl.y,tg.x-pl.x)+Math.PI/2;$("#compass svg").style.transform=`rotate(${ang}rad)`;
@@ -710,7 +739,7 @@ function target(){
   return{x:10,y:29.3,name:"השער לגן השורשים"};
 }
 function updateHud(){
-  const sc=solvedCount();$("#goalName").textContent=target().name;$("#goalCases").textContent=`${sc}/4 תיקים`;$("#goalClues").textContent=`${P.clues.length}/${CLUES.length} רמזים`;$("#goalBar").style.width=(sc/4*100)+"%";
+  const sc=solvedCount();$("#goalName").textContent=target().name;$("#goalCases").textContent=`${sc}/${LESSONS.length} תיקים`;$("#goalClues").textContent=`${P.clues.length}/${CLUES.length} רמזים`;$("#goalBar").style.width=(sc/LESSONS.length*100)+"%";
 }
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;toastT=2.6;}
 
@@ -724,7 +753,7 @@ function talk(n){
   if(n.id==="chief"){
     if(!P.tutorial){chain("המפקד",[`ברוכים הבאים לסוכנות הבלשים, בלש ${P.name}!`,"זה רובע המילים. בכל בניין כאן מחכה תיק חקירה, ובכל תיק לומדים כלי בלשי חדש.","בשטח פזורים 8 דפי רמז. דרכו עליהם והם ייכנסו למחברת הבלש שלכם.","החץ הירוק מראה לאן ללכת. התיק הראשון מחכה בבית החפצים. בהצלחה!"],()=>{P.tutorial=true;save();updateHud();});return;}
     const sc=solvedCount();
-    if(sc<4)say("המפקד",`פוענחו ${sc} מתוך 4 תיקים. התיק הבא: ${target().name}. תיק נחשב פוענח מ־70%.`);
+    if(sc<LESSONS.length)say("המפקד",`פוענחו ${sc} מתוך ${LESSONS.length} תיקים. התיק הבא: ${target().name}. תיק נחשב פוענח מ־70%.`);
     else say("המפקד","כל התיקים ברובע המילים פוענחו! קיבלתם את חותמת א׳. השער לגן השורשים פתוח.");return;}
   if(n.id==="crier"){chain("הכרוז",["שתי דרכים מכאן אל הנהר: מערב אל הגשר הישן, ומזרח אל גשר המילים השבור.","מעבר לגשר הישן נמצא השער לגן השורשים."]);return;}
   if(n.id==="fisher"){say("הדייג",P.planks<5?`לגשר המילים חסרים ${5-P.planks} קרשים. כל תשובה נכונה מחזירה קרש. באי שמעבר לגשר מחכה תיבה של המפקד.`:"תיקנתם את הגשר! עכשיו אפשר לדוג גם מהצד השני.");return;}
@@ -867,7 +896,7 @@ function advance(){
   if(C.phase==="review"){nextReview();return;}
 }
 /* skills: a wrong answer brings back a similar question (same skill), or the same one reshuffled */
-const SK={a3:"agree",a6:"agree",a7:"agree",a8:"agree",a13:"agree",a10:"trait",a14:"trait",a15:"trait",a5:"rule",a16:"rule"};
+const SK={v5:"time",v6:"time",v15:"time",v7:"body",v11:"body",a3:"agree",a6:"agree",a7:"agree",a8:"agree",a13:"agree",a10:"trait",a14:"trait",a15:"trait",a5:"rule",a16:"rule"};
 const skill=it=>SK[it.k]||it.type;
 function shuffleArr(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function shuf(it){
