@@ -1,0 +1,905 @@
+<title>סוכנות הבלשים</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Suez+One&display=swap">
+<style>
+/* Layout: case-file app shell (manila paper, ink navy, stamp red) around a full-screen pixel-art city */
+:root{
+  --paper:#f3ead6; --paper-2:#e8dbbd; --card:#fffaf0; --ink:#1f2a3a; --ink-soft:#4a5568;
+  --muted:#7a6f5c; --line:#d9caa6; --navy:#22344f; --navy-2:#2f4a6e; --stamp:#b8322a;
+  --brass:#c08a2d; --brass-soft:#f4e2b8; --good:#2f7d4f; --good-soft:#dcefe2; --bad:#b8322a; --bad-soft:#f6dcd8;
+  --display:"Suez One","Assistant",system-ui,sans-serif; --body:"Assistant",system-ui,"Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;line-height:1.2}
+#app{direction:rtl;min-height:100%;padding-bottom:84px}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-badge{width:42px;height:42px;border-radius:10px;background:var(--navy);display:grid;place-items:center}
+.brand h1{font-size:22px;color:var(--navy)}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--navy-2);color:#fff;display:grid;place-items:center;font-family:var(--display);font-size:20px;border:0}
+
+/* bottom nav */
+.nav{position:fixed;inset:auto 0 0;z-index:6;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.nav-in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px 12px;color:var(--muted);font-weight:700;font-size:14px}
+.nav button[aria-current="page"]{color:var(--navy)}
+.nav svg{width:24px;height:24px}
+
+/* cards */
+.stack{display:flex;flex-direction:column;gap:14px;padding-top:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--brass)}
+.muted{color:var(--muted)}
+.hello h2{font-size:30px;color:var(--navy)}
+.rank-chip{display:inline-flex;align-items:center;gap:6px;background:var(--brass-soft);color:#6b4a12;border-radius:999px;padding:3px 12px;font-weight:700;font-size:14px}
+.case-hero{padding:0;overflow:hidden}
+.case-hero canvas{display:block;width:100%;height:170px;image-rendering:pixelated;background:#5f8f45}
+.case-hero .body{padding:16px;display:flex;flex-direction:column;gap:8px}
+.case-tab{display:inline-block;align-self:flex-start;background:var(--navy);color:#fff;border-radius:6px;padding:2px 10px;font-size:13px;font-weight:700}
+.case-hero h3{font-size:26px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:13px 18px;font-weight:800;font-size:17px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px}
+.btn.primary{background:var(--navy);color:#fff;flex:1 1 170px}
+.btn.soft{background:var(--paper-2);color:var(--navy);flex:1 1 140px}
+.btn.good{background:var(--good);color:#fff}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--navy)}
+.btn:disabled{opacity:.45;cursor:default}
+.stack>.btn{flex:0 0 auto}
+.zones{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory}
+.zone{flex:0 0 132px;scroll-snap-align:start;border-radius:12px;padding:12px;background:var(--paper-2);display:flex;flex-direction:column;gap:6px;min-height:104px;border:0;text-align:right}
+.zone .n{width:28px;height:28px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:800;color:var(--navy)}
+.zone b{font-size:15px;line-height:1.25}
+.zone small{color:var(--muted);font-weight:600}
+.zone.on{background:var(--navy);color:#fff}
+.zone.on small{color:#c8d4e6}
+.zone.on .n{color:var(--navy)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--paper);border-radius:10px;padding:10px;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:26px;color:var(--navy);font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted);font-weight:700}
+.list{display:flex;flex-direction:column;gap:10px}
+.li{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:right;width:100%}
+.li .ic{width:46px;height:46px;border-radius:10px;background:var(--paper-2);display:grid;place-items:center;flex:0 0 auto;font-family:var(--display);color:var(--navy);font-size:18px}
+.li .tx{flex:1;min-width:0}
+.li .tx b{display:block}
+.li .tx small{color:var(--muted)}
+.pill{border-radius:999px;padding:3px 10px;font-size:13px;font-weight:800;white-space:nowrap}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.todo{background:var(--brass-soft);color:#6b4a12}
+.pill.lock{background:var(--paper-2);color:var(--muted)}
+.li.locked{opacity:.6}
+.section-title{font-family:var(--display);font-size:20px;color:var(--navy);margin-top:6px}
+.bar{height:10px;background:var(--paper-2);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brass);border-radius:999px}
+.stamps{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.stampc{width:46px;height:46px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;font-family:var(--display);color:var(--muted);font-size:18px}
+.stampc.on{border:2px solid var(--stamp);color:var(--stamp);background:#fbeee9;transform:rotate(-8deg)}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.note{background:#fff8dc;border:1px solid #ecd9a0;border-radius:4px 4px 12px 4px;padding:10px;font-size:15px;box-shadow:0 1px 0 #ecd9a0}
+.note b{display:block;font-size:13px;color:#8a6a1e}
+.note.empty{background:transparent;border-style:dashed;color:var(--muted);box-shadow:none}
+.seg{display:flex;background:var(--paper-2);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:9px;font-weight:700;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.demo{font-size:13px;color:var(--muted);text-align:center}
+
+/* world */
+#world{position:fixed;inset:0;z-index:20;background:#2b4a2a;direction:rtl;touch-action:none;user-select:none;-webkit-user-select:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.hud{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));display:flex;align-items:flex-start;justify-content:space-between;gap:8px;pointer-events:none}
+.hud>*{pointer-events:auto}
+.hbtn{background:rgba(25,32,44,.88);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:800;font-size:16px;min-height:44px}
+.goal{background:rgba(255,250,240,.96);border-radius:14px;padding:8px 14px;text-align:center;flex:0 1 300px;min-width:0;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.goal small{display:block;color:var(--muted);font-weight:700;font-size:12.5px}
+.goal b{display:block;font-family:var(--display);font-weight:400;font-size:18px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goal .gl{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:13px;font-weight:700;color:#6b4a12}
+.goal .bar{flex:1;height:7px}
+.compass{position:absolute;top:calc(env(safe-area-inset-top,0px) + 96px);right:max(14px,env(safe-area-inset-right,0px));width:52px;height:52px;border-radius:50%;background:rgba(25,32,44,.85);border:2px solid #6fc7b5;display:grid;place-items:center}
+.compass svg{width:26px;height:26px;transition:transform .15s linear}
+.joy{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);width:140px;height:140px;border-radius:50%;background:rgba(25,32,44,.35);border:2px solid rgba(255,255,255,.25)}
+.joy.left{left:max(18px,env(safe-area-inset-left,0px))}
+.joy.right{right:max(18px,env(safe-area-inset-right,0px))}
+.joy i{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;background:#f3ead6;border:4px solid var(--navy-2)}
+.joy.big{width:170px;height:170px}
+.act{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);width:104px;height:104px;border-radius:50%;background:#2a7a6c;color:#fff;border:4px solid #8fd8c8;font-family:var(--display);font-size:21px;line-height:1.1;padding:6px;box-shadow:0 4px 0 #1b5249}
+.act.left{left:max(22px,env(safe-area-inset-left,0px))}
+.act.right{right:max(22px,env(safe-area-inset-right,0px))}
+.toast{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 120px);transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:12px;padding:10px 16px;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:90vw;text-align:center;z-index:3}
+.dlg{position:absolute;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);max-width:640px;margin:0 auto;background:var(--card);border:4px solid #1d2430;border-radius:16px;padding:16px 18px;box-shadow:0 0 0 3px var(--card),0 8px 24px rgba(0,0,0,.35);z-index:4}
+.dlg .who{font-family:var(--display);color:#2a7a6c;font-size:18px}
+.dlg p{margin:6px 0 12px;font-size:18px}
+.dlg .row{justify-content:flex-start}
+.mapov{position:absolute;inset:0;background:rgba(15,20,28,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);z-index:5}
+.mapov canvas{max-width:100%;max-height:72vh;image-rendering:pixelated;border:4px solid #f3ead6;border-radius:8px}
+.mapov h3{color:#fff}
+
+/* case file (lesson) */
+#case{position:fixed;inset:0;z-index:40;background:var(--paper);overflow-y:auto;direction:rtl}
+.case-top{position:sticky;top:0;z-index:2;background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top,0px)}
+.case-top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.case-top .t{flex:1;min-width:0}
+.case-top .t small{display:block;color:#c8d4e6;font-weight:700;font-size:13px}
+.case-top .t b{display:block;font-family:var(--display);font-weight:400;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xbtn{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:22px}
+.steps{display:flex;gap:6px;padding-bottom:10px}
+.steps i{flex:1;height:5px;border-radius:9px;background:rgba(255,255,255,.22)}
+.steps i.on{background:#f4c26b}
+.folder{background:var(--card);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:18px;position:relative;margin-top:22px}
+.folder::before{content:attr(data-tab);position:absolute;top:-24px;right:-1px;background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;padding:2px 14px;font-weight:800;font-size:13px;color:var(--brass)}
+.npc-line{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.npc-line canvas{width:48px;height:64px;image-rendering:pixelated;flex:0 0 auto;background:var(--paper-2);border-radius:10px}
+.npc-line .bub{background:var(--paper);border-radius:12px;padding:10px 12px;flex:1;min-width:0}
+.npc-line .bub b{color:#2a7a6c;font-family:var(--display);font-weight:400}
+.q{font-size:20px;font-weight:700;margin:4px 0 14px}
+.lvl{display:inline-block;background:var(--brass-soft);color:#6b4a12;border-radius:6px;padding:1px 9px;font-size:13px;font-weight:800;margin-inline-start:6px;vertical-align:middle}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:13px 14px;text-align:right;font-size:18px;font-weight:600;min-height:52px}
+.opt[aria-pressed="true"]{border-color:var(--navy);background:#eef2f8}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.sent{display:flex;flex-wrap:wrap;gap:8px;font-size:22px;line-height:1.3;margin-bottom:6px}
+.sent.grid{gap:10px}
+.tok{border:2px dashed transparent;background:var(--paper);border-radius:10px;padding:6px 10px;font-weight:600;font-size:21px}
+.sent.grid .tok{border:2px solid var(--line);background:var(--card);min-width:84px}
+.tok[aria-pressed="true"]{border:2px solid var(--navy);background:#dfe7f3}
+.tok.right{border:2px solid var(--good);background:var(--good-soft)}
+.tok.wrong{border:2px solid var(--bad);background:var(--bad-soft)}
+.tok.missed{border:2px dashed var(--good)}
+.sortw{display:flex;flex-direction:column;gap:12px}
+.sortw .cur{align-self:center;font-size:30px;font-weight:800;background:#fff8dc;border:2px solid #ecd9a0;border-radius:12px;padding:10px 26px;min-width:150px;text-align:center}
+.bins{display:grid;gap:10px}
+.bin{border:2px solid var(--line);border-radius:12px;background:var(--paper);padding:10px;min-height:96px;display:flex;flex-direction:column;gap:6px;text-align:right}
+.bin>b{font-family:var(--display);font-weight:400;color:var(--navy);font-size:18px}
+.bin .chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 9px;font-weight:700}
+.chip.right{background:var(--good-soft);border-color:var(--good)}
+.chip.wrong{background:var(--bad-soft);border-color:var(--bad);text-decoration:line-through}
+.fb{border-radius:12px;padding:12px 14px;margin-top:14px;font-size:17px}
+.fb.ok{background:var(--good-soft);color:#1d5233}
+.fb.no{background:var(--bad-soft);color:#7a1f19}
+.fb b{font-family:var(--display);font-weight:400;font-size:19px;display:block}
+.hint{margin-top:12px;background:#fff8dc;border:1px dashed #d9b85a;border-radius:12px;padding:10px 12px;font-size:16px}
+.case-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.case-actions .btn{flex:1 1 150px}
+.teach h3{font-size:24px;color:var(--navy);margin-bottom:8px}
+.teach p{margin:6px 0}
+.ex{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.ex span{background:var(--paper);border-radius:10px;padding:6px 12px;font-weight:700;font-size:19px}
+.ex span.no{background:var(--bad-soft);text-decoration:line-through}
+.ex span.yes{background:var(--good-soft)}
+.flow{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.flow div{display:flex;gap:10px;align-items:center;background:var(--paper);border-radius:10px;padding:8px 12px;font-size:18px}
+.flow div i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800;flex:0 0 auto}
+.tbl{width:100%;border-collapse:collapse;font-size:17px;margin:8px 0}
+.tbl td,.tbl th{border:1px solid var(--line);padding:6px 8px;text-align:center}
+.tbl th{background:var(--paper-2)}
+.result{text-align:center;padding-top:10px}
+.result .score{font-family:var(--display);font-size:64px;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums}
+.bigstamp{display:inline-block;margin:14px auto;border:5px solid var(--stamp);color:var(--stamp);font-family:var(--display);font-size:38px;padding:4px 22px;border-radius:10px;transform:rotate(-7deg);animation:stamp .45s cubic-bezier(.2,1.6,.4,1) both}
+.bigstamp.retry{border-color:var(--muted);color:var(--muted)}
+@keyframes stamp{from{transform:rotate(-7deg) scale(2.2);opacity:0}to{transform:rotate(-7deg) scale(1);opacity:1}}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:right;margin-top:10px}
+.sum div{background:var(--paper);border-radius:10px;padding:8px 10px;font-size:15px}
+.sum b{color:var(--brass);display:block;font-family:var(--display);font-weight:400}
+.confirm{margin-top:10px;background:var(--bad-soft);border-radius:12px;padding:12px}
+
+/* onboarding */
+#onb{position:fixed;inset:0;z-index:60;background:var(--navy);overflow-y:auto;direction:rtl;color:#fff}
+#onb .wrap{min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:16px;padding-block:calc(env(safe-area-inset-top,0px) + 24px) calc(env(safe-area-inset-bottom,0px) + 24px)}
+#onb h2{font-size:38px;color:#f4c26b}
+#onb .card{color:var(--ink)}
+#onb label{font-weight:800;display:block;margin-bottom:6px}
+#onb input{width:100%;font:inherit;font-size:20px;padding:12px;border-radius:10px;border:2px solid var(--line);background:#fff;direction:rtl}
+.coats{display:flex;gap:10px;flex-wrap:wrap}
+.coat{width:64px;height:84px;border-radius:12px;border:3px solid transparent;background:var(--paper)}
+.coat[aria-pressed="true"]{border-color:var(--navy)}
+.coat canvas{width:36px;height:48px;image-rendering:pixelated}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (min-width:560px){.bins.three{grid-template-columns:repeat(3,1fr)}.bins.two{grid-template-columns:1fr 1fr}}
+</style>
+
+<div id="app" dir="rtl" lang="he">
+  <header class="topbar"><div class="wrap">
+    <div class="brand">
+      <div class="brand-badge" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f4c26b" stroke-width="2.4" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5 20 20"/></svg></div>
+      <h1>סוכנות הבלשים</h1>
+    </div>
+    <button class="avatar" id="avatarBtn" aria-label="הפרופיל שלי">ב</button>
+  </div></header>
+  <main id="screen"></main>
+  <nav class="nav" aria-label="ניווט ראשי"><div class="nav-in">
+    <button data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>היום</button>
+    <button data-go="world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>העולם</button>
+    <button data-go="cases"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7l2 2h9v11H3z"/></svg>תיקים</button>
+    <button data-go="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>אני</button>
+  </div></nav>
+</div>
+
+<div id="world" hidden>
+  <canvas id="cv"></canvas>
+  <div class="hud">
+    <button class="hbtn" id="exitBtn">יציאה ←</button>
+    <div class="goal" id="goal"><small id="goalTop">אזור 1 מתוך 6 · היעד</small><b id="goalName">מטה הסוכנות</b>
+      <div class="gl"><span id="goalCases">0/4 תיקים</span><div class="bar"><i id="goalBar" style="width:0%"></i></div><span id="goalClues">0/8 רמזים</span></div></div>
+    <button class="hbtn" id="mapBtn">מפה</button>
+  </div>
+  <div class="compass" id="compass" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 19 20 12 16 5 20z" fill="#6fc7b5"/></svg></div>
+  <div class="joy left" id="joy"><i id="knob"></i></div>
+  <button class="act right" id="actBtn" hidden>כניסה</button>
+  <div class="toast" id="toast" hidden></div>
+  <div class="dlg" id="dlg" hidden><div class="who" id="dlgWho"></div><p id="dlgText"></p><div class="row" id="dlgBtns"></div></div>
+  <div class="mapov" id="mapov" hidden><h3>מפת רובע המילים</h3><canvas id="mapcv"></canvas><button class="btn soft" id="mapClose" style="flex:0 0 auto">סגירה</button></div>
+</div>
+
+<div id="case" hidden></div>
+<div id="onb" hidden></div>
+
+<script>
+"use strict";
+/* ============ storage ============ */
+const KEY="sochnut-v1";
+const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,settings:{side:"left",big:false},pos:null});
+let P=fresh();
+function load(){try{const s=localStorage.getItem(KEY);if(s)P=Object.assign(fresh(),JSON.parse(s));}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
+load();
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ============ ranks ============ */
+const RANKS=[[0,"בלש מתלמד"],[150,"בלש"],[400,"בלש ראשי"],[800,"מפקד הסוכנות"]];
+function rank(){let r=RANKS[0],nx=null;for(let i=0;i<RANKS.length;i++){if(P.points>=RANKS[i][0]){r=RANKS[i];nx=RANKS[i+1]||null;}}return{name:r[1],from:r[0],next:nx};}
+
+/* ============ content ============ */
+const ZONES=[
+ {n:"1",name:"רובע המילים",topic:"שם עצם · שם תואר · פועל · ניקוד"},
+ {n:"2",name:"גן השורשים",topic:"שורשים · מילון · פירושי מילים"},
+ {n:"3",name:"מגדל הקורא הפעיל",topic:"בקרה · עוצר ושואל · פיצוח שאלה"},
+ {n:"4",name:"הארכיון",topic:"איתור מידע · מאזכרים"},
+ {n:"5",name:"חדר החקירות",topic:"הסקת מסקנות · מסר"},
+ {n:"6",name:"מערכת העיתון",topic:"מגירות · ויכוח · שיפוט"},
+ {n:"★",name:"השמורה",topic:"חזרה על הכול"}
+];
+const COATS=[["#8a5a2b","#6d4522"],["#2f5d8a","#244a6e"],["#3f7a45","#2f5e35"],["#7a3b52","#5e2d3f"]];
+
+const LESSONS=[
+{id:"noun",num:"1/א",title:"שם עצם",building:"בית החפצים",npc:"האוצר",npcColors:["#5b6b8a","#3d4a63"],
+ intro:"בבית החפצים כל דבר מחכה לשם שלו. אבל מישהו ערבב כאן מילים שהן בכלל לא שמות של דברים. בואו נבדוק.",
+ experience:[{type:"tap",grid:true,q:"בחדר מסתתרים שמות של חפצים, ובאמצע גם מילים אחרות. סמנו את המילים שהן שם של חפץ.",words:["ארון","רץ","כרית","יפה","שולחן","קפץ","מיטה","ירוק"],targets:[0,2,4,6],why:"ארון, כרית, שולחן ומיטה הם שמות של חפצים. עכשיו נלמד כלי בלשי שיעזור לבדוק כל מילה."}],
+ teach:[
+  {h:"מה זה שם עצם?",html:`<p>שם עצם הוא מילה שאומרת <b>מי</b> או <b>מה</b>: שם של אדם, בעל חיים, חפץ או מקום.</p><div class="ex"><span>ילד</span><span>כלב</span><span>כדור</span><span>גינה</span></div><p>שואלים: מי? מה? שם העצם עונה.</p>`},
+  {h:"הכלי הבלשי: ה___ ופותחים משפט",html:`<div class="flow"><div><i>1</i>מוסיפים ה לפני המילה: כלב ← הכלב</div><div><i>2</i>פותחים איתה משפט: הכלב נובח.</div><div><i>3</i>המשפט נשמע טוב? זה שם עצם.</div></div><p>מילת פעולה או מילת תיאור לא עוברות את הבדיקה:</p><div class="ex"><span class="no">השיחק בחצר?</span><span class="no">היפה פורח?</span></div>`},
+  {h:"גם מה שלא רואים",html:`<p>רגשות ורעיונות הם גם שמות עצם, אפילו שאי אפשר לגעת בהם.</p><div class="ex"><span>שמחה</span><span>חברות</span><span>אומץ</span></div><p>השמחה מילאה את הלב. ✓</p>`},
+  {h:"שייכות: הסוף אומר של מי",html:`<div class="ex"><span>הכלב שלי ← כלבי</span><span>הגינה שלנו ← גינתנו</span><span>הבית שלו ← ביתו</span></div><p>גם אלה שמות עצם. לא מוסיפים להן ה, כי הסוף כבר אומר של מי.</p>`}],
+ pool:[
+  {k:"n1",lv:1,type:"tap",q:"סמנו 3 שמות עצם במשפט.",words:["הילד","שתל","עץ","בגינה."],targets:[0,2,3],why:"ילד, עץ, גינה. ״שתל״ היא פעולה.",hint:"נסו להוסיף ה ולפתוח משפט: העץ... הגינה..."},
+  {k:"n2",lv:1,type:"tap",q:"סמנו 3 שמות עצם במשפט.",words:["הציפור","בנתה","קן","על","הגג."],targets:[0,2,4],why:"ציפור, קן, גג.",hint:"מי? מה? הציפור, הקן, הגג."},
+  {k:"n3",lv:1,type:"choice",q:"איזו מילה היא שם עצם?",opts:["קפץ","כדור","ירוק","שתה"],a:1,why:"הכדור התגלגל. ✓ אפשר לפתוח איתה משפט.",hint:"נסו כל מילה עם ה: הקפץ? הכדור? הירוק?"},
+  {k:"n4",lv:1,type:"sort",q:"שם עצם או לא? הוסיפו ה ונסו לפתוח משפט.",bins:["שם עצם","לא שם עצם"],items:[["כדור",0],["שמח",1],["גינה",0],["קפץ",1],["חתול",0],["שתה",1]],why:"שמות עצם: כדור, גינה, חתול."},
+  {k:"n5",lv:1,type:"choice",q:"בודקים את המילה ״חתול״: מוסיפים ה ופותחים משפט. מה גילינו?",opts:["״החתול ישן על הספה.״ זה שם עצם","אי אפשר לפתוח איתה משפט, אז זה לא שם עצם"],a:0,why:"החתול ישן על הספה. המשפט נשמע טוב."},
+  {k:"n6",lv:2,type:"tap",q:"סמנו 3 שמות עצם במשפט.",words:["השמחה","מילאה","את","הלב","של","הילד."],targets:[0,3,5],why:"שמחה, לב, ילד. גם רגש הוא שם עצם.",hint:"גם רגש הוא שם עצם."},
+  {k:"n7",lv:2,type:"sort",q:"מיינו את המילים.",bins:["שם עצם","לא שם עצם"],items:[["חברות",0],["ירוק",1],["אומץ",0],["רץ",1],["מורה",0],["עצוב",1],["עיר",0],["כתב",1]],why:"שמות עצם: חברות, אומץ, מורה, עיר."},
+  {k:"n8",lv:2,type:"choice",q:"למה ״יפה״ איננה שם עצם?",opts:["כי אי אפשר לפתוח איתה משפט: ״היפה פורח?״ נשמע מוזר","כי היא מילה קצרה","כי היא מתארת מקום","כי אין בה ה"],a:0,why:"״יפה״ מתארת. היא צריכה שם עצם לידה: הפרח היפה פורח."},
+  {k:"n9",lv:2,type:"tap",q:"סמנו 3 שמות עצם במשפט.",words:["הדייג","מצא","דג","גדול","בים."],targets:[0,2,4],why:"דייג, דג, ים. ״גדול״ מתארת את הדג."},
+  {k:"n10",lv:2,type:"choice",q:"איזו מילה היא שם עצם של רגש או רעיון?",opts:["אמיץ","אומץ","התאמץ","אמיצים"],a:1,why:"האומץ עזר לו לקפוץ למים. ✓"},
+  {k:"n11",lv:3,type:"tap",q:"סמנו 3 שמות עצם במשפט.",words:["כלבי","רץ","אל","ביתו","של","השכן."],targets:[0,3,5],why:"כלבי וביתו הן מילים עם שייכות, וגם הן שמות עצם. וגם: השכן.",hint:"כלבי = הכלב שלי."},
+  {k:"n12",lv:3,type:"sort",q:"מיינו את המילים. שימו לב לתוספות!",bins:["שם עצם","לא שם עצם"],items:[["גינתנו",0],["שמחנו",1],["ספריהם",0],["צחקו",1],["ביתה",0],["גבוהים",1],["התרגשות",0],["התרגשו",1]],why:"שמות עצם: גינתנו, ספריהם, ביתה, התרגשות."},
+  {k:"n13",lv:3,type:"tap",q:"סמנו את כל שמות העצם במשפט (4).",words:["בבוקר","יצאו","התלמידים","לטיול","בפארק."],targets:[0,2,3,4],why:"בוקר, תלמידים, טיול, פארק. גם עם ב או ל בהתחלה זה שם עצם.",hint:"הורידו את ב/ל: בוקר, טיול, פארק."},
+  {k:"n14",lv:3,type:"choice",q:"איזו מילה איננה שם עצם?",opts:["גינתנו","שולחנות","מיהרו","חברות"],a:2,why:"״מיהרו״ היא פעולה: מה הם עשו? מיהרו."}],
+ judge:[{k:"nj",type:"choice",judge:true,q:"הבלש המתלמד כתב בדו״ח: ״המילה ירוק היא שם עצם, כי אפשר להגיד: הירוק.״ מה הבעיה בבדיקה שלו?",opts:["הוא הוסיף ה, אבל לא ניסה לפתוח משפט. ״הירוק קפץ?״ נשמע מוזר, אז זה לא שם עצם","אין בעיה, ירוק הוא שם עצם","היה צריך לשאול ״מה הוא עשה אתמול?״","היה צריך להוסיף ב במקום ה"],a:0,why:"בבדיקה יש שני שלבים: גם ה, וגם פתיחת משפט."}],
+ sum:{מה:"מילה שאומרת מי או מה: אדם, חיה, חפץ, מקום, רגש.",מתי:"בכל משפט: הוא אומר על מי או על מה מדברים.",איך:"מוסיפים ה ופותחים משפט: הילד רץ. ✓",למה:"כדי להבין את המשפט ולכתוב נכון."},
+ clue:{h:"שם עצם",t:"ה___ ופותחים משפט. גם רגש הוא שם עצם!"}},
+
+{id:"adj",num:"1/ב",title:"שם תואר",building:"סדנת הצבעים",npc:"הצבע",npcColors:["#c0702d","#9a561f"],
+ intro:"בסדנת הצבעים צובעים מילים. אבל בלי מילים שמתארות, אף אחד לא יודע באיזה צבע לצבוע.",
+ experience:[{type:"choice",q:"הצבע צריך לצבוע כדור, אבל לא יודע איזה. איזו מילה תעזור לו?",opts:["כדור","אדום","זרק","מגרש"],a:1,why:"״אדום״ מתארת את הכדור. מילה כזאת נקראת שם תואר."}],
+ teach:[
+  {h:"מה זה שם תואר?",html:`<p>שם תואר הוא מילה ש<b>מתארת</b> שם עצם. הוא עונה על השאלות: איך הוא? איזה הוא?</p><table class="tbl"><tr><th>צבע</th><th>גודל</th><th>הרגשה</th><th>אופי</th></tr><tr><td>אדום</td><td>גדול</td><td>שמח</td><td>נדיב</td></tr></table>`},
+  {h:"איפה הוא עומד?",html:`<p><b>כלל 1:</b> שם התואר בא אחרי שם העצם.</p><div class="ex"><span class="yes">בית גדול</span><span class="no">גדול בית</span></div><p><b>כלל 2:</b> יש ה לשם העצם? גם לשם התואר יש ה.</p><div class="ex"><span>כלב קטן</span><span>הכלב הקטן</span></div>`},
+  {h:"כלל 3: מתאים לשם העצם",html:`<p>זכר או נקבה? יחיד או רבים? שם התואר משתנה בהתאם.</p><table class="tbl"><tr><th></th><th>יחיד</th><th>רבים</th></tr><tr><th>זכר</th><td>ספר חדש</td><td>ספרים חדשים</td></tr><tr><th>נקבה</th><td>מחברת חדשה</td><td>מחברות חדשות</td></tr></table>`},
+  {h:"שתי בדיקות, ולא מתבלבלים",html:`<div class="flow"><div><i>1</i>פותחים איתה משפט? ״הגדולה רצה״ — חסר מי!</div><div><i>2</i>על איזו שאלה היא עונה? מי? מה? ← שם עצם. איך? איזה? ← שם תואר.</div></div>`}],
+ pool:[
+  {k:"a1",lv:1,type:"tap",q:"סמנו את שם התואר.",words:["הדג","הכתום","שוחה","באקווריום."],targets:[1],why:"איזה דג? כתום.",hint:"שאלו: איזה דג?"},
+  {k:"a2",lv:1,type:"tap",q:"סמנו את שם התואר.",words:["הסוס","הקטן","אכל","גזר."],targets:[1],why:"איזה סוס? קטן."},
+  {k:"a3",lv:1,type:"choice",q:"קנינו כדור ______.",opts:["חדש","חדשה","חדשים"],a:0,why:"כדור — זכר, יחיד ← חדש."},
+  {k:"a4",lv:1,type:"sort",q:"שם עצם או שם תואר?",bins:["שם עצם","שם תואר"],items:[["שולחן",0],["ירוק",1],["ציפור",0],["אמיץ",1],["חלון",0],["רך",1]],why:"שמות תואר: ירוק, אמיץ, רך."},
+  {k:"a5",lv:1,type:"choice",q:"איזה צירוף נכון?",opts:["הבית הגדול","גדול הבית","הבית גדולה","גדול בית"],a:0,why:"שם התואר בא אחרי שם העצם, עם ה כמו שלו."},
+  {k:"a6",lv:2,type:"choice",q:"הספרים ______ מונחים על המדף. (חדש)",opts:["החדש","החדשים","החדשות","חדשים"],a:1,why:"הספרים — זכר, רבים, עם ה ← החדשים."},
+  {k:"a7",lv:2,type:"choice",q:"בשדה רועות פרות ______. (גדול)",opts:["גדולות","הגדולות","גדולים","גדול"],a:0,why:"פרות — נקבה, רבות, בלי ה ← גדולות."},
+  {k:"a8",lv:2,type:"choice",q:"הליצן ______ הצחיק את כולם. (מצחיק)",opts:["מצחיק","המצחיק","המצחיקים","מצחיקה"],a:1,why:"הליצן — עם ה, אז גם התואר: המצחיק."},
+  {k:"a9",lv:2,type:"tap",q:"בכל משפט שני שמות תואר. סמנו אותם.",words:["הילד","החכם","פתר","שאלה","קשה."],targets:[1,4],why:"איזה ילד? חכם. איזו שאלה? קשה."},
+  {k:"a10",lv:2,type:"choice",q:"איתי מקפיד להניח את הצעצועים והספרים במקום. איתי הוא...",opts:["מסודר","אמיץ","עצלן","חזק"],a:0,why:"מי שמחזיר כל דבר למקום — מסודר."},
+  {k:"a11",lv:2,type:"sort",q:"שם עצם או שם תואר?",bins:["שם עצם","שם תואר"],items:[["עוגה",0],["מתוקה",1],["ארנב",0],["עצוב",1],["מגדל",0],["גבוהים",1],["שמיכה",0],["חמה",1]],why:"שמות תואר: מתוקה, עצוב, גבוהים, חמה."},
+  {k:"a12",lv:3,type:"tap",q:"סמנו את שני שמות התואר.",words:["הפרח","הצהוב","והריחני","גדל","בגינה."],targets:[1,2],why:"איזה פרח? צהוב וריחני. גם עם ו בהתחלה."},
+  {k:"a13",lv:3,type:"choice",q:"השכן ______ עזר לנו לסחוב את הארגזים. (נדיב)",opts:["הנדיב","נדיב","הנדיבה","הנדיבים"],a:0,why:"השכן — זכר, יחיד, עם ה ← הנדיב."},
+  {k:"a14",lv:3,type:"choice",q:"כשדן מתווכח עם מישהו, הוא בדרך כלל מצליח לשכנע אותו. דן הוא...",opts:["משכנע","שקט","ביישן","מסודר"],a:0,why:"מי שמצליח לשכנע — משכנע."},
+  {k:"a15",lv:3,type:"choice",q:"גם כשיש רעש רב, רן מצליח להכין שיעורי בית. רן הוא...",opts:["מרוכז","רועש","עייף","מצחיק"],a:0,why:"מי שלא מתבלבל מרעש — מרוכז."},
+  {k:"a16",lv:3,type:"choice",q:"במשפט ״הגבוה רץ מהר״ חסר משהו. מה?",opts:["שם עצם: מי הגבוה? למשל ״השחקן הגבוה רץ מהר״","פועל","שם תואר","סימן שאלה"],a:0,why:"שם תואר צריך שם עצם לידו."},
+  {k:"a17",lv:3,type:"tap",q:"סמנו את שני שמות התואר.",words:["המורה","הסבלני","הקריא","סיפור","מצחיק."],targets:[1,4],why:"איזה מורה? סבלני. איזה סיפור? מצחיק."}],
+ judge:[{k:"aj",type:"choice",judge:true,q:"הבלש המתלמד כתב: ״בחנות ראינו מכוניות אדומים.״ מה הטעות?",opts:["שם התואר לא מתאים: מכוניות — נקבה, רבות ← אדומות","חסרה ה","שם התואר צריך לבוא לפני שם העצם","אין טעות"],a:0,why:"מכוניות אדומות. שם התואר מתאים לשם העצם."}],
+ sum:{מה:"מילה שמתארת שם עצם: איך? איזה?",מתי:"כשרוצים לספר איך משהו נראה, מרגיש או מתנהג.",איך:"אחרי שם העצם, ומתאים לו: הכלב הקטן.",למה:"כדי לתאר בבירור ולהבין מה שקוראים."},
+ clue:{h:"שם תואר",t:"בא אחרי שם העצם ומתאים לו: ספרים חדשים."}},
+
+{id:"sort3",num:"1/ג",title:"שם עצם, פועל, שם תואר",building:"תחנת המיון",npc:"הסדרן",npcColors:["#6b4f8a","#4f3a68"],
+ intro:"בתחנת המיון מגיעות מילים בלי תווית. התפקיד שלכם: לשים כל מילה בתא הנכון.",
+ experience:[{type:"sort",q:"נסו למיין לפי מה שאתם יודעים.",bins:["שם עצם","פועל","שם תואר"],items:[["הכלב",0],["קופץ",1],["השמח",2]],why:"הכלב — מי? קופץ — מה עושה? השמח — איזה? עכשיו נלמד שלוש בדיקות."}],
+ teach:[{h:"שלוש בדיקות",html:`<table class="tbl"><tr><th>שם עצם</th><th>פועל</th><th>שם תואר</th></tr><tr><td>מי? מה?</td><td>מה עושים?</td><td>איך? איזה?</td></tr><tr><td>פותח משפט עם ה: הילדים…</td><td>פג״ז: פעולה, גוף וזמן</td><td>מתאר שם עצם ובא אחריו</td></tr></table><div class="ex"><span>הכלב</span><span>השמח</span><span>קופץ</span></div>`},
+  {h:"פג״ז: איך מזהים פועל",html:`<div class="flow"><div><i>פ</i>פעולה: יש כאן משהו שעושים?</div><div><i>ג</i>גוף: מי עושה? אני, אתה, הוא, הם…</div><div><i>ז</i>זמן: עבר, הווה או עתיד?</div></div><p>״קפצנו״: פעולה — קפיצה, גוף — אנחנו, זמן — עבר. זה פועל!</p>`}],
+ pool:[
+  {k:"s1",lv:1,type:"sort",q:"מיינו לשלוש קבוצות.",bins:["שם עצם","פועל","שם תואר"],items:[["שולחן",0],["קפץ",1],["ירוק",2],["ציפור",0],["צוחקים",1],["רך",2]],why:"שולחן, ציפור — מי/מה. קפץ, צוחקים — מה עושים. ירוק, רך — איזה."},
+  {k:"s2",lv:1,type:"tap",q:"סמנו את הפועל.",words:["הכלב","הגדול","נובח."],targets:[2],why:"מה הכלב עושה? נובח."},
+  {k:"s3",lv:1,type:"choice",q:"המילה ״נובח״ היא...",opts:["פועל","שם עצם","שם תואר"],a:0,why:"פעולה (נביחה), גוף (הוא), זמן (הווה)."},
+  {k:"s4",lv:2,type:"sort",q:"מיינו לשלוש קבוצות.",bins:["שם עצם","פועל","שם תואר"],items:[["מחברת",0],["שותים",1],["גבוהים",2],["פרח",0],["ישנו",1],["עצובה",2]],why:"שותים, ישנו — פעלים. גבוהים, עצובה — שמות תואר."},
+  {k:"s5",lv:2,type:"tap",q:"סמנו את שני שמות התואר.",words:["השכן","הנחמד","קטף","תפוח","אדום."],targets:[1,4],why:"איזה שכן? נחמד. איזה תפוח? אדום."},
+  {k:"s6",lv:2,type:"choice",q:"איזו מילה היא פועל?",opts:["הזריזה","פתחה","חלון","גדול"],a:1,why:"פתחה: פעולה, גוף (היא), זמן (עבר)."},
+  {k:"s7",lv:2,type:"tap",q:"סמנו את הפועל.",words:["הילדים","העליזים","רצו","לחצר."],targets:[2],why:"מה עשו? רצו."},
+  {k:"s8",lv:3,type:"sort",q:"מילים דומות, תפקיד שונה. מיינו.",bins:["שם עצם","פועל","שם תואר"],items:[["התנהגות",0],["התנהג",1],["מנומס",2],["התרגשות",0],["מתרגשים",1],["נרגש",2]],why:"ההתנהגות (שם עצם) ≠ התנהג (פועל)."},
+  {k:"s9",lv:3,type:"choice",q:"במשפט ״ההתנהגות שלו הייתה יפה״, המילה ״ההתנהגות״ היא...",opts:["שם עצם","פועל","שם תואר"],a:0,why:"אפשר לפתוח איתה משפט: ההתנהגות הייתה יפה."},
+  {k:"s10",lv:3,type:"choice",q:"במשפט ״מחר נטייל בהרים״, מה מגלה פג״ז על ״נטייל״?",opts:["פעולה: טיול · גוף: אנחנו · זמן: עתיד","פעולה: טיול · גוף: הוא · זמן: עבר","זה בכלל שם עצם","זה שם תואר"],a:0,why:"נטייל = אנחנו, בעתיד."}],
+ judge:[{k:"sj",type:"choice",judge:true,q:"הבלש המתלמד מיין: שם עצם — שולחן, ירוק. פועל — קפץ, צוחקת. שם תואר — עצובה, רך. איזו מילה בתא הלא נכון?",opts:["ירוק","קפץ","עצובה","שולחן"],a:0,why:"ירוק עונה על ״איזה?״ — שם תואר."}],
+ sum:{מה:"שם עצם, פועל ושם תואר — סוגי מילים.",מתי:"בכל משפט שקוראים או כותבים.",איך:"ה + משפט? פג״ז? איזה?",למה:"כדי להבין את המשפט ולכתוב נכון."},
+ clue:{h:"פג״ז",t:"פועל = פעולה, גוף וזמן."}},
+
+{id:"nikud",num:"1/ד",title:"ניקוד מתאים",building:"בית הדפוס",npc:"המדפיס",npcColors:["#3d5a5a","#2b4242"],
+ intro:"במכונת הדפוס התערבבו הנקודות. אותן אותיות יכולות להיות מילים שונות לגמרי, והניקוד מגלה איזו.",
+ experience:[{type:"choice",q:"״דני יצא לטייל עם ה___ שלו בפארק, והוא נבח על כל עובר אורח.״ איזו מילה מתאימה?",opts:["חָלָב","כֶּלֶב"],a:1,why:"חלב לא נובח! הבלש עוצר, קורא שוב, ובודק מה הגיוני."}],
+ teach:[{h:"אותן אותיות, מילים שונות",html:`<div class="ex"><span>סֵפֶר — קוראים בו</span><span>סַפָּר — גוזר שיער</span><span>סִפֵּר — סיפור</span></div><p>הניקוד מגלה איזו מילה כתובה.</p>`},
+  {h:"הכלי הבלשי",html:`<div class="flow"><div><i>1</i>קוראים את כל המשפט.</div><div><i>2</i>מנסים כל אחת מהקריאות.</div><div><i>3</i>בוחרים את מה שהגיוני במשפט.</div></div>`}],
+ pool:[
+  {k:"k1",lv:1,type:"choice",q:"למדען יש ______ רב בנושא בעלי החיים.",opts:["יֶדַע","יָדַע"],a:0,why:"יֶדַע — מה שיודעים. יָדַע — פעולה בעבר."},
+  {k:"k2",lv:1,type:"choice",q:"לא מצאתי בארון אף ______ מתאים למסיבה.",opts:["בֶּגֶד","בָּגַד"],a:0,why:"בֶּגֶד — לובשים אותו."},
+  {k:"k3",lv:1,type:"choice",q:"״יש לי ______״, אמר התלמיד למורה.",opts:["שְׁאֵלָה","שָׁאֲלָה"],a:0,why:"שְׁאֵלָה — דבר ששואלים."},
+  {k:"k4",lv:1,type:"choice",q:"ה______ גזר לי את השיער.",opts:["סַפָּר","סֵפֶר"],a:0,why:"סַפָּר — מי שגוזר שיער."},
+  {k:"k5",lv:2,type:"choice",q:"הארנבים נבהלו וברחו לכל ______.",opts:["עֵבֶר","עָבַר"],a:0,why:"לכל עֵבֶר — לכל הכיוונים."},
+  {k:"k6",lv:2,type:"choice",q:"______ הביא את החבילה עד לפתח הדלת.",opts:["הַדַּוָּר","הַדּוֹר"],a:0,why:"הַדַּוָּר — מביא דואר וחבילות."},
+  {k:"k7",lv:2,type:"choice",q:"האש שרפה את כל הקרש, לא נשאר ממנו ______.",opts:["זֵכֶר","זָכָר"],a:0,why:"לא נשאר זֵכֶר — לא נשאר כלום."},
+  {k:"k8",lv:2,type:"choice",q:"השביל הזה הוא ______ מהיר לקצה השכונה.",opts:["מַעֲבָר","מֵעֵבֶר"],a:0,why:"מַעֲבָר — דרך לעבור בה."},
+  {k:"k9",lv:2,type:"choice",q:"אהרון ______ את הגרביים בזריזות רבה.",opts:["גָּרַב","גֶּרֶב"],a:0,why:"גָּרַב — פעולה: שם גרביים."},
+  {k:"k10",lv:3,type:"choice",q:"השופט הביט בנאשם בסבר פנים ______.",opts:["חָמוּר","חֲמוֹר"],a:0,why:"חָמוּר — רציני מאוד. חֲמוֹר — בעל חיים."},
+  {k:"k11",lv:3,type:"choice",q:"סבא ______ לנו סיפור מצחיק.",opts:["סִפֵּר","סֵפֶר","סַפָּר"],a:0,why:"סִפֵּר — פעולה: סיפר סיפור."},
+  {k:"k12",lv:3,type:"choice",q:"בחנות קנינו ______ חדש עם סיפורי הרפתקאות.",opts:["סֵפֶר","סַפָּר","סִפֵּר"],a:0,why:"סֵפֶר — קונים וקוראים אותו."},
+  {k:"k13",lv:3,type:"choice",q:"פתחתי את החלון, הרוח נשבה והנר ______.",opts:["כָּבָה","כָּבֶה","כִּבָּה"],a:0,why:"הנר כָּבָה — הוא נכבה מעצמו."}],
+ judge:[{k:"kj",type:"choice",judge:true,q:"הבלש המתלמד קרא בקול: ״הַדּוֹר הביא את החבילה״, והמשיך לקרוא הלאה. מה הייתם מציעים לו?",opts:["לעצור ולקרוא שוב: מי מביא חבילות? הַדַּוָּר","להמשיך — זה לא משנה","לדלג על כל הפסקה","לקרוא מהר יותר"],a:0,why:"בלש עוצר כשמשהו לא הגיוני, ומנסה שוב (עד 3 פעמים)."}],
+ sum:{מה:"אותן אותיות יכולות להיות מילים שונות.",מתי:"כשמילה נשמעת לא הגיונית במשפט.",איך:"קוראים את כל המשפט ובוחרים את הקריאה ההגיונית.",למה:"כדי להבין נכון את מה שקוראים."},
+ clue:{h:"ניקוד",t:"יֶדַע / יָדַע — הניקוד משנה את המשמעות."}}
+];
+const L=id=>LESSONS.find(l=>l.id===id);
+
+const CLUES=[
+ {id:"c1",x:14,y:6,h:"מי? מה?",t:"שם עצם עונה על מי? מה?"},
+ {id:"c2",x:31,y:5,h:"רגש",t:"גם רגש הוא שם עצם: שמחה, אומץ."},
+ {id:"c3",x:4,y:21,h:"שייכות",t:"כלבי = הכלב שלי. גם זה שם עצם."},
+ {id:"c4",x:41,y:16,h:"איזה?",t:"שם תואר עונה על איך? איזה?"},
+ {id:"c5",x:28,y:22,h:"התאמה",t:"מחברות חדשות, ספרים חדשים."},
+ {id:"c6",x:16,y:23,h:"פג״ז",t:"פעולה, גוף, זמן — זה פועל."},
+ {id:"c7",x:3,y:30,h:"3 ניסיונות",t:"נתקעתם במילה? עד 3 ניסיונות, ואז ממשיכים."},
+ {id:"c8",x:40,y:32,h:"חבר טוב",t:"בלש טוב הוא קודם כל חבר טוב."}
+];
+const PLANKS=[
+ {q:"איזו מילה היא שם עצם?",o:["קפץ","גשר","רטוב"],a:1},
+ {q:"איזו מילה היא שם תואר?",o:["חזק","נהר","שחה"],a:0},
+ {q:"איזו מילה היא פועל?",o:["קרש","עץ","בנינו"],a:2},
+ {q:"איזה צירוף נכון?",o:["הגשר הישן","הגשר ישנה","ישן הגשר"],a:0},
+ {q:"איזו מילה היא שם עצם של רגש?",o:["אומץ","אמיץ","התאמץ"],a:0}
+];
+
+/* ============ app shell ============ */
+let screen="home";
+function go(s){
+  if(s==="world"){openWorld();return;}
+  screen=s;render();window.scrollTo(0,0);
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
+$("#avatarBtn").addEventListener("click",()=>go("me"));
+
+function solvedCount(){return LESSONS.filter(l=>P.solved[l.id]&&P.solved[l.id].done).length;}
+function nextLesson(){return LESSONS.find(l=>!(P.solved[l.id]&&P.solved[l.id].done))||null;}
+
+function render(){
+  document.querySelectorAll("[data-go]").forEach(b=>b.setAttribute("aria-current",b.dataset.go===screen?"page":"false"));
+  $("#avatarBtn").textContent=(P.name||"ב").trim().charAt(0);
+  const el=$("#screen");
+  if(screen==="home")el.innerHTML=homeHTML();
+  else if(screen==="cases")el.innerHTML=casesHTML();
+  else el.innerHTML=meHTML();
+  bindScreen();
+}
+function homeHTML(){
+  const nl=nextLesson(),r=rank(),sc=solvedCount();
+  const rev=P.review.length;
+  return `<div class="wrap stack">
+  <div class="hello"><div class="eyebrow">אזור 1 · רובע המילים</div><h2>שלום, בלש ${esc(P.name||"")}</h2><span class="rank-chip">${r.name} · ${P.points} נקודות</span></div>
+  <div class="card case-hero"><canvas id="heroCv" width="320" height="170" aria-hidden="true"></canvas>
+   <div class="body">${nl?`<span class="case-tab">התיק הבא · ${nl.num}</span><h3>${nl.building}</h3><div class="muted">נושא: ${nl.title}</div>`:`<span class="case-tab">כל התיקים פוענחו</span><h3>רובע המילים פוענח!</h3><div class="muted">הגשר לגן השורשים פתוח. אזור 2 בבנייה.</div>`}
+   <div class="row"><button class="btn primary" data-act="world">להיכנס לעולם ▶</button>${nl?`<button class="btn soft" data-open="${nl.id}">לפתוח את התיק</button>`:""}</div></div></div>
+  <div class="card"><div class="section-title">המסע</div><p class="muted" style="margin:4px 0 10px">שבעה אזורים. כל אזור נפתח כשמסיימים את הקודם.</p>
+   <div class="zones">${ZONES.map((z,i)=>`<div class="zone ${i===0?"on":""}"><span class="n">${z.n}</span><b>${z.name}</b><small>${i===0?`${sc}/4 תיקים`:"נעול"}</small></div>`).join("")}</div></div>
+  <div class="card"><div class="section-title">תיקים פתוחים</div>
+   ${rev?`<p style="margin:6px 0 10px">${rev} שאלות שכדאי לחזור אליהן. כמה דקות ביום, כדי לא לשכוח.</p><button class="btn soft" data-act="review" style="width:100%">לחזור עליהן עכשיו</button>`:`<p class="muted" style="margin:6px 0 0">אין כרגע שאלות לחזרה. שאלות שטועים בהן מחכות כאן.</p>`}</div>
+  <div class="card"><div class="section-title">ההתקדמות שלי</div><div class="stats" style="margin-top:10px">
+   <div class="stat"><b>${sc}/4</b><span>תיקים</span></div><div class="stat"><b>${P.clues.length}/${CLUES.length}</b><span>רמזים</span></div><div class="stat"><b>${P.planks}/5</b><span>קרשים בגשר</span></div></div></div>
+  <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
+}
+function lessonPill(l){const s=P.solved[l.id];if(s&&s.done)return `<span class="pill ok">פוענח · ${s.best}%</span>`;if(s)return `<span class="pill todo">${s.best}% · עוד לא 70%</span>`;return `<span class="pill todo">פתוח</span>`;}
+function casesHTML(){
+  return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">התיקים</h2>
+  <div class="section-title">אזור 1 · רובע המילים</div><div class="list">
+  ${LESSONS.map(l=>`<button class="li" data-open="${l.id}"><span class="ic">${l.num}</span><span class="tx"><b>${l.building}</b><small>${l.title}</small></span>${lessonPill(l)}</button>`).join("")}</div>
+  ${ZONES.slice(1).map(z=>`<div class="section-title">אזור ${z.n} · ${z.name}</div><div class="li locked"><span class="ic">🔒</span><span class="tx"><b>${z.topic}</b><small>ייפתח בהמשך</small></span><span class="pill lock">נעול</span></div>`).join("")}
+  </div>`;
+}
+function meHTML(){
+  const r=rank();const pct=r.next?Math.round((P.points-r.from)/(r.next[0]-r.from)*100):100;
+  const z1=solvedCount()===LESSONS.length;
+  const notes=[...LESSONS.filter(l=>P.solved[l.id]&&P.solved[l.id].done).map(l=>l.clue),...CLUES.filter(c=>P.clues.includes(c.id))];
+  const s=P.settings;
+  return `<div class="wrap stack">
+  <div class="card" style="text-align:center"><canvas id="meCv" width="24" height="32" style="width:72px;height:96px;image-rendering:pixelated" aria-hidden="true"></canvas>
+   <h2 style="font-size:28px;color:var(--navy);margin-top:6px">${esc(P.name)}</h2><div class="muted">${r.name}</div>
+   <div class="stamps" style="margin:14px 0">${["א","ב","ג","ד","ה","ו"].map((h,i)=>`<span class="stampc ${i===0&&z1?"on":""}">${h}</span>`).join("")}</div>
+   <div style="background:var(--brass-soft);border-radius:12px;padding:12px;text-align:right"><div style="display:flex;justify-content:space-between;font-weight:800"><span style="font-family:var(--display);font-weight:400;font-size:20px;color:#6b4a12">${r.name}</span><span>${P.points} נקודות</span></div>
+   <div class="bar" style="margin:8px 0"><i style="width:${pct}%"></i></div><small class="muted">${r.next?`עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:"הדרגה הגבוהה ביותר!"} · נקודות על תשובות נכונות, תיקים שפוענחו ורמזים</small></div></div>
+  <div class="section-title">מחברת הבלש</div>
+  <div class="notes">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<4?`<div class="note empty">רמזים שתאספו בעולם ותיקים שתפענחו יופיעו כאן.</div>`:""}</div>
+  <div class="section-title">הגדרות</div>
+  <div class="card stack" style="padding-top:12px"><div><b>הג׳ויסטיק בצד</b><div class="seg" style="margin-top:6px"><button id="sideL" aria-pressed="${s.side==="left"}">שמאל</button><button id="sideR" aria-pressed="${s.side==="right"}">ימין</button></div></div>
+   <div><b>גודל</b><div class="seg" style="margin-top:6px"><button id="sizeN" aria-pressed="${!s.big}">רגיל</button><button id="sizeB" aria-pressed="${s.big}">גדול</button></div></div>
+   <div><button class="btn ghost" id="resetBtn" style="width:100%">לאפס את ההתקדמות</button><div id="resetBox"></div></div></div>
+  <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
+}
+function bindScreen(){
+  document.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>openCase(b.dataset.open,"screen")));
+  document.querySelectorAll("[data-act=world]").forEach(b=>b.addEventListener("click",()=>go("world")));
+  document.querySelectorAll("[data-act=review]").forEach(b=>b.addEventListener("click",()=>openReview()));
+  const hc=$("#heroCv");if(hc)drawHero(hc);
+  const mc=$("#meCv");if(mc){const c=mc.getContext("2d");drawChar(c,6,8,coatOf(P.coat),0,1);}
+  const set=(k,v)=>{P.settings[k]=v;save();render();};
+  if($("#sideL")){$("#sideL").onclick=()=>set("side","left");$("#sideR").onclick=()=>set("side","right");$("#sizeN").onclick=()=>set("big",false);$("#sizeB").onclick=()=>set("big",true);
+   $("#resetBtn").onclick=()=>{$("#resetBox").innerHTML=`<div class="confirm"><b>למחוק את כל ההתקדמות?</b><div class="row" style="margin-top:8px"><button class="btn primary" id="resetYes" style="background:var(--stamp)">כן, למחוק</button><button class="btn soft" id="resetNo">ביטול</button></div></div>`;
+    $("#resetYes").onclick=()=>{P=fresh();save();buildMap();startOnboarding();};$("#resetNo").onclick=()=>{$("#resetBox").innerHTML="";};};}
+}
+function coatOf(i){const c=COATS[i]||COATS[0];return{hat:"#2b2320",band:"#7a2a22",skin:"#f1c9a0",coat:c[0],coatD:c[1],pants:"#2f3440",boots:"#1c1c1c"};}
+
+/* ============ pixel art ============ */
+const T=16, MW=46, MH=36;
+let map=[], mapCv=null, buildings=[], npcs=[];
+function hash(x,y,k){let h=(x*374761393+y*668265263+(k||0)*2246822519)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967296;}
+function px(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h);}
+function drawGrass(c,ox,oy,x,y,alt){px(c,ox,oy,T,T,alt?"#6c9a4c":"#679548");for(let i=0;i<7;i++){const a=hash(x,y,i),b=hash(x,y,i+20);px(c,ox+Math.floor(a*15),oy+Math.floor(b*15),1,2,hash(x,y,i+40)>.5?"#5a8640":"#78a957");}
+ if(hash(x,y,99)>.9){const fx=ox+3+Math.floor(hash(x,y,5)*9),fy=oy+3+Math.floor(hash(x,y,6)*9),col=hash(x,y,7)>.5?"#d9534f":"#f2efe6";px(c,fx,fy,2,2,col);px(c,fx+4,fy+3,2,2,col);px(c,fx+1,fy+5,2,2,col);}}
+function drawPath(c,ox,oy,x,y){px(c,ox,oy,T,T,"#cdb88d");for(let i=0;i<5;i++)px(c,ox+Math.floor(hash(x,y,i)*15),oy+Math.floor(hash(x,y,i+9)*15),2,1,"#b9a479");}
+function drawCobble(c,ox,oy,x,y){px(c,ox,oy,T,T,"#bdb6a6");c.fillStyle="#a49c8b";for(let r=0;r<4;r++){const off=(r%2)*3;for(let k=0;k<3;k++){c.fillRect(ox+((k*6+off)%16),oy+r*4,1,4);}c.fillRect(ox,oy+r*4,T,1);}}
+function drawWater(c,ox,oy,x,y){px(c,ox,oy,T,T,"#3e7ea6");for(let i=0;i<3;i++)px(c,ox+Math.floor(hash(x,y,i)*11),oy+Math.floor(hash(x,y,i+5)*14),4,1,"#6ea8cc");}
+function drawBridge(c,ox,oy){px(c,ox,oy,T,T,"#8a5a35");for(let r=0;r<4;r++)px(c,ox,oy+r*4+3,T,1,"#6a4327");}
+function drawRails(c,ox,oy,left){px(c,ox+(left?0:13),oy,3,T,"#4a2f1b");px(c,ox+(left?1:14),oy,1,T,"#6a4327");}
+function drawTree(c,ox,oy,x,y){drawGrass(c,ox,oy,x,y);px(c,ox+7,oy+10,3,6,"#5a3a22");c.fillStyle="#2c6131";c.beginPath();c.arc(ox+8,oy+7,7,0,7);c.fill();c.fillStyle="#3d7f42";c.beginPath();c.arc(ox+6,oy+5,4,0,7);c.fill();px(c,ox+5,oy+3,2,2,"#58a15b");}
+function drawFence(c,ox,oy,x,y){drawGrass(c,ox,oy,x,y);px(c,ox,oy+6,T,2,"#8a5a35");px(c,ox,oy+11,T,2,"#8a5a35");px(c,ox+2,oy+3,3,12,"#6a4327");px(c,ox+11,oy+3,3,12,"#6a4327");}
+function drawFountain(c,ox,oy,x,y){drawCobble(c,ox,oy,x,y);}
+function drawSign(c,ox,oy){px(c,ox+7,oy+8,2,8,"#5a3a22");px(c,ox+2,oy+2,12,7,"#8a5a35");px(c,ox+3,oy+3,10,5,"#c9a26b");px(c,ox+4,oy+4,8,1,"#6a4327");px(c,ox+4,oy+6,6,1,"#6a4327");}
+
+function setT(x,y,v){if(x>=0&&y>=0&&x<MW&&y<MH)map[y][x]=v;}
+function rect(x0,y0,x1,y1,v){for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)setT(x,y,v);}
+function buildMap(){
+  map=[];for(let y=0;y<MH;y++){map.push([]);for(let x=0;x<MW;x++)map[y].push("g");}
+  rect(0,0,MW-1,1,"t");rect(0,0,1,MH-1,"t");rect(MW-2,0,MW-1,MH-1,"t");rect(0,MH-1,MW-1,MH-1,"w");
+  // river + bridges
+  rect(0,25,MW-1,27,"w");rect(9,25,10,27,"b");rect(34,25,35,27,P.planks>=5?"b":"k");
+  // island area (south east) surrounded by water
+  rect(24,28,25,MH-1,"w");rect(26,34,MW-1,MH-1,"w");
+  // paths
+  rect(3,20,42,20,"p");rect(22,9,23,24,"p");rect(9,20,10,24,"p");rect(34,20,35,24,"p");
+  rect(9,28,10,32,"p");rect(34,28,35,30,"p");rect(29,31,40,31,"p");
+  // plaza
+  rect(16,10,29,17,"c");rect(22,13,23,14,"f");
+  // building doors paths
+  rect(8,13,15,13,"p");rect(30,13,37,13,"p");rect(8,19,8,19,"p");rect(37,19,37,19,"p");
+  // zone-2 fence with gate
+  rect(2,30,22,30,"F");rect(9,30,10,30,"G");rect(2,31,22,33,"z");
+  buildings=[
+   {x:19,y:4,w:8,h:5,name:"מטה הסוכנות",roof:"#7a2a22",hq:true,door:{x:22,y:8}},
+   {x:5,y:8,w:7,h:5,name:"בית החפצים",roof:"#3d5f8a",lesson:"noun",door:{x:8,y:12}},
+   {x:34,y:8,w:7,h:5,name:"סדנת הצבעים",roof:"#b8642a",lesson:"adj",door:{x:37,y:12}},
+   {x:5,y:14,w:7,h:5,name:"תחנת המיון",roof:"#5e4a7a",lesson:"sort3",door:{x:8,y:18}},
+   {x:34,y:14,w:7,h:5,name:"בית הדפוס",roof:"#2f6b63",lesson:"nikud",door:{x:37,y:18}}];
+  buildings.forEach(b=>rect(b.x,b.y,b.x+b.w-1,b.y+b.h-1,"B"));
+  setT(22,9,"p");setT(23,9,"p");
+  // trees
+  for(let y=2;y<MH-1;y++)for(let x=2;x<MW-2;x++){if(map[y][x]!=="g")continue;
+    const near=(dx,dy)=>{const v=(map[y+dy]||[])[x+dx];return v&&v!=="g"&&v!=="t";};
+    let block=false;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(near(dx,dy))block=true;
+    if(!block&&hash(x,y,3)>.86)map[y][x]="t";}
+  CLUES.forEach(c=>{map[c.y][c.x]="g";});
+  setT(12,21,"s");setT(11,29,"s");setT(36,24,"g");setT(33,24,"s");
+  npcs=[
+   {id:"chief",name:"המפקד",x:21,y:10.2,colors:["#22344f","#16243a"]},
+   {id:"crier",name:"הכרוז",x:24.8,y:19.3,colors:["#8a3b2a","#6a2c1f"]},
+   {id:"fisher",name:"הדייג",x:31.5,y:23.6,colors:["#4f6b3a","#3a5229"]},
+   ...LESSONS.map(l=>{const b=buildings.find(b=>b.lesson===l.id);return{id:"l_"+l.id,name:l.npc,x:b.door.x-1.6,y:b.door.y+1.3,colors:l.npcColors,lesson:l.id};})];
+  bake();
+}
+function bake(){
+  mapCv=document.createElement("canvas");mapCv.width=MW*T;mapCv.height=MH*T;const c=mapCv.getContext("2d");
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const v=map[y][x],ox=x*T,oy=y*T;
+    if(v==="g"||v==="B")drawGrass(c,ox,oy,x,y);
+    else if(v==="z")drawGrass(c,ox,oy,x,y,true);
+    else if(v==="p")drawPath(c,ox,oy,x,y);
+    else if(v==="c")drawCobble(c,ox,oy,x,y);
+    else if(v==="w")drawWater(c,ox,oy,x,y);
+    else if(v==="b"){drawBridge(c,ox,oy);drawRails(c,ox,oy,x===9||x===34);}
+    else if(v==="k"){drawWater(c,ox,oy,x,y);drawRails(c,ox,oy,x===34);}
+    else if(v==="t")drawTree(c,ox,oy,x,y);
+    else if(v==="F")drawFence(c,ox,oy,x,y);
+    else if(v==="G")drawPath(c,ox,oy,x,y);
+    else if(v==="f")drawCobble(c,ox,oy,x,y);
+    else if(v==="s"){drawGrass(c,ox,oy,x,y);drawSign(c,ox,oy);}}
+  // river banks
+  c.fillStyle="#7d6a4a";for(let x=0;x<MW;x++){if(map[24][x]!=="p")c.fillRect(x*T,25*T-2,T,2);if(map[28]&&map[28][x]!=="p"&&map[28][x]!=="w")c.fillRect(x*T,28*T,T,2);}
+  // fountain
+  c.fillStyle="#7f8693";c.beginPath();c.arc(23*T,14*T,15,0,7);c.fill();c.fillStyle="#4c8db3";c.beginPath();c.arc(23*T,14*T,11,0,7);c.fill();c.fillStyle="#9a9fab";c.fillRect(23*T-3,14*T-8,6,12);c.fillStyle="#bfe3f2";c.fillRect(23*T-1,14*T-12,2,5);
+  // big tree in zone 2
+  c.fillStyle="#5a3a22";c.fillRect(16*T,31*T,10,26);c.fillStyle="#2c6131";c.beginPath();c.arc(16*T+5,31*T,22,0,7);c.fill();c.fillStyle="#3d7f42";c.beginPath();c.arc(16*T-2,31*T-6,12,0,7);c.fill();
+  buildings.forEach(b=>drawBuilding(c,b));
+  // chest on island
+  if(!P.chest)drawChest(c,37*T,29*T);
+}
+function drawChest(c,x,y){px(c,x+2,y+5,12,9,"#8a5a35");px(c,x+2,y+3,12,4,"#a86d3c");px(c,x+2,y+8,12,1,"#4a2f1b");px(c,x+7,y+7,2,3,"#f4c26b");}
+function drawBuilding(c,b){
+  const X=b.x*T,Y=b.y*T,W=b.w*T,H=b.h*T,roofH=2*T;
+  c.fillStyle="rgba(0,0,0,.18)";c.fillRect(X+3,Y+H-2,W,4);
+  px(c,X,Y+roofH,W,H-roofH,"#ddd3c0");
+  c.fillStyle="#c9bea8";for(let r=Y+roofH+3;r<Y+H;r+=5)c.fillRect(X,r,W,1);
+  for(let r=0,yy=Y+roofH;yy<Y+H;r++,yy+=5)for(let xx=X+(r%2)*6;xx<X+W;xx+=12)c.fillRect(xx,yy,1,5);
+  px(c,X-2,Y+roofH-2,W+4,4,"#2b2320");
+  px(c,X,Y,W,roofH,b.roof);c.fillStyle="rgba(0,0,0,.18)";for(let r=4;r<roofH;r+=5)c.fillRect(X,Y+r,W,1);
+  c.fillStyle="rgba(255,255,255,.12)";c.fillRect(X,Y,W,2);
+  const winY=Y+roofH+8;
+  for(let i=0;i<b.w;i++){const wx=X+i*T+4;if(i===b.door.x-b.x)continue;if(i%2===1||b.w<6){px(c,wx-1,winY-1,10,9,"#5a3a22");px(c,wx,winY,8,7,"#7fb6d6");px(c,wx+3,winY,1,7,"#5a3a22");px(c,wx,winY+3,8,1,"#5a3a22");}}
+  const dx=b.door.x*T,dy=Y+H-14;px(c,dx+1,dy-2,14,16,"#3a2618");px(c,dx+3,dy,10,14,"#7a4a28");px(c,dx+10,dy+7,2,2,"#f4c26b");
+  if(b.hq){px(c,X+W-12,Y-10,2,12,"#2b2320");px(c,X+W-10,Y-10,8,5,"#f4c26b");}
+}
+function drawChar(c,x,y,col,frame,s){
+  s=s||1;const P_=["...hhhhhh...","..hhhhhhhh..","..HHHHHHHH..","hhhhhhhhhhhh","...ssssss...","...sesses...","...ssssss...","..cccccccc..",".cccCccCccc.",".ccccCCcccc.",".scccCCcccs.","..cccccccc..","..pppppppp..",frame?"..pp...pp...":"...pp..pp...",frame?"..pp...pp...":"...pp..pp...",frame?"..bb...bb...":"...bb..bb..."];
+  const m={h:col.hat,H:col.band,s:col.skin,e:"#1d1d1d",c:col.coat,C:col.coatD,p:col.pants,b:col.boots};
+  for(let r=0;r<16;r++)for(let k=0;k<12;k++){const ch=P_[r][k];if(ch!=="."){c.fillStyle=m[ch];c.fillRect(x+k*s,y+r*s,s,s);}}
+}
+function npcCol(n){return{hat:"#2b2320",band:"#3a3a3a",skin:"#e8bf96",coat:n.colors[0],coatD:n.colors[1],pants:"#33363f",boots:"#1c1c1c"};}
+
+function drawHero(cv){
+  if(!mapCv)buildMap();const c=cv.getContext("2d");c.imageSmoothingEnabled=false;
+  const nl=nextLesson();const b=nl?buildings.find(b=>b.lesson===nl.id):buildings[0];
+  const cx=(b.x+b.w/2)*T,cy=(b.y+b.h/2+1)*T;const vw=160,vh=85;
+  c.drawImage(mapCv,cx-vw/2,cy-vh/2,vw,vh,0,0,320,170);
+  drawChar(c,(b.door.x*T-(cx-vw/2))*2-6,((b.door.y+1)*T-(cy-vh/2))*2-12,coatOf(P.coat),0,2);
+}
+
+/* ============ world ============ */
+const cv=$("#cv"),ctx=cv.getContext("2d");
+let W=0,H=0,S=3,DPR=1,running=false,last=0,t0=0;
+const pl={x:22.5,y:11.2,f:0,moving:false,anim:0};
+const input={x:0,y:0};const keys={};
+let dlgOpen=false,nearObj=null,toastT=0,mapOpen=false;
+
+function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  const base=Math.min(W,H);S=Math.max(2,Math.min(4,Math.round(base/(T*11))));if(P.settings.big)S+=1;}
+window.addEventListener("resize",()=>{if(running)resize();});
+
+function openWorld(){
+  if(!mapCv)buildMap();
+  $("#world").hidden=false;document.body.style.overflow="hidden";
+  if(P.pos){pl.x=P.pos.x;pl.y=P.pos.y;}
+  const side=P.settings.side;$("#joy").className="joy "+side+(P.settings.big?" big":"");$("#actBtn").className="act "+(side==="left"?"right":"left");
+  resize();running=true;last=performance.now();requestAnimationFrame(loop);updateHud();
+  if(!P.tutorial){setTimeout(()=>talk(npcs.find(n=>n.id==="chief")),350);}
+}
+function closeWorld(){running=false;P.pos={x:pl.x,y:pl.y};save();$("#world").hidden=true;document.body.style.overflow="";closeDlg();screen="home";render();}
+$("#exitBtn").addEventListener("click",closeWorld);
+
+function solid(tx,ty){const v=(map[ty]||[])[tx];if(v===undefined)return true;
+  if(v==="G")return !gateOpen();return "wtBFkf".includes(v)||v==="s";}
+function gateOpen(){return solvedCount()>=3;}
+function blocked(x,y){const r=.28;for(const[dx,dy]of[[-r,-.05],[r,-.05],[-r,.3],[r,.3]]){if(solid(Math.floor(x+dx),Math.floor(y+dy)))return true;}
+  for(const n of npcs){if(Math.abs(n.x-x)<.5&&Math.abs(n.y-y)<.35)return true;}return false;}
+
+function loop(now){
+  if(!running)return;const dt=Math.min(.05,(now-last)/1000);last=now;t0+=dt;
+  let ix=input.x,iy=input.y;
+  if(keys.ArrowLeft||keys.a)ix=-1;if(keys.ArrowRight||keys.d)ix=1;if(keys.ArrowUp||keys.w)iy=-1;if(keys.ArrowDown||keys.s)iy=1;
+  const mag=Math.hypot(ix,iy);pl.moving=false;
+  if(mag>.15&&!dlgOpen&&!mapOpen){const sp=4.2*dt/Math.max(1,mag);const nx=pl.x+ix*sp,ny=pl.y+iy*sp;
+    if(!blocked(nx,pl.y))pl.x=nx;if(!blocked(pl.x,ny))pl.y=ny;pl.moving=true;pl.anim+=dt*8;}
+  checkNear();draw();
+  if(toastT>0){toastT-=dt;if(toastT<=0)$("#toast").hidden=true;}
+  requestAnimationFrame(loop);
+}
+function interactables(){
+  const arr=[];
+  buildings.forEach(b=>arr.push({kind:"door",x:b.door.x+.5,y:b.door.y+1.2,b,label:"כניסה"}));
+  npcs.forEach(n=>arr.push({kind:"npc",x:n.x,y:n.y,n,label:"לדבר"}));
+  CLUES.forEach(c=>{if(!P.clues.includes(c.id))arr.push({kind:"clue",x:c.x+.5,y:c.y+.5,c,label:"לאסוף"});});
+  if(P.planks<5)arr.push({kind:"bridge",x:35,y:24.4,label:"לתקן"});
+  arr.push({kind:"gate",x:10,y:29.3,label:gateOpen()?"לעבור":"לבדוק"});
+  if(!P.chest)arr.push({kind:"chest",x:37.5,y:29.9,label:"לפתוח"});
+  [[12,21,"רובע המילים · דרום: הנהר והגשרים · צפון: מטה הסוכנות"],[11,29,"גן השורשים · אזור 2"],[33,24,"גשר המילים · כל קרש הוא תשובה נכונה"]].forEach(s=>arr.push({kind:"sign",x:s[0]+.5,y:s[1]+1.1,text:s[2],label:"לקרוא"}));
+  return arr;
+}
+function checkNear(){
+  if(dlgOpen||mapOpen){$("#actBtn").hidden=true;nearObj=null;return;}
+  let best=null,bd=1.15;
+  for(const o of interactables()){const d=Math.hypot(o.x-pl.x,o.y-pl.y);if(d<bd){bd=d;best=o;}}
+  if(best&&best.kind==="clue"){collectClue(best.c);return;}
+  nearObj=best;const ab=$("#actBtn");if(best){ab.hidden=false;ab.textContent=best.label;}else ab.hidden=true;
+}
+function act(){const o=nearObj;if(!o||dlgOpen)return;
+  if(o.kind==="door"){if(o.b.hq)say("המפקד","המטה סגור כרגע לשיפוצים. המפקד מחכה לכם בכיכר.");else openCase(o.b.lesson,"world");}
+  else if(o.kind==="npc")talk(o.n);
+  else if(o.kind==="bridge")bridgePuzzle();
+  else if(o.kind==="gate"){if(gateOpen())say("שומר השער","השער פתוח! גן השורשים עדיין בבנייה. בקרוב תוכלו להיכנס ולגלות את סוד עץ המילים.");else say("שומר השער",`השער לגן השורשים נפתח אחרי 3 תיקים ברובע המילים. פוענחו עד עכשיו: ${solvedCount()}.`);}
+  else if(o.kind==="chest")openChest();
+  else if(o.kind==="sign")say("שלט",o.text);
+}
+$("#actBtn").addEventListener("click",act);
+window.addEventListener("keydown",e=>{if($("#world").hidden)return;const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=true;
+  if(k===" "||k==="Enter"){e.preventDefault();if(dlgOpen){const b=$("#dlgBtns button");if(b)b.click();}else act();}
+  if(k==="m"||k==="M")toggleMap();if(k==="Escape"&&mapOpen)toggleMap();
+  if(k.startsWith("Arrow"))e.preventDefault();});
+window.addEventListener("keyup",e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false;});
+
+// joystick
+(function(){const j=$("#joy"),kn=$("#knob");let id=null,cx=0,cy=0;
+  const upd=(x,y)=>{const R=j.offsetWidth/2-20;let dx=x-cx,dy=y-cy;const d=Math.hypot(dx,dy);if(d>R){dx*=R/d;dy*=R/d;}kn.style.transform=`translate(${dx}px,${dy}px)`;input.x=dx/R;input.y=dy/R;};
+  j.addEventListener("pointerdown",e=>{id=e.pointerId;j.setPointerCapture(id);const r=j.getBoundingClientRect();cx=r.left+r.width/2;cy=r.top+r.height/2;upd(e.clientX,e.clientY);});
+  j.addEventListener("pointermove",e=>{if(e.pointerId===id)upd(e.clientX,e.clientY);});
+  const end=e=>{if(e.pointerId!==id)return;id=null;kn.style.transform="";input.x=0;input.y=0;};
+  j.addEventListener("pointerup",end);j.addEventListener("pointercancel",end);})();
+// tap on canvas: talk to npc / walk hint
+cv.addEventListener("pointerdown",e=>{if(dlgOpen)return;const wx=(e.clientX-W/2)/(T*S)+pl.x,wy=(e.clientY-H/2)/(T*S)+pl.y;
+  for(const n of npcs){if(Math.abs(n.x-wx)<.7&&wy>n.y-1.3&&wy<n.y+.4){if(Math.hypot(n.x-pl.x,n.y-pl.y)<3)talk(n);else toast(`לכו אל ${n.name} כדי לדבר`);return;}}});
+
+function draw(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.imageSmoothingEnabled=false;
+  const ts=T*S;let camX=pl.x*ts-W/2,camY=pl.y*ts-H/2;
+  camX=Math.max(0,Math.min(MW*ts-W,camX));camY=Math.max(0,Math.min(MH*ts-H,camY));
+  if(MW*ts<W)camX=(MW*ts-W)/2;if(MH*ts<H)camY=(MH*ts-H)/2;
+  ctx.fillStyle="#2b4a2a";ctx.fillRect(0,0,W,H);
+  ctx.drawImage(mapCv,Math.round(camX/S),Math.round(camY/S),Math.ceil(W/S)+1,Math.ceil(H/S)+1,0,0,(Math.ceil(W/S)+1)*S,(Math.ceil(H/S)+1)*S);
+  const sx=wx=>Math.round(wx*ts-camX),sy=wy=>Math.round(wy*ts-camY);
+  // water shimmer
+  ctx.fillStyle="rgba(190,225,245,.5)";for(let i=0;i<40;i++){const x=(i*7.3+t0*.6)%MW,y=25+(i%3)+((i*.37)%1)*.8;const X=sx(x),Y=sy(y);if(X>-20&&X<W+20&&Y>-20&&Y<H+20&&map[Math.floor(y)]&&map[Math.floor(y)][Math.floor(x)]==="w")ctx.fillRect(X,Y,3*S,S);}
+  // broken bridge planks
+  if(P.planks<5){for(let i=0;i<5;i++){const yy=25*T+2+i*9.4;const X=sx(34)+3*S,Y=Math.round(yy*S-camY);
+      if(i<P.planks){ctx.fillStyle="#8a5a35";ctx.fillRect(X,Y,26*S,7*S);ctx.fillStyle="#6a4327";ctx.fillRect(X,Y+6*S,26*S,S);}
+      else{ctx.strokeStyle="rgba(255,255,255,.5)";ctx.setLineDash([3*S,3*S]);ctx.lineWidth=S;ctx.strokeRect(X+S,Y+S,24*S,5*S);ctx.setLineDash([]);}}}
+  // gate
+  if(!gateOpen()){ctx.fillStyle="#6a4327";for(let i=0;i<2;i++){const X=sx(9+i),Y=sy(30);ctx.fillRect(X+S,Y+3*S,14*S,3*S);ctx.fillRect(X+S,Y+9*S,14*S,3*S);ctx.fillRect(X+2*S,Y+S,2*S,14*S);ctx.fillRect(X+12*S,Y+S,2*S,14*S);}ctx.fillStyle="#f4c26b";ctx.fillRect(sx(10)-2*S,sy(30)+6*S,4*S,4*S);}
+  // clues
+  CLUES.forEach(c=>{if(P.clues.includes(c.id))return;const bob=Math.sin(t0*3+c.x)*2*S;const X=sx(c.x)+3*S,Y=sy(c.y)+2*S+bob;
+    ctx.fillStyle="rgba(0,0,0,.2)";ctx.fillRect(X+S,sy(c.y)+14*S,9*S,2*S);ctx.fillStyle="#fff8dc";ctx.fillRect(X,Y,10*S,12*S);ctx.fillStyle="#c9a26b";ctx.fillRect(X+2*S,Y+3*S,6*S,S);ctx.fillRect(X+2*S,Y+6*S,5*S,S);ctx.fillStyle="#b8322a";ctx.fillRect(X+6*S,Y+8*S,2*S,2*S);
+    if(Math.sin(t0*5+c.y)>.6){ctx.fillStyle="#fff";ctx.fillRect(X+10*S,Y-2*S,2*S,2*S);}});
+  // entities sorted by y
+  const ents=npcs.map(n=>({y:n.y,d:()=>{drawShadow(sx(n.x),sy(n.y));drawChar(ctx,sx(n.x)-6*S,sy(n.y)-15*S,npcCol(n),0,S);}}));
+  ents.push({y:pl.y,d:()=>{drawShadow(sx(pl.x),sy(pl.y));drawChar(ctx,sx(pl.x)-6*S,sy(pl.y)-15*S,coatOf(P.coat),pl.moving&&Math.floor(pl.anim)%2,S);}});
+  ents.sort((a,b)=>a.y-b.y).forEach(e=>e.d());
+  // labels
+  const fs=Math.max(13,Math.round(5.2*S));ctx.font=`700 ${fs}px Assistant, sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.direction="rtl";
+  const pill=(text,X,Y,dark)=>{const w=ctx.measureText(text).width+fs*1.1,h=fs*1.6;ctx.fillStyle=dark?"rgba(25,32,44,.85)":"rgba(255,250,240,.92)";rr(X-w/2,Y-h/2,w,h,h/2);ctx.fill();ctx.fillStyle=dark?"#fff":"#22344f";ctx.fillText(text,X,Y+1);};
+  buildings.forEach(b=>{const s=P.solved[b.lesson];pill((s&&s.done?"✓ ":"")+b.name,sx(b.x+b.w/2),sy(b.y+b.h)-fs*1.3,false);});
+  npcs.forEach(n=>{if(Math.hypot(n.x-pl.x,n.y-pl.y)<5)pill(n.name,sx(n.x),sy(n.y)-18*S,true);});
+  // compass
+  const tg=target();const ang=Math.atan2(tg.y-pl.y,tg.x-pl.x)+Math.PI/2;$("#compass svg").style.transform=`rotate(${ang}rad)`;
+  $("#compass").hidden=Math.hypot(tg.x-pl.x,tg.y-pl.y)<2;
+}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawShadow(X,Y){ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.ellipse(X,Y+S,5*S,2*S,0,0,7);ctx.fill();}
+function target(){
+  if(!P.tutorial){const c=npcs.find(n=>n.id==="chief");return{x:c.x,y:c.y,name:"המפקד בכיכר"};}
+  const nl=nextLesson();if(nl){const b=buildings.find(b=>b.lesson===nl.id);return{x:b.door.x+.5,y:b.door.y+1.2,name:b.name};}
+  if(P.planks<5)return{x:35,y:24.4,name:"גשר המילים"};
+  if(!P.chest)return{x:37.5,y:29.9,name:"התיבה באי"};
+  return{x:10,y:29.3,name:"השער לגן השורשים"};
+}
+function updateHud(){
+  const sc=solvedCount();$("#goalName").textContent=target().name;$("#goalCases").textContent=`${sc}/4 תיקים`;$("#goalClues").textContent=`${P.clues.length}/${CLUES.length} רמזים`;$("#goalBar").style.width=(sc/4*100)+"%";
+}
+function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;toastT=2.6;}
+
+/* dialog */
+function say(who,text,btns){dlgOpen=true;$("#dlg").hidden=false;$("#dlgWho").textContent=who;$("#dlgText").textContent=text;
+  const bx=$("#dlgBtns");bx.innerHTML="";(btns||[{t:"סגור"}]).forEach((b,i)=>{const e=document.createElement("button");e.className="btn "+(i===0?"primary":"soft");e.style.flex="0 1 auto";e.textContent=b.t;e.onclick=()=>{closeDlg();b.f&&b.f();};bx.appendChild(e);});
+  setTimeout(()=>{const f=bx.querySelector("button");f&&f.focus();},30);}
+function closeDlg(){dlgOpen=false;$("#dlg").hidden=true;}
+function chain(who,lines,end){let i=0;const nx=()=>{if(i>=lines.length){end&&end();return;}const l=lines[i++];say(who,l,[{t:i<lines.length?"המשך":"סגור",f:nx}]);};nx();}
+function talk(n){
+  if(n.id==="chief"){
+    if(!P.tutorial){chain("המפקד",[`ברוכים הבאים לסוכנות הבלשים, בלש ${P.name}!`,"זה רובע המילים. בכל בניין כאן מחכה תיק חקירה, ובכל תיק לומדים כלי בלשי חדש.","בשטח פזורים 8 דפי רמז. דרכו עליהם והם ייכנסו למחברת הבלש שלכם.","החץ הירוק מראה לאן ללכת. התיק הראשון מחכה בבית החפצים. בהצלחה!"],()=>{P.tutorial=true;save();updateHud();});return;}
+    const sc=solvedCount();
+    if(sc<4)say("המפקד",`פוענחו ${sc} מתוך 4 תיקים. התיק הבא: ${target().name}. תיק נחשב פוענח מ־70%.`);
+    else say("המפקד","כל התיקים ברובע המילים פוענחו! קיבלתם את חותמת א׳. השער לגן השורשים פתוח.");return;}
+  if(n.id==="crier"){chain("הכרוז",["שתי דרכים מכאן אל הנהר: מערב אל הגשר הישן, ומזרח אל גשר המילים השבור.","מעבר לגשר הישן נמצא השער לגן השורשים."]);return;}
+  if(n.id==="fisher"){say("הדייג",P.planks<5?`לגשר המילים חסרים ${5-P.planks} קרשים. כל תשובה נכונה מחזירה קרש. באי שמעבר לגשר מחכה תיבה של המפקד.`:"תיקנתם את הגשר! עכשיו אפשר לדוג גם מהצד השני.");return;}
+  if(n.lesson){const l=L(n.lesson),s=P.solved[l.id];
+    say(l.npc,s&&s.done?`התיק ״${l.title}״ פוענח (${s.best}%). רוצים לחזור עליו ולשפר?`:l.intro,[{t:"לפתוח את התיק",f:()=>openCase(l.id,"world")},{t:"אחר כך"}]);}
+}
+function collectClue(c){P.clues.push(c.id);P.points+=10;save();updateHud();
+  say("דף רמז נמצא!",`${c.h}: ${c.t}  (+10 נקודות · נשמר במחברת הבלש)`);}
+
+/* bridge */
+function bridgePuzzle(){
+  if(P.planks>=5)return;const p=PLANKS[P.planks];
+  dlgOpen=true;$("#dlg").hidden=false;$("#dlgWho").textContent=`גשר המילים · קרש ${P.planks+1} מתוך 5`;$("#dlgText").textContent=p.q;
+  const bx=$("#dlgBtns");bx.innerHTML="";
+  p.o.forEach((o,i)=>{const e=document.createElement("button");e.className="btn soft";e.style.flex="1 1 90px";e.textContent=o;
+    e.onclick=()=>{if(i===p.a){P.planks++;P.points+=10;save();updateHud();closeDlg();
+        if(P.planks>=5){buildMap();say("גשר המילים","הגשר תוקן! עכשיו אפשר לעבור לאי. +10 נקודות");}else{toast(`קרש ${P.planks} במקום! +10`);setTimeout(bridgePuzzle,500);}}
+      else{e.disabled=true;e.style.textDecoration="line-through";toast("נסו שוב, בלש!");}};bx.appendChild(e);});
+  const c=document.createElement("button");c.className="btn ghost";c.textContent="אחר כך";c.onclick=closeDlg;bx.appendChild(c);
+}
+function openChest(){P.chest=true;P.points+=50;save();buildMap();updateHud();
+  say("התיבה של המפקד","מצאתם את זכוכית המגדלת של המפקד! +50 נקודות. מי שמתקן גשרים יודע לחבר בין מילים.");}
+
+/* map overlay */
+function toggleMap(){mapOpen=!mapOpen;$("#mapov").hidden=!mapOpen;if(mapOpen){const m=$("#mapcv");m.width=MW*T;m.height=MH*T;const c=m.getContext("2d");c.drawImage(mapCv,0,0);
+  c.font="bold 13px Assistant, sans-serif";c.textAlign="center";c.direction="rtl";
+  buildings.forEach(b=>{c.fillStyle="rgba(255,250,240,.92)";const w=c.measureText(b.name).width+10;c.fillRect((b.x+b.w/2)*T-w/2,(b.y+b.h/2)*T-9,w,18);c.fillStyle="#22344f";c.fillText(b.name,(b.x+b.w/2)*T,(b.y+b.h/2)*T+5);});
+  CLUES.forEach(cl=>{if(!P.clues.includes(cl.id)){c.fillStyle="#f4c26b";c.fillRect(cl.x*T+4,cl.y*T+4,8,8);}});
+  c.fillStyle="#d9534f";c.beginPath();c.arc(pl.x*T,pl.y*T,6,0,7);c.fill();c.strokeStyle="#fff";c.lineWidth=2;c.stroke();}}
+$("#mapBtn").addEventListener("click",toggleMap);$("#mapClose").addEventListener("click",toggleMap);
+
+/* ============ case file (lesson engine) ============ */
+let C=null;
+function openCase(id,from){
+  const l=L(id);if(!l)return;closeDlg();
+  const lv=P.level[id]||1;
+  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,answered:[],used:new Set(),cur:null,state:null,score:0,count:0,practiceN:6,confirmX:false};
+  $("#case").hidden=false;document.body.style.overflow="hidden";renderCase();
+}
+function openReview(){
+  const items=[];P.review.slice(0,5).forEach(r=>{const l=L(r.l);if(!l)return;const it=[...l.pool,...l.judge].find(i=>i.k===r.k);if(it)items.push({...it,_l:l.id});});
+  if(!items.length)return;
+  C={l:{id:"review",num:"חזרה",title:"תיקים פתוחים",building:"חזרה יומית",npc:"המפקד",npcColors:["#22344f","#16243a"]},from:"screen",phase:"review",idx:0,list:items,cur:null,state:null,score:0,count:0,confirmX:false};
+  $("#case").hidden=false;document.body.style.overflow="hidden";nextReview();
+}
+function closeCase(){$("#case").hidden=true;$("#case").innerHTML="";const from=C&&C.from;C=null;
+  if(from==="world"&&running){document.body.style.overflow="hidden";updateHud();}else{document.body.style.overflow="";render();}}
+function stepsBar(){const ph=["cover","exp","teach","practice","judge","result"];if(C.phase==="review")return "";const i=ph.indexOf(C.phase);return `<div class="steps">${ph.slice(1).map((p,k)=>`<i class="${k<i?"on":""}"></i>`).join("")}</div>`;}
+function phaseName(){return{cover:"פתיחת התיק",exp:"התנסות",teach:"הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
+function npcCanvas(){return `<canvas class="npcc" width="12" height="16"></canvas>`;}
+function paintNpc(){document.querySelectorAll("#case .npcc").forEach(c=>{const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,npcCol({colors:C.l.npcColors}),0,1);});}
+function renderCase(){
+  const l=C.l;let body="";
+  if(C.phase==="cover"){
+    const s=P.solved[l.id];
+    body=`<div class="folder" data-tab="תיק ${l.num}"><div class="npc-line">${npcCanvas()}<div class="bub"><b>${l.npc}:</b> ${l.intro}</div></div>
+    <h3 style="font-size:28px;color:var(--navy)">${l.building}</h3><p class="muted" style="margin:4px 0 12px">נושא: ${l.title} · כ־10 דקות${s?` · הציון הכי טוב: ${s.best}%`:""}</p>
+    <div class="flow"><div><i>1</i>התנסות: נסו לפני שמסבירים</div><div><i>2</i>הכלי הבלשי: מה, איך, מתי ולמה</div><div><i>3</i>תרגול: השאלות מתאימות את עצמן לרמה שלכם</div><div><i>4</i>משימת שיפוט: מוצאים את הטעות של הבלש המתלמד</div></div>
+    <div class="case-actions"><button class="btn primary" id="go1">לפתוח את התיק</button><button class="btn soft" id="goTeach">רק לקרוא את ההסבר</button></div></div>`;
+  }else if(C.phase==="teach"){
+    const t=l.teach[C.teachIdx];
+    body=`<div class="folder teach" data-tab="הכלי הבלשי · ${C.teachIdx+1}/${l.teach.length}"><h3>${t.h}</h3>${t.html}
+    <div class="case-actions">${C.teachIdx>0?`<button class="btn soft" id="tPrev">הקודם</button>`:""}<button class="btn primary" id="tNext">${C.teachIdx<l.teach.length-1?"הבא":(C.readOnly?"סגירה":"לתרגול ▶")}</button></div></div>`;
+  }else if(C.phase==="result"){body=resultHTML();}
+  else{body=itemHTML();}
+  $("#case").innerHTML=`<div class="case-top"><div class="wrap"><button class="xbtn" id="cx" aria-label="סגירת התיק">✕</button><div class="t"><small>${phaseName()}</small><b>${l.building} · ${l.title}</b></div></div><div class="wrap" style="padding-block:0">${stepsBar()}</div></div>
+  <div class="wrap" style="padding-bottom:40px">${C.confirmX?`<div class="confirm" style="margin-top:12px"><b>לצאת מהתיק?</b> ההתקדמות בתיק הזה לא תישמר.<div class="row" style="margin-top:8px"><button class="btn primary" id="cxYes" style="background:var(--stamp)">לצאת</button><button class="btn soft" id="cxNo">להמשיך בתיק</button></div></div>`:""}${body}</div>`;
+  paintNpc();bindCase();
+}
+function bindCase(){
+  const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+  on("cx",()=>{if(C.phase==="cover"||C.phase==="result"||C.readOnly){closeCase();return;}C.confirmX=true;renderCase();window.scrollTo(0,0);$("#case").scrollTop=0;});
+  on("cxYes",closeCase);on("cxNo",()=>{C.confirmX=false;renderCase();});
+  on("go1",()=>{C.phase="exp";C.cur=C.l.experience[0];C.state=null;renderCase();});
+  on("goTeach",()=>{C.readOnly=true;C.phase="teach";C.teachIdx=0;renderCase();});
+  on("tPrev",()=>{C.teachIdx--;renderCase();});
+  on("tNext",()=>{if(C.teachIdx<C.l.teach.length-1){C.teachIdx++;renderCase();}else if(C.readOnly){closeCase();}else{C.phase="practice";nextPractice();}});
+  on("again",()=>openCase(C.l.id,C.from));on("done",closeCase);
+  bindItem();
+}
+/* item rendering */
+function itemHTML(){
+  const it=C.cur,st=C.state||{};const checked=!!st.checked;
+  let tab="",lead="";
+  if(C.phase==="exp"){tab="התנסות";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עוד לא למדנו את הכלל. נסו לפי מה שאתם חושבים.</div></div>`;}
+  else if(C.phase==="judge"){tab="משימת שיפוט";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עכשיו אתם השופטים. בלש טוב הוא קודם כל חבר טוב: מוצאים את הטעות כדי לעזור.</div></div>`;}
+  else if(C.phase==="review"){tab=`חזרה · ${C.idx}/${C.list.length}`;}
+  else{tab=`שאלה ${C.count+1} מתוך ${C.practiceN}`;}
+  const lvl=C.phase==="practice"?`<span class="lvl">רמה ${["א","ב","ג"][it.lv-1]}</span>`:"";
+  let inner="";
+  if(it.type==="choice"){inner=`<div class="opts">${it.opts.map((o,i)=>{let cls="";if(checked){if(i===it.a)cls="right";else if(st.sel===i)cls="wrong";}return `<button class="opt ${cls}" data-o="${i}" aria-pressed="${st.sel===i}" ${checked?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>`;}
+  else if(it.type==="tap"){const sel=st.sel||[];inner=`<div class="sent ${it.grid?"grid":""}">${it.words.map((w,i)=>{let cls="";if(checked){const t=it.targets.includes(i),s=sel.includes(i);cls=t&&s?"right":(!t&&s?"wrong":(t?"missed":""));}return `<button class="tok ${cls}" data-t="${i}" aria-pressed="${sel.includes(i)}" ${checked?"disabled":""}>${esc(w)}</button>`;}).join("")}</div><p class="muted" style="margin:6px 0 0;font-size:15px">לחצו על מילה כדי לסמן אותה. לחיצה נוספת מבטלת.</p>`;}
+  else if(it.type==="sort"){const pl_=st.placed||[];const curI=pl_.length;const done=curI>=it.items.length;
+    inner=`<div class="sortw">${done?"":`<div class="cur">${esc(it.items[curI][0])}</div>`}<div class="bins ${it.bins.length===3?"three":"two"}">${it.bins.map((b,bi)=>`<button class="bin" data-b="${bi}" ${done||checked?"disabled":""}><b>${b}</b><span class="chips">${pl_.map((p,pi)=>p===bi?`<span class="chip ${checked?(it.items[pi][1]===bi?"right":"wrong"):""}">${esc(it.items[pi][0])}</span>`:"").join("")}</span></button>`).join("")}</div>
+    ${!done?`<p class="muted" style="margin:0;font-size:15px;text-align:center">לאיזה תא שייכת המילה? (${curI+1}/${it.items.length})</p>`:""}</div>`;}
+  let fb="";
+  if(checked){const ok=st.score>=.999;const part=!ok&&st.score>0;
+    if(C.phase==="exp")fb=`<div class="fb ok"><b>${ok?"יפה מאוד!":"ניסיון טוב!"}</b>${esc(it.why||"")}</div>`;
+    else fb=`<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}</div>`;}
+  const showHint=!checked&&it.hint&&(st.hint||(C.phase==="practice"&&C.level===1));
+  const canCheck=it.type==="choice"?st.sel!==undefined:it.type==="tap"?(st.sel||[]).length>0:(st.placed||[]).length>=it.items.length;
+  const actions=checked?`<button class="btn primary" id="nextQ">${C.phase==="exp"?"לכלי הבלשי ▶":"הבא ▶"}</button>`:
+    `${it.type==="sort"&&(st.placed||[]).length?`<button class="btn soft" id="undo">ביטול אחרון</button>`:""}${it.hint&&!showHint?`<button class="btn soft" id="hintB">רמז</button>`:""}<button class="btn primary" id="check" ${canCheck?"":"disabled"}>בדיקה</button>`;
+  return `<div class="folder" data-tab="${tab}">${lead}<div class="q">${esc(it.q)}${lvl}</div>${inner}${showHint?`<div class="hint">💡 ${esc(it.hint)}</div>`:""}${fb}<div class="case-actions">${actions}</div></div>`;
+}
+function bindItem(){
+  if(!C||!C.cur||C.phase==="result"||C.phase==="cover"||C.phase==="teach")return;
+  const it=C.cur;C.state=C.state||{};const st=C.state;
+  document.querySelectorAll("#case [data-o]").forEach(b=>b.onclick=()=>{st.sel=+b.dataset.o;renderCase();});
+  document.querySelectorAll("#case [data-t]").forEach(b=>b.onclick=()=>{const i=+b.dataset.t;st.sel=st.sel||[];st.sel=st.sel.includes(i)?st.sel.filter(x=>x!==i):[...st.sel,i];renderCase();});
+  document.querySelectorAll("#case [data-b]").forEach(b=>b.onclick=()=>{st.placed=st.placed||[];if(st.placed.length<it.items.length){st.placed.push(+b.dataset.b);renderCase();}});
+  const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+  on("undo",()=>{st.placed.pop();renderCase();});
+  on("hintB",()=>{st.hint=true;renderCase();});
+  on("check",()=>{st.score=grade(it,st);st.checked=true;afterCheck(it,st.score);renderCase();});
+  on("nextQ",()=>advance());
+}
+function grade(it,st){
+  if(it.type==="choice")return st.sel===it.a?1:0;
+  if(it.type==="tap"){const sel=st.sel||[];const hits=sel.filter(i=>it.targets.includes(i)).length,fa=sel.length-hits;return Math.max(0,(hits-fa)/it.targets.length);}
+  if(it.type==="sort"){let ok=0;st.placed.forEach((b,i)=>{if(it.items[i][1]===b)ok++;});return ok/it.items.length;}
+  return 0;
+}
+function afterCheck(it,sc){
+  if(C.phase==="practice"||C.phase==="judge"){C.score+=sc;C.count++;P.points+=Math.round(sc*10*(it.lv||2));
+    if(sc<.999&&it.k&&!P.review.some(r=>r.k===it.k))P.review.push({l:C.l.id,k:it.k});
+    if(sc>=.999&&it.k)P.review=P.review.filter(r=>r.k!==it.k);
+    if(C.phase==="practice"){if(sc>=.999){C.streak++;if(C.streak>=2&&C.level<3){C.level++;C.streak=0;C.lvlMsg="up";}}else{C.streak=0;if(sc<.5&&C.level>1){C.level--;C.lvlMsg="down";}}}
+    save();}
+  if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);else P.points+=0;save();}
+}
+function advance(){
+  if(C.phase==="exp"){C.phase="teach";C.teachIdx=0;C.cur=null;renderCase();return;}
+  if(C.phase==="practice"){if(C.count>=C.practiceN){C.phase="judge";C.cur=C.l.judge[0];C.state=null;renderCase();return;}nextPractice();return;}
+  if(C.phase==="judge"){finish();return;}
+  if(C.phase==="review"){nextReview();return;}
+}
+function nextPractice(){
+  const pool=C.l.pool.filter(i=>!C.used.has(i.k));
+  let cand=pool.filter(i=>i.lv===C.level);if(!cand.length)cand=pool.filter(i=>Math.abs(i.lv-C.level)===1);if(!cand.length)cand=pool;
+  const it=cand[Math.floor(Math.random()*cand.length)];C.used.add(it.k);C.cur=it;C.state=null;renderCase();$("#case").scrollTop=0;
+  if(C.lvlMsg){const m=C.lvlMsg;C.lvlMsg=null;flash(m==="up"?`עליתם לרמה ${["א","ב","ג"][C.level-1]}!`:`עוברים לרמה ${["א","ב","ג"][C.level-1]}, עם עוד רמזים`);}
+}
+function nextReview(){if(C.idx>=C.list.length){C.phase="result";C.reviewDone=true;renderCase();return;}const it=C.list[C.idx++];C.cur=it;C.state=null;renderCase();}
+function flash(t){const d=document.createElement("div");d.className="toast";d.style.position="fixed";d.style.zIndex=50;d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
+function finish(){
+  const pct=Math.round(C.score/C.count*100);const l=C.l;const prev=P.solved[l.id];const wasDone=prev&&prev.done;
+  const done=pct>=70;P.solved[l.id]={best:Math.max(pct,prev?prev.best:0),done:done||!!wasDone};
+  if(done&&!wasDone)P.points+=50;P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;C.phase="result";renderCase();$("#case").scrollTop=0;
+}
+function resultHTML(){
+  if(C.reviewDone){return `<div class="folder result" data-tab="חזרה"><div class="score">${Math.round(C.score)}/${C.list.length}</div><p>תשובות נכונות בחזרה. שאלות שענית עליהן נכון יצאו מהרשימה.</p><div class="case-actions"><button class="btn primary" id="done">סיום</button></div></div>`;}
+  const l=C.l,ok=C.pct>=70;
+  return `<div class="folder result" data-tab="סיכום התיק"><div class="score">${C.pct}%</div><div class="bigstamp ${ok?"":"retry"}">${ok?"פוענח!":"עוד לא"}</div>
+  <p>${ok?(C.newDone?`+50 נקודות על פענוח התיק. כרטיס ״${l.clue.h}״ נוסף למחברת הבלש.`:"כל הכבוד! התיק כבר היה מפוענח, והתרגול נשמר."):"תיק נחשב פוענח מ־70%. השאלות שטעיתם בהן מחכות ב״תיקים פתוחים״."}</p>
+  <p class="muted">רמה בסיום: ${["א","ב","ג"][C.level-1]}</p>
+  <div class="sum">${Object.entries(l.sum).map(([k,v])=>`<div><b>${k}?</b>${esc(v)}</div>`).join("")}</div>
+  <div class="case-actions">${ok?"":`<button class="btn soft" id="again">לנסות שוב</button>`}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;
+}
+
+/* ============ onboarding ============ */
+function startOnboarding(){
+  const o=$("#onb");o.hidden=false;let coat=P.coat||0;
+  const draw=()=>{o.innerHTML=`<div class="wrap"><div><div class="eyebrow" style="color:#f4c26b">רובע המילים · תיק ראשון</div><h2>סוכנות הבלשים</h2><p style="margin:6px 0 0;color:#dfe7f3;font-size:18px">פותרים תעלומות בלשון: מוצאים רמזים, מתקנים גשרים ומפענחים תיקים.</p></div>
+  <div class="card stack"><div><label for="nameInput">איך קוראים לבלש?</label><input id="nameInput" maxlength="20" autocomplete="off" value="${esc(P.name)}" placeholder="השם שלך"></div>
+  <div><label>צבע המעיל</label><div class="coats">${COATS.map((c,i)=>`<button class="coat" data-c="${i}" aria-pressed="${i===coat}" aria-label="מעיל ${i+1}"><canvas width="12" height="16"></canvas></button>`).join("")}</div></div>
+  <button class="btn primary" id="startBtn" style="width:100%">להצטרף לסוכנות ▶</button><p class="demo" style="margin:0">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div></div>`;
+   o.querySelectorAll(".coat canvas").forEach((c,i)=>drawChar(c.getContext("2d"),0,0,coatOf(i),0,1));
+   o.querySelectorAll(".coat").forEach(b=>b.onclick=()=>{P.name=$("#nameInput").value;coat=+b.dataset.c;draw();});
+   $("#startBtn").onclick=()=>{const n=$("#nameInput").value.trim();if(!n){$("#nameInput").focus();$("#nameInput").placeholder="כתבו שם כדי להתחיל";return;}P.name=n;P.coat=coat;save();o.hidden=true;screen="home";render();};};
+  draw();
+}
+
+/* ============ boot ============ */
+buildMap();
+if(!P.name)startOnboarding();
+render();
+</script>
