@@ -124,6 +124,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .mapov{position:absolute;inset:0;background:rgba(15,20,28,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);z-index:5}
 .mapov canvas{max-width:100%;max-height:72vh;image-rendering:pixelated;border:4px solid #f3ead6;border-radius:8px}
 .mapov h3{color:#fff}
+.nbov{justify-content:flex-start;overflow-y:auto}
+.nbbox{background:var(--paper);border-radius:16px;padding:16px;width:100%;max-width:560px;direction:rtl}
+.nbbox h3{color:var(--navy);font-size:24px;margin-bottom:6px}
+.nbintro{margin:0 0 12px;font-size:16px}
 
 /* case file (lesson) */
 #case{position:fixed;inset:0;z-index:40;background:var(--paper);overflow-y:auto;direction:rtl}
@@ -146,16 +150,17 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .lvl{display:inline-block;background:var(--brass-soft);color:#6b4a12;border-radius:6px;padding:1px 9px;font-size:13px;font-weight:800;margin-inline-start:6px;vertical-align:middle}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:13px 14px;text-align:right;font-size:18px;font-weight:600;min-height:52px}
-.opt[aria-pressed="true"]{border-color:var(--navy);background:#eef2f8}
-.opt.right{border-color:var(--good);background:var(--good-soft)}
-.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:#fff}
+.opt.right{color:var(--ink);border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{color:var(--ink);border-color:var(--bad);background:var(--bad-soft)}
 .sent{display:flex;flex-wrap:wrap;gap:8px;font-size:22px;line-height:1.3;margin-bottom:6px}
 .sent.grid{gap:10px}
 .tok{border:2px dashed transparent;background:var(--paper);border-radius:10px;padding:6px 10px;font-weight:600;font-size:21px}
 .sent.grid .tok{border:2px solid var(--line);background:var(--card);min-width:84px}
-.tok[aria-pressed="true"]{border:2px solid var(--navy);background:#dfe7f3}
-.sent .tok.right{border:2px solid var(--good);background:var(--good-soft)}
-.sent .tok.wrong{border:2px solid var(--bad);background:var(--bad-soft)}
+.sent .tok[aria-pressed="true"]{border:2px solid var(--navy);background:var(--navy);color:#fff;box-shadow:0 3px 0 #0f1a2b;transform:translateY(-2px)}
+.sent .tok[aria-pressed="true"]::before,.opt[aria-pressed="true"]::before{content:"✓ ";font-weight:800}
+.sent .tok.right{color:var(--ink);transform:none;box-shadow:none;border:2px solid var(--good);background:var(--good-soft)}
+.sent .tok.wrong{color:var(--ink);transform:none;box-shadow:none;border:2px solid var(--bad);background:var(--bad-soft)}
 .sent .tok.missed{border:2px dashed var(--good);background:var(--card)}
 .sortw{display:flex;flex-direction:column;gap:12px}
 .sortw .cur{align-self:center;font-size:30px;font-weight:800;background:#fff8dc;border:2px solid #ecd9a0;border-radius:12px;padding:10px 26px;min-width:150px;text-align:center}
@@ -196,6 +201,21 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .pastnote{background:var(--paper-2);border-radius:10px;padding:8px 12px;font-weight:700;font-size:15px;color:var(--navy);margin-bottom:10px}
 .kbd{display:none;margin:12px 0 0;font-size:13px;color:var(--muted);text-align:center}
 @media (hover:hover) and (pointer:fine){.kbd{display:block}}
+.goalbox{background:var(--brass-soft);border-radius:12px;padding:12px 14px;font-size:18px}
+.goalbox b{display:block;font-family:var(--display);font-weight:400;color:#6b4a12;font-size:16px}
+.journey{list-style:none;margin:0;padding:0;counter-reset:j;display:flex;flex-direction:column}
+.journey li{counter-increment:j;position:relative;padding:0 46px 18px 0;font-size:17px}
+.journey li::before{content:counter(j);position:absolute;right:0;top:0;width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800}
+.journey li::after{content:"";position:absolute;right:15px;top:34px;bottom:2px;width:2px;background:var(--line)}
+.journey li:last-child{padding-bottom:0}.journey li:last-child::after{display:none}
+.journey b{color:var(--navy)}
+.flow div.hide{display:none}
+.saybub{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.saybub canvas{width:42px;height:56px;image-rendering:pixelated;flex:0 0 auto;background:var(--paper-2);border-radius:10px}
+.saybub div{background:var(--paper);border-radius:12px;padding:8px 12px;font-size:17px;flex:1}
+.checkbox{margin-top:16px;border:2px dashed var(--brass);border-radius:14px;padding:12px 14px;background:#fffdf6}
+.checkbox>b{font-family:var(--display);font-weight:400;color:#6b4a12}
+.checkbox .q{font-size:18px;margin:4px 0 10px}
 .confirm{margin-top:10px;background:var(--bad-soft);border-radius:12px;padding:12px}
 
 /* onboarding */
@@ -236,13 +256,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <button class="hbtn" id="exitBtn">יציאה ←</button>
     <div class="goal" id="goal"><small id="goalTop">אזור 1 מתוך 6 · היעד</small><b id="goalName">מטה הסוכנות</b>
       <div class="gl"><span id="goalCases">0/5 תיקים</span><div class="bar"><i id="goalBar" style="width:0%"></i></div><span id="goalClues">0/8 רמזים</span></div></div>
-    <button class="hbtn" id="mapBtn">מפה</button>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><button class="hbtn" id="mapBtn">מפה</button><button class="hbtn" id="nbBtn">מחברת</button></div>
   </div>
   <div class="compass" id="compass" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 19 20 12 16 5 20z" fill="#6fc7b5"/></svg></div>
   <div class="joy left" id="joy"><i id="knob"></i></div>
   <button class="act right" id="actBtn" hidden>כניסה</button>
   <div class="toast" id="toast" hidden></div>
   <div class="dlg" id="dlg" hidden><div class="who" id="dlgWho"></div><p id="dlgText"></p><div class="row" id="dlgBtns"></div></div>
+  <div class="mapov nbov" id="nbov" hidden><div class="nbbox"><h3>מחברת הבלש</h3><div id="nbBody"></div><button class="btn soft" id="nbClose" style="width:100%;margin-top:12px">סגירה</button></div></div>
   <div class="mapov" id="mapov" hidden><h3>מפת רובע המילים</h3><canvas id="mapcv"></canvas><button class="btn soft" id="mapClose" style="flex:0 0 auto">סגירה</button></div>
 </div>
 
@@ -406,6 +427,29 @@ const LESSONS=[
  sum:{מה:"אותן אותיות יכולות להיות מילים שונות.",מתי:"כשמילה נשמעת לא הגיונית במשפט.",איך:"קוראים את כל המשפט ובוחרים את הקריאה ההגיונית.",למה:"כדי להבין נכון את מה שקוראים."},
  clue:{h:"ניקוד",t:"יֶדַע / יָדַע — הניקוד משנה את המשמעות."}}
 ];
+const LEARN={
+ noun:{goal:"לזהות שם עצם בכל משפט, גם כשהוא רגש וגם כשיש לו שייכות.",cards:[
+  {say:"כל דבר בעולם צריך שם. בואו נתחיל מהבסיס.",check:{q:"מה מהבאים הוא שם של מקום?",opts:["גינה","רץ","ירוק"],a:0,why:"גינה היא מקום. מה? הגינה."}},
+  {say:"זה הכלי הכי חשוב שלי. נעבור עליו צעד אחרי צעד.",check:{q:"בודקים את המילה ״שמש״. מה גילינו?",opts:["״השמש זורחת.״ זה שם עצם","אי אפשר לפתוח איתה משפט, אז זה לא שם עצם"],a:0,why:"השמש זורחת. המשפט נשמע טוב."}},
+  {say:"יש שמות עצם שאי אפשר לגעת בהם.",check:{q:"איזו מילה היא שם עצם של רגש?",opts:["שמחה","שמח","שמחו"],a:0,why:"השמחה מילאה את הלב. ✓"}},
+  {say:"ויש מילים שהסוף שלהן מספר של מי הדבר.",check:{q:"״ביתו״ פירושו...",opts:["הבית שלו","הבית שלי","הרבה בתים"],a:0,why:"ו בסוף המילה = שלו."}}]},
+ adj:{goal:"לזהות שם תואר ולהתאים אותו לשם העצם שהוא מתאר.",cards:[
+  {say:"בלי תיאור, אני לא יודע באיזה צבע לצבוע!",check:{q:"״הכלב השחור נבח.״ איזו מילה מתארת את הכלב?",opts:["השחור","נבח","הכלב"],a:0,why:"איזה כלב? שחור."}},
+  {say:"לשם התואר יש מקום קבוע במשפט.",check:{q:"איזה צירוף נכון?",opts:["התיק הכבד","כבד התיק","התיק כבדה"],a:0,why:"אחרי שם העצם, עם ה כמו שלו."}},
+  {say:"שם התואר ״מתלבש״ לפי שם העצם.",check:{q:"עוגיות ______",opts:["טעימות","טעים","טעימים"],a:0,why:"עוגיות — נקבה, רבות ← טעימות."}},
+  {say:"ככה לא מתבלבלים בין שם עצם לשם תואר.",check:{q:"המילה ״אמיץ״ עונה על השאלה...",opts:["איזה? — שם תואר","מי? מה? — שם עצם"],a:0,why:"איזה ילד? אמיץ."}}]},
+ verb:{goal:"לזהות פועל בעזרת פג״ז: פעולה, גוף וזמן.",cards:[
+  {say:"כאן באולם תמיד זזים!",check:{q:"איזו מילה מספרת מה עושים?",opts:["קופץ","קופסה","קטן"],a:0,why:"קופץ — פעולה."}},
+  {say:"שלוש אותיות שמגלות כל פועל.",check:{q:"״רצנו״ — מי רץ?",opts:["אנחנו","הם","אני"],a:0,why:"רצ־נו: אנחנו."}},
+  {say:"כל פועל קורה בזמן מסוים.",check:{q:"״מחר נצייר.״ באיזה זמן?",opts:["עתיד","עבר","הווה"],a:0,why:"מחר — עתיד."}},
+  {say:"זהירות ממילים תאומות!",check:{q:"״ההתרגשות הייתה גדולה.״ ״ההתרגשות״ היא...",opts:["שם עצם","פועל"],a:0,why:"אין לה גוף וזמן, ואפשר לפתוח איתה משפט."}}]},
+ sort3:{goal:"להבחין בין שם עצם, פועל ושם תואר באותו משפט.",cards:[
+  {say:"שלוש שאלות, שלוש קבוצות. זה כל הסוד.",check:{q:"״הציפור הקטנה שרה.״ איזו מילה היא שם תואר?",opts:["הקטנה","הציפור","שרה"],a:0,why:"איזו ציפור? קטנה."}},
+  {say:"ולפועל יש בדיקה משלו.",check:{q:"״שתינו״ — באיזה זמן?",opts:["עבר","עתיד","הווה"],a:0,why:"שתינו — כבר קרה."}}]},
+ nikud:{goal:"לבחור את הקריאה הנכונה של מילה לפי המשפט.",cards:[
+  {say:"אותן אותיות יכולות להיות מילים שונות לגמרי.",check:{q:"״ה____ גזר לי את השיער.״ איך קוראים?",opts:["סַפָּר","סֵפֶר"],a:0,why:"מי גוזר שיער? הסַפָּר."}},
+  {say:"כשמשהו לא הגיוני — בלש עוצר.",check:{q:"מה עושים כשמילה נשמעת לא הגיונית?",opts:["קוראים שוב את כל המשפט ומנסים קריאה אחרת","ממשיכים מהר הלאה","מדלגים על המשפט"],a:0,why:"עוצרים, מנסים שוב (עד 3 פעמים), ובודקים מה הגיוני."}}]}
+};
 const L=id=>LESSONS.find(l=>l.id===id);
 
 const CLUES=[
@@ -474,7 +518,7 @@ function casesHTML(){
 function meHTML(){
   const r=rank();const pct=r.next?Math.round((P.points-r.from)/(r.next[0]-r.from)*100):100;
   const z1=solvedCount()===LESSONS.length;
-  const notes=[...LESSONS.filter(l=>P.solved[l.id]&&P.solved[l.id].done).map(l=>l.clue),...CLUES.filter(c=>P.clues.includes(c.id))];
+  const notes=notesList();
   const s=P.settings;
   return `<div class="wrap stack">
   <div class="card" style="text-align:center"><canvas id="meCv" width="24" height="32" style="width:72px;height:96px;image-rendering:pixelated" aria-hidden="true"></canvas>
@@ -483,7 +527,7 @@ function meHTML(){
    <div style="background:var(--brass-soft);border-radius:12px;padding:12px;text-align:right"><div style="display:flex;justify-content:space-between;font-weight:800"><span style="font-family:var(--display);font-weight:400;font-size:20px;color:#6b4a12">${r.name}</span><span>${P.points} נקודות</span></div>
    <div class="bar" style="margin:8px 0"><i style="width:${pct}%"></i></div><small class="muted">${r.next?`עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:"הדרגה הגבוהה ביותר!"} · נקודות על תשובות נכונות, תיקים שפוענחו ורמזים</small></div></div>
   <div class="section-title">מחברת הבלש</div>
-  <div class="notes">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<4?`<div class="note empty">רמזים שתאספו בעולם ותיקים שתפענחו יופיעו כאן.</div>`:""}</div>
+  <div class="notes">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.src)} · ${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<CLUES.length+LESSONS.length?`<div class="note empty">כרטיסי תזכורת: דפי רמז שמוצאים בעולם, וכרטיס על כל תיק שמפענחים. נאספו ${notes.length} מתוך ${CLUES.length+LESSONS.length}.</div>`:""}</div>
   <div class="section-title">הגדרות</div>
   <div class="card stack" style="padding-top:12px"><div><b>הג׳ויסטיק בצד</b><div class="seg" style="margin-top:6px"><button id="sideL" aria-pressed="${s.side==="left"}">שמאל</button><button id="sideR" aria-pressed="${s.side==="right"}">ימין</button></div></div>
    <div><b>גודל</b><div class="seg" style="margin-top:6px"><button id="sizeN" aria-pressed="${!s.big}">רגיל</button><button id="sizeB" aria-pressed="${s.big}">גדול</button></div></div>
@@ -747,14 +791,14 @@ function updateHud(){
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;toastT=2.6;}
 
 /* dialog */
-function say(who,text,btns){dlgOpen=true;$("#dlg").hidden=false;$("#dlgWho").textContent=who;$("#dlgText").textContent=text;
+function say(who,text,btns){dlgOpen=true;$("#dlg").hidden=false;$("#dlgWho").textContent=who;$("#dlgText").textContent=text;$("#dlgText").style.whiteSpace="pre-line";
   const bx=$("#dlgBtns");bx.innerHTML="";(btns||[{t:"סגור"}]).forEach((b,i)=>{const e=document.createElement("button");e.className="btn "+(i===0?"primary":"soft");e.style.flex="0 1 auto";e.textContent=b.t;e.onclick=()=>{closeDlg();b.f&&b.f();};bx.appendChild(e);});
   setTimeout(()=>{const f=bx.querySelector("button");f&&f.focus();},30);}
 function closeDlg(){dlgOpen=false;$("#dlg").hidden=true;}
 function chain(who,lines,end){let i=0;const nx=()=>{if(i>=lines.length){end&&end();return;}const l=lines[i++];say(who,l,[{t:i<lines.length?"המשך":"סגור",f:nx}]);};nx();}
 function talk(n){
   if(n.id==="chief"){
-    if(!P.tutorial){chain("המפקד",[`ברוכים הבאים לסוכנות הבלשים, בלש ${P.name}!`,"זה רובע המילים. בכל בניין כאן מחכה תיק חקירה, ובכל תיק לומדים כלי בלשי חדש.","בשטח פזורים 8 דפי רמז. דרכו עליהם והם ייכנסו למחברת הבלש שלכם.","החץ הירוק מראה לאן ללכת. התיק הראשון מחכה בבית החפצים. בהצלחה!"],()=>{P.tutorial=true;save();updateHud();});return;}
+    if(!P.tutorial){chain("המפקד",[`ברוכים הבאים לסוכנות הבלשים, בלש ${P.name}!`,"זה רובע המילים. בכל בניין כאן מחכה תיק חקירה, ובכל תיק לומדים כלי בלשי חדש.","בשטח פזורים 8 דפי רמז: כרטיסי תזכורת קטנים על מה שלומדים. מספיק לעבור עליהם, והם נשמרים במחברת הבלש. את המחברת פותחים בכפתור ״מחברת״ למעלה.","החץ הירוק מראה לאן ללכת. התיק הראשון מחכה בבית החפצים. בהצלחה!"],()=>{P.tutorial=true;save();updateHud();});return;}
     const sc=solvedCount();
     if(sc<LESSONS.length)say("המפקד",`פוענחו ${sc} מתוך ${LESSONS.length} תיקים. התיק הבא: ${target().name}. תיק נחשב פוענח מ־70%.`);
     else say("המפקד","כל התיקים ברובע המילים פוענחו! קיבלתם את חותמת א׳. השער לגן השורשים פתוח.");return;}
@@ -763,8 +807,16 @@ function talk(n){
   if(n.lesson){const l=L(n.lesson),s=P.solved[l.id];
     say(l.npc,s&&s.done?`התיק ״${l.title}״ פוענח (${s.best}%). רוצים לחזור עליו ולשפר?`:l.intro,[{t:"לפתוח את התיק",f:()=>openCase(l.id,"world")},{t:"אחר כך"}]);}
 }
-function collectClue(c){P.clues.push(c.id);P.points+=10;save();updateHud();
-  say("דף רמז נמצא!",`${c.h}: ${c.t}  (+10 נקודות · נשמר במחברת הבלש)`);}
+function collectClue(c){P.clues.push(c.id);P.points+=10;const first=!P.clueTip;P.clueTip=true;save();updateHud();
+  const head=`״${c.h}״ — ${c.t}`;
+  if(first)chain("מצאתם דף רמז!",[head,"דף רמז הוא כרטיס תזכורת קטן על מה שלומדים. כל דף שמוצאים נשמר במחברת הבלש שלכם, כדי שתוכלו לחזור אליו כשאתם פותרים תיקים.",`את המחברת פותחים בכפתור ״מחברת״ למעלה, או במסך ״אני״. על כל דף מקבלים 10 נקודות, ונקודות מעלות אתכם בדרגה: מבלש מתלמד לבלש. נמצאו ${P.clues.length} מתוך ${CLUES.length} דפים.`]);
+  else say("מצאתם דף רמז!",`${head}\nהדף נשמר במחברת הבלש (+10 נקודות). נמצאו ${P.clues.length} מתוך ${CLUES.length}.`,[{t:"להמשיך לחקור"},{t:"לפתוח את המחברת",f:openNotebook}]);}
+function notesList(){return [...LESSONS.filter(l=>P.solved[l.id]&&P.solved[l.id].done).map(l=>({...l.clue,src:"תיק "+l.num})),...CLUES.filter(c=>P.clues.includes(c.id)).map(c=>({...c,src:"דף רמז"}))];}
+function openNotebook(){closeDlg();mapOpen=true;const n=notesList(),r=rank();
+  $("#nbBody").innerHTML=`<p class="nbintro">כאן נשמרים כרטיסי התזכורת שאספתם: דפי רמז מהעולם, וכרטיס אחד על כל תיק שפוענח.<br><b>${r.name}</b> · ${P.points} נקודות${r.next?` · עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:""}</p>
+  <div class="notes">${n.map(x=>`<div class="note"><b>${esc(x.src)} · ${esc(x.h)}</b>${esc(x.t)}</div>`).join("")}${n.length<CLUES.length+LESSONS.length?`<div class="note empty">עוד ${CLUES.length-P.clues.length} דפי רמז מחכים ברובע. הנקודות הצהובות במפה מראות איפה.</div>`:""}</div>`;
+  $("#nbov").hidden=false;}
+function closeNotebook(){mapOpen=false;$("#nbov").hidden=true;}
 
 /* bridge */
 function bridgePuzzle(){
@@ -786,14 +838,14 @@ function toggleMap(){mapOpen=!mapOpen;$("#mapov").hidden=!mapOpen;if(mapOpen){co
   buildings.forEach(b=>{c.fillStyle="rgba(255,250,240,.92)";const w=c.measureText(b.name).width+10;c.fillRect((b.x+b.w/2)*T-w/2,(b.y+b.h/2)*T-9,w,18);c.fillStyle="#22344f";c.fillText(b.name,(b.x+b.w/2)*T,(b.y+b.h/2)*T+5);});
   CLUES.forEach(cl=>{if(!P.clues.includes(cl.id)){c.fillStyle="#f4c26b";c.fillRect(cl.x*T+4,cl.y*T+4,8,8);}});
   c.fillStyle="#d9534f";c.beginPath();c.arc(pl.x*T,pl.y*T,6,0,7);c.fill();c.strokeStyle="#fff";c.lineWidth=2;c.stroke();}}
-$("#mapBtn").addEventListener("click",toggleMap);$("#mapClose").addEventListener("click",toggleMap);
+$("#mapBtn").addEventListener("click",toggleMap);$("#nbBtn").addEventListener("click",openNotebook);$("#nbClose").addEventListener("click",closeNotebook);$("#mapClose").addEventListener("click",toggleMap);
 
 /* ============ case file (lesson engine) ============ */
 function caseKey(e){
   const k=e.key;if(k!=="Enter"&&k!=="ArrowRight"&&k!=="ArrowLeft")return;
   const a=document.activeElement;if(k==="Enter"&&a&&a.tagName==="BUTTON"&&a.closest("#case"))return;
   const click=id=>{const b=document.getElementById(id);if(b&&!b.disabled){e.preventDefault();b.click();return true;}return false;};
-  if(k==="Enter"){["check","nextQ","histNext","tNext","go1","done"].some(click);return;}
+  if(k==="Enter"){["tStep","check","nextQ","histNext","tNext","go1","done"].some(click);return;}
   if(k==="ArrowRight"){click("histBack")||click("histPrev");return;}
   if(k==="ArrowLeft"){click("histNext")||click("tNext");}
 }
@@ -813,7 +865,7 @@ function openReview(){
 function closeCase(){$("#case").hidden=true;$("#case").innerHTML="";const from=C&&C.from;C=null;
   if(from==="world"&&running){document.body.style.overflow="hidden";updateHud();}else{document.body.style.overflow="";render();}}
 function stepsBar(){const ph=["cover","exp","teach","practice","judge","result"];if(C.phase==="review")return "";const i=ph.indexOf(C.phase);return `<div class="steps">${ph.slice(1).map((p,k)=>`<i class="${k<i?"on":""}"></i>`).join("")}</div>`;}
-function phaseName(){return{cover:"פתיחת התיק",exp:"התנסות",teach:"הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
+function phaseName(){return{cover:"תדריך",exp:"קודם מנסים לבד",teach:"לומדים את הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
 function npcCanvas(){return `<canvas class="npcc" width="12" height="16"></canvas>`;}
 function paintNpc(){document.querySelectorAll("#case .npcc").forEach(c=>{const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,npcCol({colors:C.l.npcColors}),0,1);});}
 function renderCase(){
@@ -822,12 +874,30 @@ function renderCase(){
     const s=P.solved[l.id];
     body=`<div class="folder" data-tab="תיק ${l.num}"><div class="npc-line">${npcCanvas()}<div class="bub"><b>${l.npc}:</b> ${l.intro}</div></div>
     <h3 style="font-size:28px;color:var(--navy)">${l.building}</h3><p class="muted" style="margin:4px 0 12px">נושא: ${l.title} · כ־10 דקות${s?` · הציון הכי טוב: ${s.best}%`:""}</p>
-    <div class="flow"><div><i>1</i>התנסות: נסו לפני שמסבירים</div><div><i>2</i>הכלי הבלשי: מה, איך, מתי ולמה</div><div><i>3</i>תרגול: השאלות מתאימות את עצמן לרמה שלכם</div><div><i>4</i>משימת שיפוט: מוצאים את הטעות של הבלש המתלמד</div></div>
-    <div class="case-actions"><button class="btn primary" id="go1">לפתוח את התיק</button><button class="btn soft" id="goTeach">רק לקרוא את ההסבר</button></div></div>`;
+    <div class="goalbox"><b>המטרה שלכם בתיק הזה</b>${LEARN[l.id].goal}</div>
+    <div class="section-title" style="margin:14px 0 6px">איך החקירה תתנהל</div>
+    <ol class="journey">
+     <li><b>קודם תנסו לבד.</b> תקבלו משימה קטנה עוד לפני שמסבירים. לא צריך לדעת את התשובה, רק לנסות. כך תגלו מה אתם כבר יודעים.</li>
+     <li><b>אחר כך ${l.npc} ילמד אתכם את הכלי הבלשי.</b> שיעור קצר, צעד אחרי צעד, ובכל שלב שאלה קטנה כדי לבדוק שהבנתם.</li>
+     <li><b>עכשיו תתרגלו בעצמכם.</b> ${C.practiceN} שאלות שמתאימות את עצמן אליכם. מי שטועה מקבל שאלה דומה, ותמיד אפשר לחזור לשאלה קודמת.</li>
+     <li><b>ובסוף, אתם השופטים.</b> בלש מתלמד כתב דו״ח עם טעות. תמצאו אותה, ומ־70% התיק מפוענח ומקבל חותמת.</li>
+    </ol>
+    <div class="case-actions"><button class="btn primary" id="go1">יוצאים לחקירה ←</button><button class="btn soft" id="goTeach">רק ללמוד, בלי תרגול</button></div></div>`;
   }else if(C.phase==="teach"){
-    const t=l.teach[C.teachIdx];
-    body=`<div class="folder teach" data-tab="הכלי הבלשי · ${C.teachIdx+1}/${l.teach.length}"><h3>${t.h}</h3>${t.html}
-    <div class="case-actions">${C.teachIdx>0?`<button class="btn soft" id="tPrev">הקודם</button>`:""}<button class="btn primary" id="tNext">${C.teachIdx<l.teach.length-1?"הבא":(C.readOnly?"סגירה":"לתרגול ▶")}</button></div></div>`;
+    const t=l.teach[C.teachIdx],lc=(LEARN[l.id].cards||[])[C.teachIdx]||{};
+    const tw=document.createElement("div");tw.innerHTML=t.html;const steps=[...tw.querySelectorAll(".flow div")];
+    if(C.stepShown==null)C.stepShown=1;
+    steps.forEach((d,i)=>{if(i>=C.stepShown)d.classList.add("hide");});
+    const moreSteps=steps.length&&C.stepShown<steps.length;
+    if(lc.check&&!C.tcheck){C.tcheck={it:shuf({type:"choice",...lc.check}),sel:undefined,done:false,tries:0};if((C.tdone||{})[C.teachIdx]){C.tcheck.done=true;C.tcheck.sel=C.tcheck.it.a;}}
+    const ck=C.tcheck;
+    const needCheck=lc.check&&!ck.done;
+    const last=C.teachIdx>=l.teach.length-1;
+    body=`<div class="folder teach" data-tab="שיעור · ${C.teachIdx+1} מתוך ${l.teach.length}">${lc.say?`<div class="saybub">${npcCanvas()}<div><b style="color:#2a7a6c;font-family:var(--display);font-weight:400">${l.npc}:</b> ${lc.say}</div></div>`:""}<h3>${t.h}</h3>${tw.innerHTML}
+    ${moreSteps?`<button class="btn soft" id="tStep" style="width:100%">הצעד הבא (${C.stepShown}/${steps.length})</button>`:""}
+    ${lc.check&&!moreSteps?`<div class="checkbox"><b>בדקו שהבנתם</b><div class="q">${esc(ck.it.q)}</div><div class="opts">${ck.it.opts.map((o,i)=>{let cls="";if(ck.sel===i)cls=i===ck.it.a?"right":"wrong";return `<button class="opt ${cls}" data-tc="${i}" ${ck.done?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>${ck.sel!==undefined?(ck.done?`<div class="fb ok"><b>נכון!</b>${esc(ck.it.why||"")}</div>`:`<div class="fb no"><b>עוד לא.</b>נסו תשובה אחרת. ${ck.tries>=2?esc(ck.it.why||""):"קראו שוב את ההסבר שלמעלה."}</div>`):""}</div>`:""}
+    <div class="case-actions">${C.teachIdx>0?`<button class="btn soft" id="tPrev">→ הקודם</button>`:""}<button class="btn primary" id="tNext" ${moreSteps||needCheck?"disabled":""}>${!last?"ממשיכים ←":(C.readOnly?"סיום השיעור":"מתחילים לתרגל ←")}</button></div>
+    ${moreSteps||needCheck?`<p class="muted" style="font-size:14px;text-align:center;margin:8px 0 0">${moreSteps?"לחצו ״הצעד הבא״ כדי לראות את כל הצעדים.":"ענו על שאלת הבדיקה כדי להמשיך."}</p>`:""}</div>`;
   }else if(C.phase==="result"){body=resultHTML();}
   else{body=itemHTML();}
   $("#case").innerHTML=`<div class="case-top"><div class="wrap"><button class="xbtn" id="cx" aria-label="סגירת התיק">✕</button><div class="t"><small>${phaseName()}</small><b>${l.building} · ${l.title}</b></div></div><div class="wrap" style="padding-block:0">${stepsBar()}</div></div>
@@ -839,16 +909,19 @@ function bindCase(){
   on("cx",()=>{if(C.phase==="cover"||C.phase==="result"||C.readOnly){closeCase();return;}C.confirmX=true;renderCase();window.scrollTo(0,0);$("#case").scrollTop=0;});
   on("cxYes",closeCase);on("cxNo",()=>{C.confirmX=false;renderCase();});
   on("go1",()=>{C.phase="exp";serve(C.l.experience[0]);});
-  on("goTeach",()=>{C.readOnly=true;C.phase="teach";C.teachIdx=0;renderCase();});
-  on("tPrev",()=>{C.teachIdx--;renderCase();});
-  on("tNext",()=>{if(C.teachIdx<C.l.teach.length-1){C.teachIdx++;renderCase();}else if(C.readOnly){closeCase();}else{C.phase="practice";nextPractice();}});
+  on("goTeach",()=>{C.readOnly=true;C.phase="teach";C.teachIdx=0;C.stepShown=null;C.tcheck=null;renderCase();});
+  const tReset=()=>{C.stepShown=null;C.tcheck=null;$("#case").scrollTop=0;};
+  on("tStep",()=>{C.stepShown++;renderCase();});
+  document.querySelectorAll("#case [data-tc]").forEach(b=>b.onclick=()=>{const ck=C.tcheck;ck.sel=+b.dataset.tc;ck.tries++;if(ck.sel===ck.it.a){ck.done=true;C.tdone=C.tdone||{};C.tdone[C.teachIdx]=true;}renderCase();});
+  on("tPrev",()=>{C.teachIdx--;tReset();C.stepShown=99;C.tcheck=null;renderCase();});
+  on("tNext",()=>{if(C.teachIdx<C.l.teach.length-1){C.teachIdx++;tReset();renderCase();}else if(C.readOnly){closeCase();}else{C.phase="practice";nextPractice();}});
   on("again",()=>openCase(C.l.id,C.from));on("done",closeCase);
   bindItem();
 }
 /* item rendering */
 function innerHTML_(it,st,checked){
   if(it.type==="choice")return `<div class="opts">${it.opts.map((o,i)=>{let cls="";if(checked){if(i===it.a)cls="right";else if(st.sel===i)cls="wrong";}return `<button class="opt ${cls}" data-o="${i}" aria-pressed="${st.sel===i}" ${checked?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>`;
-  if(it.type==="tap"){const sel=st.sel||[];return `<div class="sent ${it.grid?"grid":""}">${it.words.map((w,i)=>{let cls="";if(checked){const t=it.targets.includes(i),s=sel.includes(i);cls=t&&s?"right":(!t&&s?"wrong":(t?"missed":""));}return `<button class="tok ${cls}" data-t="${i}" aria-pressed="${sel.includes(i)}" ${checked?"disabled":""}>${esc(w)}</button>`;}).join("")}</div>${checked?"":`<p class="muted" style="margin:6px 0 0;font-size:15px">לחצו על מילה כדי לסמן אותה. לחיצה נוספת מבטלת.</p>`}`;}
+  if(it.type==="tap"){const sel=st.sel||[];return `<div class="sent ${it.grid?"grid":""}">${it.words.map((w,i)=>{let cls="";if(checked){const t=it.targets.includes(i),s=sel.includes(i);cls=t&&s?"right":(!t&&s?"wrong":(t?"missed":""));}return `<button class="tok ${cls}" data-t="${i}" aria-pressed="${sel.includes(i)}" ${checked?"disabled":""}>${esc(w)}</button>`;}).join("")}</div>${checked?"":`<p class="muted" style="margin:6px 0 0;font-size:15px">${sel.length?`סימנתם ${sel.length} ${sel.length===1?"מילה":"מילים"}. לחיצה נוספת על מילה מבטלת את הסימון.`:"לחצו על מילה כדי לסמן אותה. מילה מסומנת נצבעת בכחול."}</p>`}`;}
   const pl_=st.placed||[];const curI=pl_.length;const done=curI>=it.items.length;
   return `<div class="sortw">${done?"":`<div class="cur">${esc(it.items[curI][0])}</div>`}<div class="bins ${it.bins.length===3?"three":"two"}">${it.bins.map((b,bi)=>`<button class="bin" data-b="${bi}" ${done||checked?"disabled":""}><b>${b}</b><span class="chips">${pl_.map((p,pi)=>p===bi?`<span class="chip ${checked?(it.items[pi][1]===bi?"right":"wrong"):""}">${esc(it.items[pi][0])}</span>`:"").join("")}</span></button>`).join("")}</div>
     ${!done?`<p class="muted" style="margin:0;font-size:15px;text-align:center">לאיזה תא שייכת המילה? (${curI+1}/${it.items.length})</p>`:""}</div>`;
@@ -865,7 +938,7 @@ function itemHTML(){
   if(C.view>=0&&C.hist[C.view])return pastHTML();
   const it=C.cur,st=C.state||{};const checked=!!st.checked;
   let tab="",lead="";
-  if(C.phase==="exp"){tab="התנסות";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עוד לא למדנו את הכלל. נסו לפי מה שאתם חושבים.</div></div>`;}
+  if(C.phase==="exp"){tab="התנסות";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עוד לא למדנו את הכלל, וזה בסדר. נסו לפי מה שנראה לכם, ואחר כך נלמד יחד.</div></div>`;}
   else if(C.phase==="judge"){tab="משימת שיפוט";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עכשיו אתם השופטים. בלש טוב הוא קודם כל חבר טוב: מוצאים את הטעות כדי לעזור.</div></div>`;}
   else if(C.phase==="review"){tab=`חזרה · ${C.idx}/${C.list.length}`;}
   else{tab=it._retry==="similar"?"ניסיון נוסף · שאלה דומה":it._retry==="again"?"ניסיון נוסף · השאלה חוזרת":`שאלה ${C.newServed} מתוך ${C.practiceN}`;}
@@ -915,7 +988,7 @@ function afterCheck(it,sc){
   if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);else P.points+=0;save();}
 }
 function advance(){
-  if(C.phase==="exp"){C.phase="teach";C.teachIdx=0;renderCase();return;}
+  if(C.phase==="exp"){C.phase="teach";C.teachIdx=0;C.stepShown=null;C.tcheck=null;renderCase();$("#case").scrollTop=0;return;}
   if(C.phase==="practice"){C.retryNote=null;nextPractice();return;}
   if(C.phase==="judge"){if(C.judgeAgain){C.judgeAgain=false;serve(C.l.judge[0],"again");return;}finish();return;}
   if(C.phase==="review"){nextReview();return;}
