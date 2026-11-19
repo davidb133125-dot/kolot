@@ -283,6 +283,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ============ ranks ============ */
+const PASS=80;
 const RANKS=[[0,"בלש מתלמד"],[150,"בלש"],[400,"בלש ראשי"],[800,"מפקד הסוכנות"]];
 function rank(){let r=RANKS[0],nx=null;for(let i=0;i<RANKS.length;i++){if(P.points>=RANKS[i][0]){r=RANKS[i];nx=RANKS[i+1]||null;}}return{name:r[1],from:r[0],next:nx};}
 
@@ -499,7 +500,7 @@ function homeHTML(){
   <div class="card case-hero"><canvas id="heroCv" width="320" height="170" aria-hidden="true"></canvas>
    <div class="body">${nl?`<span class="case-tab">התיק הבא · ${nl.num}</span><h3>${nl.building}</h3><div class="muted">נושא: ${nl.title}</div>`:`<span class="case-tab">כל התיקים פוענחו</span><h3>רובע המילים פוענח!</h3><div class="muted">הגשר לגן השורשים פתוח. אזור 2 בבנייה.</div>`}
    <div class="row"><button class="btn primary" data-act="world">להיכנס לעולם ▶</button>${nl?`<button class="btn soft" data-open="${nl.id}">לפתוח את התיק</button>`:""}</div></div></div>
-  <div class="card"><div class="section-title">המסע</div><p class="muted" style="margin:4px 0 10px">שבעה אזורים. כל אזור נפתח כשמסיימים את הקודם.</p>
+  <div class="card"><div class="section-title">המסע</div><p class="muted" style="margin:4px 0 10px">שבעה אזורים בעולם אחד. כדי לעבור לאזור הבא מפענחים את כל התיקים באזור, כל תיק מ־${PASS}%.</p>
    <div class="zones">${ZONES.map((z,i)=>`<div class="zone ${i===0?"on":""}"><span class="n">${z.n}</span><b>${z.name}</b><small>${i===0?`${sc}/${LESSONS.length} תיקים`:"נעול"}</small></div>`).join("")}</div></div>
   <div class="card"><div class="section-title">תיקים פתוחים</div>
    ${rev?`<p style="margin:6px 0 10px">${rev} שאלות שכדאי לחזור אליהן. כמה דקות ביום, כדי לא לשכוח.</p><button class="btn soft" data-act="review" style="width:100%">לחזור עליהן עכשיו</button>`:`<p class="muted" style="margin:6px 0 0">אין כרגע שאלות לחזרה. שאלות שטועים בהן מחכות כאן.</p>`}</div>
@@ -507,10 +508,10 @@ function homeHTML(){
    <div class="stat"><b>${sc}/${LESSONS.length}</b><span>תיקים</span></div><div class="stat"><b>${P.clues.length}/${CLUES.length}</b><span>רמזים</span></div><div class="stat"><b>${P.planks}/5</b><span>קרשים בגשר</span></div></div></div>
   <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
 }
-function lessonPill(l){const s=P.solved[l.id];if(s&&s.done)return `<span class="pill ok">פוענח · ${s.best}%</span>`;if(s)return `<span class="pill todo">${s.best}% · עוד לא 70%</span>`;return `<span class="pill todo">פתוח</span>`;}
+function lessonPill(l){const s=P.solved[l.id];if(s&&s.done)return `<span class="pill ok">פוענח · ${s.best}%</span>`;if(s)return `<span class="pill todo">${s.best}% · עוד לא ${PASS}%</span>`;return `<span class="pill todo">פתוח</span>`;}
 function casesHTML(){
   return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">התיקים</h2>
-  <div class="section-title">אזור 1 · רובע המילים</div><div class="list">
+  <div class="section-title">אזור 1 · רובע המילים</div><p class="muted" style="margin:0">כל תיק מפוענח מ־${PASS}%. כשכל ${LESSONS.length} התיקים מפוענחים, נפתח השער לאזור 2.</p><div class="list">
   ${LESSONS.map(l=>`<button class="li" data-open="${l.id}"><span class="ic">${l.num}</span><span class="tx"><b>${l.building}</b><small>${l.title}</small></span>${lessonPill(l)}</button>`).join("")}</div>
   ${ZONES.slice(1).map(z=>`<div class="section-title">אזור ${z.n} · ${z.name}</div><div class="li locked"><span class="ic">🔒</span><span class="tx"><b>${z.topic}</b><small>ייפתח בהמשך</small></span><span class="pill lock">נעול</span></div>`).join("")}
   </div>`;
@@ -684,7 +685,8 @@ $("#exitBtn").addEventListener("click",closeWorld);
 
 function solid(tx,ty){const v=(map[ty]||[])[tx];if(v===undefined)return true;
   if(v==="G")return !gateOpen();return "wtBFkf".includes(v)||v==="s";}
-function gateOpen(){return solvedCount()>=3;}
+function missingList(){return LESSONS.filter(l=>!(P.solved[l.id]&&P.solved[l.id].done)).map(l=>l.building).join(", ");}
+function gateOpen(){return solvedCount()>=LESSONS.length;}
 function blocked(x,y){const r=.28;for(const[dx,dy]of[[-r,-.05],[r,-.05],[-r,.3],[r,.3]]){if(solid(Math.floor(x+dx),Math.floor(y+dy)))return true;}
   for(const n of npcs){if(Math.abs(n.x-x)<.5&&Math.abs(n.y-y)<.35)return true;}return false;}
 
@@ -721,7 +723,7 @@ function act(){const o=nearObj;if(!o||dlgOpen)return;
   if(o.kind==="door"){if(o.b.hq)say("המפקד","המטה סגור כרגע לשיפוצים. המפקד מחכה לכם בכיכר.");else openCase(o.b.lesson,"world");}
   else if(o.kind==="npc")talk(o.n);
   else if(o.kind==="bridge")bridgePuzzle();
-  else if(o.kind==="gate"){if(gateOpen())say("שומר השער","השער פתוח! גן השורשים עדיין בבנייה. בקרוב תוכלו להיכנס ולגלות את סוד עץ המילים.");else say("שומר השער",`השער לגן השורשים נפתח אחרי 3 תיקים ברובע המילים. פוענחו עד עכשיו: ${solvedCount()}.`);}
+  else if(o.kind==="gate"){if(gateOpen())say("שומר השער","השער פתוח! גן השורשים עדיין בבנייה. בקרוב תוכלו להיכנס ולגלות את סוד עץ המילים.");else say("שומר השער",`השער לגן השורשים נפתח רק אחרי שמפענחים את כל ${LESSONS.length} התיקים ברובע המילים, כל אחד מ־${PASS}%. פוענחו עד עכשיו: ${solvedCount()}. עוד חסרים: ${missingList()}.`);}
   else if(o.kind==="chest")openChest();
   else if(o.kind==="sign")say("שלט",o.text);
 }
@@ -800,7 +802,7 @@ function talk(n){
   if(n.id==="chief"){
     if(!P.tutorial){chain("המפקד",[`ברוכים הבאים לסוכנות הבלשים, בלש ${P.name}!`,"זה רובע המילים. בכל בניין כאן מחכה תיק חקירה, ובכל תיק לומדים כלי בלשי חדש.","בשטח פזורים 8 דפי רמז: כרטיסי תזכורת קטנים על מה שלומדים. מספיק לעבור עליהם, והם נשמרים במחברת הבלש. את המחברת פותחים בכפתור ״מחברת״ למעלה.","החץ הירוק מראה לאן ללכת. התיק הראשון מחכה בבית החפצים. בהצלחה!"],()=>{P.tutorial=true;save();updateHud();});return;}
     const sc=solvedCount();
-    if(sc<LESSONS.length)say("המפקד",`פוענחו ${sc} מתוך ${LESSONS.length} תיקים. התיק הבא: ${target().name}. תיק נחשב פוענח מ־70%.`);
+    if(sc<LESSONS.length)say("המפקד",`פוענחו ${sc} מתוך ${LESSONS.length} תיקים. התיק הבא: ${target().name}. תיק נחשב פוענח מ־${PASS}%. כדי לפתוח את השער לאזור הבא צריך לפענח את כל התיקים ברובע.`);
     else say("המפקד","כל התיקים ברובע המילים פוענחו! קיבלתם את חותמת א׳. השער לגן השורשים פתוח.");return;}
   if(n.id==="crier"){chain("הכרוז",["שתי דרכים מכאן אל הנהר: מערב אל הגשר הישן, ומזרח אל גשר המילים השבור.","מעבר לגשר הישן נמצא השער לגן השורשים."]);return;}
   if(n.id==="fisher"){say("הדייג",P.planks<5?`לגשר המילים חסרים ${5-P.planks} קרשים. כל תשובה נכונה מחזירה קרש. באי שמעבר לגשר מחכה תיבה של המפקד.`:"תיקנתם את הגשר! עכשיו אפשר לדוג גם מהצד השני.");return;}
@@ -880,7 +882,7 @@ function renderCase(){
      <li><b>קודם תנסו לבד.</b> תקבלו משימה קטנה עוד לפני שמסבירים. לא צריך לדעת את התשובה, רק לנסות. כך תגלו מה אתם כבר יודעים.</li>
      <li><b>אחר כך ${l.npc} ילמד אתכם את הכלי הבלשי.</b> שיעור קצר, צעד אחרי צעד, ובכל שלב שאלה קטנה כדי לבדוק שהבנתם.</li>
      <li><b>עכשיו תתרגלו בעצמכם.</b> ${C.practiceN} שאלות שמתאימות את עצמן אליכם. מי שטועה מקבל שאלה דומה, ותמיד אפשר לחזור לשאלה קודמת.</li>
-     <li><b>ובסוף, אתם השופטים.</b> בלש מתלמד כתב דו״ח עם טעות. תמצאו אותה, ומ־70% התיק מפוענח ומקבל חותמת.</li>
+     <li><b>ובסוף, אתם השופטים.</b> בלש מתלמד כתב דו״ח עם טעות. תמצאו אותה, ומ־${PASS}% התיק מפוענח.</li>
     </ol>
     <div class="case-actions"><button class="btn primary" id="go1">יוצאים לחקירה ←</button><button class="btn soft" id="goTeach">רק ללמוד, בלי תרגול</button></div></div>`;
   }else if(C.phase==="teach"){
@@ -1025,14 +1027,14 @@ function nextReview(){if(C.idx>=C.list.length){C.phase="result";C.reviewDone=tru
 function flash(t){const d=document.createElement("div");d.className="toast";d.style.position="fixed";d.style.zIndex=50;d.style.top="auto";d.style.bottom="calc(env(safe-area-inset-bottom,0px) + 24px)";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
 function finish(){
   const pct=Math.round(C.score/C.count*100);const l=C.l;const prev=P.solved[l.id];const wasDone=prev&&prev.done;
-  const done=pct>=70;P.solved[l.id]={best:Math.max(pct,prev?prev.best:0),done:done||!!wasDone};
+  const done=pct>=PASS;P.solved[l.id]={best:Math.max(pct,prev?prev.best:0),done:done||!!wasDone};
   if(done&&!wasDone)P.points+=50;P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;C.phase="result";renderCase();$("#case").scrollTop=0;
 }
 function resultHTML(){
   if(C.reviewDone){return `<div class="folder result" data-tab="חזרה"><div class="score">${Math.round(C.score)}/${C.list.length}</div><p>תשובות נכונות בחזרה. שאלות שענית עליהן נכון יצאו מהרשימה.</p><div class="case-actions"><button class="btn primary" id="done">סיום</button></div></div>`;}
-  const l=C.l,ok=C.pct>=70;
+  const l=C.l,ok=C.pct>=PASS;
   return `<div class="folder result" data-tab="סיכום התיק"><div class="score">${C.pct}%</div><div class="bigstamp ${ok?"":"retry"}">${ok?"פוענח!":"עוד לא"}</div>
-  <p>${ok?(C.newDone?`+50 נקודות על פענוח התיק. כרטיס ״${l.clue.h}״ נוסף למחברת הבלש.`:"כל הכבוד! התיק כבר היה מפוענח, והתרגול נשמר."):"תיק נחשב פוענח מ־70%. השאלות שטעיתם בהן מחכות ב״תיקים פתוחים״."}</p>
+  <p>${ok?(C.newDone?`+50 נקודות על פענוח התיק. כרטיס ״${l.clue.h}״ נוסף למחברת הבלש.`:"כל הכבוד! התיק כבר היה מפוענח, והתרגול נשמר."):`תיק נחשב פוענח מ־${PASS}%. אפשר לנסות שוב עכשיו, והשאלות שטעיתם בהן מחכות גם ב״תיקים פתוחים״.`}</p>
   <p class="muted">רמה בסיום: ${["א","ב","ג"][C.level-1]}</p>
   <div class="sum">${Object.entries(l.sum).map(([k,v])=>`<div><b>${k}?</b>${esc(v)}</div>`).join("")}</div>
   <div class="case-actions">${ok?"":`<button class="btn soft" id="again">לנסות שוב</button>`}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;
