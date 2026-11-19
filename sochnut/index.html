@@ -216,6 +216,27 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .checkbox{margin-top:16px;border:2px dashed var(--brass);border-radius:14px;padding:12px 14px;background:#fffdf6}
 .checkbox>b{font-family:var(--display);font-weight:400;color:#6b4a12}
 .checkbox .q{font-size:18px;margin:4px 0 10px}
+.path{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.path li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--paper)}
+.path li span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--card);border:2px solid var(--line);flex:0 0 auto;font-size:14px}
+.path li b{flex:1}.path li small{color:var(--muted);font-weight:700}
+.path li.done span{background:var(--good);border-color:var(--good);color:#fff}
+.path li.cur{background:var(--navy);color:#fff}.path li.cur small{color:#c8d4e6}.path li.cur span{color:var(--navy)}
+.path li.lock{opacity:.55}
+.teachbox{border:2px dashed var(--line);border-radius:12px;padding:12px}
+.meter{padding:0 0 10px}
+.mtop{display:flex;align-items:baseline;gap:8px;font-size:14px;font-weight:700;color:#c8d4e6}
+.mtop b{font-family:var(--display);font-weight:400;font-size:22px;color:#fff;font-variant-numeric:tabular-nums}
+.mtop small{margin-inline-start:auto;font-size:12.5px}
+.mbar{position:relative;height:10px;border-radius:9px;background:rgba(255,255,255,.18);margin-top:4px}
+.mbar i{position:absolute;right:0;top:0;bottom:0;border-radius:9px;background:#f4c26b;transition:width .4s}
+.meter.ok .mbar i{background:#5cc28a}.meter.low .mbar i{background:#f08c7a}
+.mbar em{position:absolute;top:-4px;bottom:-4px;width:3px;margin-right:-1px;background:#fff;border-radius:2px}
+.passpop{background:var(--good-soft);border:2px solid var(--good);border-radius:14px;padding:12px;margin:8px 0;font-size:17px;animation:pop .5s cubic-bezier(.2,1.6,.4,1) .25s both}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.passpop b{display:block;font-family:var(--display);font-weight:400;font-size:21px;color:#1d5233}
+.perfect{background:#fff3cf;border:2px solid var(--brass);border-radius:14px;padding:12px;margin:8px 0;font-size:17px}
+.perfect b{display:block;font-family:var(--display);font-weight:400;font-size:21px;color:#6b4a12}
 .confirm{margin-top:10px;background:var(--bad-soft);border-radius:12px;padding:12px}
 
 /* onboarding */
@@ -274,7 +295,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 "use strict";
 /* ============ storage ============ */
 const KEY="sochnut-v1";
-const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,settings:{side:"left",big:false},pos:null});
+const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,settings:{side:"left",big:false},pos:null,teacher:{gate:"auto",unlockAll:false}});
 let P=fresh();
 function load(){try{const s=localStorage.getItem(KEY);if(s)P=Object.assign(fresh(),JSON.parse(s));}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
@@ -283,7 +304,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ============ ranks ============ */
-const PASS=80;
+const PASS=80, PERFECT_BONUS=30;
 const RANKS=[[0,"בלש מתלמד"],[150,"בלש"],[400,"בלש ראשי"],[800,"מפקד הסוכנות"]];
 function rank(){let r=RANKS[0],nx=null;for(let i=0;i<RANKS.length;i++){if(P.points>=RANKS[i][0]){r=RANKS[i];nx=RANKS[i+1]||null;}}return{name:r[1],from:r[0],next:nx};}
 
@@ -350,6 +371,8 @@ const LESSONS=[
   {k:"a12",lv:3,type:"tap",q:"סמנו את שני שמות התואר.",words:["הפרח","הצהוב","והריחני","גדל","בגינה."],targets:[1,2],why:"איזה פרח? צהוב וריחני. גם עם ו בהתחלה."},
   {k:"a13",lv:3,type:"choice",q:"השכן ______ עזר לנו לסחוב את הארגזים. (נדיב)",opts:["הנדיב","נדיב","הנדיבה","הנדיבים"],a:0,why:"השכן — זכר, יחיד, עם ה ← הנדיב."},
   {k:"a14",lv:3,type:"choice",q:"כשדן מתווכח עם מישהו, הוא בדרך כלל מצליח לשכנע אותו. דן הוא...",opts:["משכנע","שקט","ביישן","מסודר"],a:0,why:"מי שמצליח לשכנע — משכנע."},
+  {k:"a18",lv:1,type:"choice",q:"בכל מסיבה גל אוהב לרקוד ולשיר. גל הוא...",opts:["שמח","עצוב","שקט"],a:0,why:"מי שאוהב לרקוד ולשיר — שמח."},
+  {k:"a19",lv:1,type:"choice",q:"לפני מבחן דני לומד כמה שעות ביום. דני הוא...",opts:["שקדן","עצלן","ביישן"],a:0,why:"מי שלומד הרבה ומתאמץ — שקדן."},
   {k:"a15",lv:3,type:"choice",q:"גם כשיש רעש רב, רן מצליח להכין שיעורי בית. רן הוא...",opts:["מרוכז","רועש","עייף","מצחיק"],a:0,why:"מי שלא מתבלבל מרעש — מרוכז."},
   {k:"a16",lv:3,type:"choice",q:"במשפט ״הגבוה רץ מהר״ חסר משהו. מה?",opts:["שם עצם: מי הגבוה? למשל ״השחקן הגבוה רץ מהר״","פועל","שם תואר","סימן שאלה"],a:0,why:"שם תואר צריך שם עצם לידו."},
   {k:"a17",lv:3,type:"tap",q:"סמנו את שני שמות התואר.",words:["המורה","הסבלני","הקריא","סיפור","מצחיק."],targets:[1,4],why:"איזה מורה? סבלני. איזה סיפור? מצחיק."}],
@@ -371,6 +394,7 @@ const LESSONS=[
   {k:"v3",lv:1,type:"choice",q:"איזו מילה היא פועל?",opts:["כתבנו","מחברת","כחול","שולחן"],a:0,why:"כתבנו: פעולה (כתיבה), גוף (אנחנו), זמן (עבר).",hint:"חפשו מילה שמספרת מה עושים."},
   {k:"v4",lv:1,type:"sort",q:"פועל או לא?",bins:["פועל","לא פועל"],items:[["קפץ",0],["כדור",1],["אכלו",0],["גדול",1],["שרים",0],["עץ",1]],why:"פעלים: קפץ, אכלו, שרים."},
   {k:"v5",lv:1,type:"choice",q:"באיזה זמן הפועל ״אכלתי״?",opts:["עבר","הווה","עתיד"],a:0,why:"אכלתי — כבר קרה, בעבר."},
+  {k:"v16",lv:1,type:"choice",q:"״אכלתי״ — מי אכל?",opts:["אני","הם","אתם"],a:0,why:"אכל־תי: אני."},
   {k:"v6",lv:2,type:"choice",q:"״מחר נשחק בפארק.״ באיזה זמן הפועל ״נשחק״?",opts:["עתיד","עבר","הווה"],a:0,why:"מחר — עתיד."},
   {k:"v7",lv:2,type:"choice",q:"מי עושה את הפעולה במילה ״קפצנו״?",opts:["אנחנו","אני","הם","אתה"],a:0,why:"קפצ־נו: אנחנו."},
   {k:"v8",lv:2,type:"tap",q:"סמנו את הפועל.",words:["מחר","נטייל","עם","המשפחה","בהרים."],targets:[1],why:"נטייל: פעולה, אנחנו, עתיד."},
@@ -452,6 +476,38 @@ const LEARN={
   {say:"כשמשהו לא הגיוני — בלש עוצר.",check:{q:"מה עושים כשמילה נשמעת לא הגיונית?",opts:["קוראים שוב את כל המשפט ומנסים קריאה אחרת","ממשיכים מהר הלאה","מדלגים על המשפט"],a:0,why:"עוצרים, מנסים שוב (עד 3 פעמים), ובודקים מה הגיוני."}}]}
 };
 const L=id=>LESSONS.find(l=>l.id===id);
+const SK0={};
+/* extra questions so that a retry after a mistake can be a differently worded question */
+const S2=(k,lv,q,bins,items,why)=>({k,lv,type:"sort",q,bins,items,why});
+const EXTRA={
+ noun:[S2("n4b",1,"שם עצם או לא? הוסיפו ה ונסו לפתוח משפט.",["שם עצם","לא שם עצם"],[["ספר",0],["קפץ",1],["כיסא",0],["ירוק",1],["דג",0],["אכל",1]],"שמות עצם: ספר, כיסא, דג."),
+  S2("n7b",2,"מיינו את המילים.",["שם עצם","לא שם עצם"],[["תקווה",0],["רטוב",1],["ידידות",0],["צחק",1],["ים",0],["עייף",1]],"שמות עצם: תקווה, ידידות, ים."),
+  S2("n12b",3,"מיינו את המילים. שימו לב לתוספות!",["שם עצם","לא שם עצם"],[["בגינתנו",0],["הלכנו",1],["ספריו",0],["שמחים",1],["בהתרגשות",0],["התרגש",1]],"שמות עצם: בגינתנו, ספריו, בהתרגשות."),
+  {k:"n14b",lv:3,type:"choice",q:"איזו מילה היא שם עצם?",opts:["ציוריהם","ציירו","מצויר","ציירנו"],a:0,why:"ציוריהם = הציורים שלהם. שם עצם עם שייכות."}],
+ adj:[S2("a4b",1,"שם עצם או שם תואר?",["שם עצם","שם תואר"],[["כיסא",0],["אדום",1],["ילד",0],["קטן",1],["בית",0],["חם",1]],"שמות תואר: אדום, קטן, חם."),
+  S2("a11b",2,"שם עצם או שם תואר?",["שם עצם","שם תואר"],[["פרחים",0],["צהובים",1],["ענן",0],["אפור",1],["מכונית",0],["מהירה",1]],"שמות תואר: צהובים, אפור, מהירה."),
+  S2("a20",3,"מילים דומות — שם עצם או שם תואר?",["שם עצם","שם תואר"],[["נדיבות",0],["נדיב",1],["זריזות",0],["זריזה",1],["יופי",0],["יפים",1]],"נדיבות (שם עצם) — נדיב (שם תואר)."),
+  {k:"a13b",lv:3,type:"choice",q:"החיילים ______ צעדו בטקס. (גאה)",opts:["הגאים","הגאה","גאות","הגאות"],a:0,why:"החיילים — זכר, רבים, עם ה ← הגאים."},
+  {k:"a5b",lv:1,type:"choice",q:"איזה צירוף נכון?",opts:["הכדור הירוק","ירוק הכדור","הכדור ירוקה","ירוק כדור"],a:0,why:"שם התואר בא אחרי שם העצם, עם ה כמו שלו."},
+  {k:"a16b",lv:2,type:"choice",q:"במשפט ״המהירה ניצחה במרוץ״ חסר משהו. מה?",opts:["שם עצם: מי המהירה? למשל ״הרצה המהירה״ או ״המכונית המהירה״","פועל","סימן קריאה","מילת קישור"],a:0,why:"שם תואר צריך שם עצם לידו."}],
+ verb:[S2("v4b",1,"פועל או לא?",["פועל","לא פועל"],[["שתה",0],["כוס",1],["כתבנו",0],["עיפרון",1],["ישנים",0],["מיטה",1]],"פעלים: שתה, כתבנו, ישנים."),
+  S2("v9b",2,"פועל או לא?",["פועל","לא פועל"],[["נלמד",0],["לימוד",1],["הלכו",0],["הליכה",1],["מצייר",0],["ציור",1]],"פעלים: נלמד, הלכו, מצייר."),
+  S2("v14b",3,"מילים דומות — פועל או לא?",["פועל","לא פועל"],[["התלבשנו",0],["תלבושת",1],["ייפתח",0],["פתיחה",1],["מתכוננים",0],["הכנה",1]],"פעלים: התלבשנו, ייפתח, מתכוננים."),
+  {k:"v3b",lv:1,type:"choice",q:"איזו מילה היא פועל?",opts:["שיחקנו","משחק","שמח","מגרש"],a:0,why:"שיחקנו: פעולה, אנחנו, עבר."},
+  {k:"v10b",lv:2,type:"choice",q:"״הדייג הזקן משך את הרשת.״ מה הפועל?",opts:["משך","הזקן","הרשת","הדייג"],a:0,why:"מה הדייג עשה? משך."},
+  {k:"v13b",lv:3,type:"choice",q:"איזו מילה איננה פועל?",opts:["התרגשות","התרגשו","מתרגש","נתרגש"],a:0,why:"התרגשות היא שם עצם."}],
+ sort3:[S2("s1b",1,"מיינו לשלוש קבוצות.",["שם עצם","פועל","שם תואר"],[["כלב",0],["נבח",1],["שחור",2],["תפוח",0],["נפל",1],["מתוק",2]],"כלב, תפוח — מי/מה. נבח, נפל — מה עשו. שחור, מתוק — איזה."),
+  S2("s4b",2,"מיינו לשלוש קבוצות.",["שם עצם","פועל","שם תואר"],[["מורה",0],["הסביר",1],["סבלני",2],["חבילה",0],["הגיעה",1],["כבדה",2]],"הסביר, הגיעה — פעלים. סבלני, כבדה — שמות תואר."),
+  S2("s8b",3,"מילים דומות, תפקיד שונה. מיינו.",["שם עצם","פועל","שם תואר"],[["הצלחה",0],["הצליחו",1],["מוצלח",2],["התפתחות",0],["התפתח",1],["מפותח",2]],"הצלחה (שם עצם) · הצליחו (פועל) · מוצלח (שם תואר)."),
+  {k:"s2b",lv:1,type:"tap",q:"סמנו את הפועל.",words:["החתול","השחור","ישן."],targets:[2],why:"מה החתול עושה? ישן."},
+  {k:"s3b",lv:1,type:"choice",q:"המילה ״צהוב״ היא...",opts:["שם תואר","פועל","שם עצם"],a:0,why:"איזה? צהוב."}],
+ nikud:[{k:"k4b",lv:1,type:"choice",q:"אבא קרא לי ______ מעניין לפני השינה.",opts:["סִפּוּר","סַפָּר"],a:0,why:"קוראים סִפּוּר."},
+  {k:"k9b",lv:2,type:"choice",q:"______ את הכלב לטיול בפארק.",opts:["לָקַחְנוּ","לֶקַח"],a:0,why:"לָקַחְנוּ — פעולה. לֶקַח — מה שלומדים."},
+  {k:"k13b",lv:3,type:"choice",q:"בסוף הסיפור למדנו ______ חשוב: לא לוותר.",opts:["לֶקַח","לָקַח","לִקֵּחַ"],a:0,why:"לֶקַח — מה שלומדים מסיפור."}]
+};
+LESSONS.forEach(l=>l.pool.push(...(EXTRA[l.id]||[])));
+Object.assign(SK0,{a13b:"agree",a5b:"rule",a16b:"rule"});
+
 
 const CLUES=[
  {id:"c1",x:17,y:7,h:"מי? מה?",t:"שם עצם עונה על מי? מה?"},
@@ -480,6 +536,10 @@ function go(s){
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 $("#avatarBtn").addEventListener("click",()=>go("me"));
 
+function isDone(l){return !!(P.solved[l.id]&&P.solved[l.id].done);}
+function unlocked(l){const i=LESSONS.indexOf(l);return i<=0||isDone(LESSONS[i-1])||P.teacher.unlockAll;}
+function orderText(){return LESSONS.map((l,i)=>`${i+1}. ${l.building}`).join(" ← ");}
+function lockMsg(l){const prev=LESSONS[LESSONS.indexOf(l)-1];return `${l.building} עדיין נעול. הוא נפתח אחרי שמפענחים את ${prev.building}.\nהסדר ברובע: ${orderText()}`;}
 function solvedCount(){return LESSONS.filter(l=>P.solved[l.id]&&P.solved[l.id].done).length;}
 function nextLesson(){return LESSONS.find(l=>!(P.solved[l.id]&&P.solved[l.id].done))||null;}
 
@@ -500,6 +560,8 @@ function homeHTML(){
   <div class="card case-hero"><canvas id="heroCv" width="320" height="170" aria-hidden="true"></canvas>
    <div class="body">${nl?`<span class="case-tab">התיק הבא · ${nl.num}</span><h3>${nl.building}</h3><div class="muted">נושא: ${nl.title}</div>`:`<span class="case-tab">כל התיקים פוענחו</span><h3>רובע המילים פוענח!</h3><div class="muted">הגשר לגן השורשים פתוח. אזור 2 בבנייה.</div>`}
    <div class="row"><button class="btn primary" data-act="world">להיכנס לעולם ▶</button>${nl?`<button class="btn soft" data-open="${nl.id}">לפתוח את התיק</button>`:""}</div></div></div>
+  <div class="card"><div class="section-title">הדרך ברובע המילים</div><p class="muted" style="margin:4px 0 10px">פותרים לפי הסדר. כל בית נפתח אחרי שמפענחים את הקודם מ־${PASS}%.</p>
+   <ol class="path">${LESSONS.map((l,i)=>{const d=isDone(l),u=unlocked(l),cur=nl&&nl.id===l.id;return `<li class="${d?"done":cur?"cur":u?"":"lock"}"><span>${d?"✓":u?i+1:"🔒"}</span><b>${l.building}</b><small>${l.title.split(":")[0]}</small></li>`;}).join("")}</ol></div>
   <div class="card"><div class="section-title">המסע</div><p class="muted" style="margin:4px 0 10px">שבעה אזורים בעולם אחד. כדי לעבור לאזור הבא מפענחים את כל התיקים באזור, כל תיק מ־${PASS}%.</p>
    <div class="zones">${ZONES.map((z,i)=>`<div class="zone ${i===0?"on":""}"><span class="n">${z.n}</span><b>${z.name}</b><small>${i===0?`${sc}/${LESSONS.length} תיקים`:"נעול"}</small></div>`).join("")}</div></div>
   <div class="card"><div class="section-title">תיקים פתוחים</div>
@@ -508,11 +570,11 @@ function homeHTML(){
    <div class="stat"><b>${sc}/${LESSONS.length}</b><span>תיקים</span></div><div class="stat"><b>${P.clues.length}/${CLUES.length}</b><span>רמזים</span></div><div class="stat"><b>${P.planks}/5</b><span>קרשים בגשר</span></div></div></div>
   <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
 }
-function lessonPill(l){const s=P.solved[l.id];if(s&&s.done)return `<span class="pill ok">פוענח · ${s.best}%</span>`;if(s)return `<span class="pill todo">${s.best}% · עוד לא ${PASS}%</span>`;return `<span class="pill todo">פתוח</span>`;}
+function lessonPill(l){const s=P.solved[l.id];if(s&&s.done)return `<span class="pill ok">${s.perfect?"★ ":""}פוענח · ${s.best}%</span>`;if(s)return `<span class="pill todo">${s.best}% · עוד לא ${PASS}%</span>`;return `<span class="pill todo">פתוח</span>`;}
 function casesHTML(){
   return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">התיקים</h2>
   <div class="section-title">אזור 1 · רובע המילים</div><p class="muted" style="margin:0">כל תיק מפוענח מ־${PASS}%. כשכל ${LESSONS.length} התיקים מפוענחים, נפתח השער לאזור 2.</p><div class="list">
-  ${LESSONS.map(l=>`<button class="li" data-open="${l.id}"><span class="ic">${l.num}</span><span class="tx"><b>${l.building}</b><small>${l.title}</small></span>${lessonPill(l)}</button>`).join("")}</div>
+  ${LESSONS.map((l,i)=>unlocked(l)?`<button class="li" data-open="${l.id}"><span class="ic">${i+1}</span><span class="tx"><b>${l.building}</b><small>${l.title}</small></span>${lessonPill(l)}</button>`:`<button class="li locked" data-open="${l.id}"><span class="ic">🔒</span><span class="tx"><b>${i+1}. ${l.building}</b><small>${l.title} · נפתח אחרי ${LESSONS[i-1].building}</small></span><span class="pill lock">נעול</span></button>`).join("")}</div>
   ${ZONES.slice(1).map(z=>`<div class="section-title">אזור ${z.n} · ${z.name}</div><div class="li locked"><span class="ic">🔒</span><span class="tx"><b>${z.topic}</b><small>ייפתח בהמשך</small></span><span class="pill lock">נעול</span></div>`).join("")}
   </div>`;
 }
@@ -532,6 +594,9 @@ function meHTML(){
   <div class="section-title">הגדרות</div>
   <div class="card stack" style="padding-top:12px"><div><b>הג׳ויסטיק בצד</b><div class="seg" style="margin-top:6px"><button id="sideL" aria-pressed="${s.side==="left"}">שמאל</button><button id="sideR" aria-pressed="${s.side==="right"}">ימין</button></div></div>
    <div><b>גודל</b><div class="seg" style="margin-top:6px"><button id="sizeN" aria-pressed="${!s.big}">רגיל</button><button id="sizeB" aria-pressed="${s.big}">גדול</button></div></div>
+   <div class="teachbox"><b>מצב מורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">במשחק האמיתי זה יופיע בלוח המורה, לכל הכיתה או לתלמיד מסוים. כאן אפשר לנסות את זה בדפדפן הזה.</p>
+    <div style="font-weight:700">השער לאזור 2</div><div class="seg" style="margin:6px 0 10px"><button id="gAuto" aria-pressed="${P.teacher.gate==="auto"}">אוטומטי</button><button id="gOpen" aria-pressed="${P.teacher.gate==="open"}">פתוח עכשיו</button><button id="gLock" aria-pressed="${P.teacher.gate==="locked"}">נעול</button></div>
+    <div style="font-weight:700">סדר הבתים</div><div class="seg" style="margin-top:6px"><button id="oSeq" aria-pressed="${!P.teacher.unlockAll}">לפי הסדר</button><button id="oAll" aria-pressed="${P.teacher.unlockAll}">כל הבתים פתוחים</button></div></div>
    <div><button class="btn ghost" id="resetBtn" style="width:100%">לאפס את ההתקדמות</button><div id="resetBox"></div></div></div>
   <p class="demo">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div>`;
 }
@@ -542,6 +607,7 @@ function bindScreen(){
   const hc=$("#heroCv");if(hc)drawHero(hc);
   const mc=$("#meCv");if(mc){const c=mc.getContext("2d");drawChar(c,6,8,coatOf(P.coat),0,1);}
   const set=(k,v)=>{P.settings[k]=v;save();render();};
+  if($("#gAuto")){const tset=(k,v)=>{P.teacher[k]=v;save();render();};$("#gAuto").onclick=()=>tset("gate","auto");$("#gOpen").onclick=()=>tset("gate","open");$("#gLock").onclick=()=>tset("gate","locked");$("#oSeq").onclick=()=>tset("unlockAll",false);$("#oAll").onclick=()=>tset("unlockAll",true);}
   if($("#sideL")){$("#sideL").onclick=()=>set("side","left");$("#sideR").onclick=()=>set("side","right");$("#sizeN").onclick=()=>set("big",false);$("#sizeB").onclick=()=>set("big",true);
    $("#resetBtn").onclick=()=>{$("#resetBox").innerHTML=`<div class="confirm"><b>למחוק את כל ההתקדמות?</b><div class="row" style="margin-top:8px"><button class="btn primary" id="resetYes" style="background:var(--stamp)">כן, למחוק</button><button class="btn soft" id="resetNo">ביטול</button></div></div>`;
     $("#resetYes").onclick=()=>{P=fresh();save();buildMap();startOnboarding();};$("#resetNo").onclick=()=>{$("#resetBox").innerHTML="";};};}
@@ -686,7 +752,7 @@ $("#exitBtn").addEventListener("click",closeWorld);
 function solid(tx,ty){const v=(map[ty]||[])[tx];if(v===undefined)return true;
   if(v==="G")return !gateOpen();return "wtBFkf".includes(v)||v==="s";}
 function missingList(){return LESSONS.filter(l=>!(P.solved[l.id]&&P.solved[l.id].done)).map(l=>l.building).join(", ");}
-function gateOpen(){return solvedCount()>=LESSONS.length;}
+function gateOpen(){const g=P.teacher.gate;if(g==="open")return true;if(g==="locked")return false;return solvedCount()>=LESSONS.length;}
 function blocked(x,y){const r=.28;for(const[dx,dy]of[[-r,-.05],[r,-.05],[-r,.3],[r,.3]]){if(solid(Math.floor(x+dx),Math.floor(y+dy)))return true;}
   for(const n of npcs){if(Math.abs(n.x-x)<.5&&Math.abs(n.y-y)<.35)return true;}return false;}
 
@@ -723,7 +789,7 @@ function act(){const o=nearObj;if(!o||dlgOpen)return;
   if(o.kind==="door"){if(o.b.hq)say("המפקד","המטה סגור כרגע לשיפוצים. המפקד מחכה לכם בכיכר.");else openCase(o.b.lesson,"world");}
   else if(o.kind==="npc")talk(o.n);
   else if(o.kind==="bridge")bridgePuzzle();
-  else if(o.kind==="gate"){if(gateOpen())say("שומר השער","השער פתוח! גן השורשים עדיין בבנייה. בקרוב תוכלו להיכנס ולגלות את סוד עץ המילים.");else say("שומר השער",`השער לגן השורשים נפתח רק אחרי שמפענחים את כל ${LESSONS.length} התיקים ברובע המילים, כל אחד מ־${PASS}%. פוענחו עד עכשיו: ${solvedCount()}. עוד חסרים: ${missingList()}.`);}
+  else if(o.kind==="gate"){if(P.teacher.gate==="locked")say("שומר השער","המורה נעל את השער לזמן מה, כדי שכל הכיתה תתקדם יחד. בינתיים אפשר לחזור על התיקים ולאסוף דפי רמז.");else if(gateOpen())say("שומר השער","השער פתוח! גן השורשים עדיין בבנייה. בקרוב תוכלו להיכנס ולגלות את סוד עץ המילים.");else say("שומר השער",`השער לגן השורשים נפתח רק אחרי שמפענחים את כל ${LESSONS.length} התיקים ברובע המילים, כל אחד מ־${PASS}%. פוענחו עד עכשיו: ${solvedCount()}. עוד חסרים: ${missingList()}.`);}
   else if(o.kind==="chest")openChest();
   else if(o.kind==="sign")say("שלט",o.text);
 }
@@ -772,7 +838,9 @@ function draw(){
   // labels
   const fs=Math.max(13,Math.round(5.2*S));ctx.font=`700 ${fs}px Assistant, sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.direction="rtl";
   const pill=(text,X,Y,dark)=>{const w=ctx.measureText(text).width+fs*1.1,h=fs*1.6;ctx.fillStyle=dark?"rgba(25,32,44,.85)":"rgba(255,250,240,.92)";rr(X-w/2,Y-h/2,w,h,h/2);ctx.fill();ctx.fillStyle=dark?"#fff":"#22344f";ctx.fillText(text,X,Y+1);};
-  buildings.forEach(b=>{const s=P.solved[b.lesson];pill((s&&s.done?"✓ ":"")+b.name+(b.lesson?" · "+L(b.lesson).title.split(":")[0]:""),sx(b.x+b.w/2),sy(b.y+1),false);});
+  buildings.forEach(b=>{if(!b.lesson){pill(b.name,sx(b.x+b.w/2),sy(b.y+1),false);return;}const l=L(b.lesson),n=LESSONS.indexOf(l)+1,lk=!unlocked(l);
+    if(lk){ctx.fillStyle="rgba(20,25,35,.42)";ctx.fillRect(sx(b.x),sy(b.y),b.w*ts,b.h*ts);}
+    pill((P.solved[l.id]&&P.solved[l.id].perfect?"★ ":isDone(l)?"✓ ":lk?"🔒 ":"")+n+". "+b.name+" · "+l.title.split(":")[0]+(P.solved[l.id]?` · ${P.solved[l.id].best}%`:""),sx(b.x+b.w/2),sy(b.y+1),lk);});
   npcs.forEach(n=>{if(Math.hypot(n.x-pl.x,n.y-pl.y)<5)pill(n.name,sx(n.x),sy(n.y)-18*S,true);});
   // compass
   const tg=target();const ang=Math.atan2(tg.y-pl.y,tg.x-pl.x)+Math.PI/2;$("#compass svg").style.transform=`rotate(${ang}rad)`;
@@ -788,7 +856,7 @@ function target(){
   return{x:10,y:29.3,name:"השער לגן השורשים"};
 }
 function updateHud(){
-  const sc=solvedCount();$("#goalName").textContent=target().name;$("#goalCases").textContent=`${sc}/${LESSONS.length} תיקים`;$("#goalClues").textContent=`${P.clues.length}/${CLUES.length} רמזים`;$("#goalBar").style.width=(sc/LESSONS.length*100)+"%";
+  const sc=solvedCount(),nl=nextLesson();$("#goalTop").textContent=nl?`אזור 1 · היעד: תיק ${LESSONS.indexOf(nl)+1} מתוך ${LESSONS.length}`:"אזור 1 · היעד";$("#goalName").textContent=target().name;$("#goalCases").textContent=`${sc}/${LESSONS.length} תיקים`;$("#goalClues").textContent=`${P.clues.length}/${CLUES.length} רמזים`;$("#goalBar").style.width=(sc/LESSONS.length*100)+"%";
 }
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;toastT=2.6;}
 
@@ -804,8 +872,9 @@ function talk(n){
     const sc=solvedCount();
     if(sc<LESSONS.length)say("המפקד",`פוענחו ${sc} מתוך ${LESSONS.length} תיקים. התיק הבא: ${target().name}. תיק נחשב פוענח מ־${PASS}%. כדי לפתוח את השער לאזור הבא צריך לפענח את כל התיקים ברובע.`);
     else say("המפקד","כל התיקים ברובע המילים פוענחו! קיבלתם את חותמת א׳. השער לגן השורשים פתוח.");return;}
-  if(n.id==="crier"){chain("הכרוז",["שתי דרכים מכאן אל הנהר: מערב אל הגשר הישן, ומזרח אל גשר המילים השבור.","מעבר לגשר הישן נמצא השער לגן השורשים."]);return;}
+  if(n.id==="crier"){chain("הכרוז",[`ברובע המילים פותרים את התיקים לפי הסדר. כל בית נפתח אחרי שמפענחים את הקודם:\n${orderText()}`,"שתי דרכים מכאן אל הנהר: מערב אל הגשר הישן, ומזרח אל גשר המילים השבור.","מעבר לגשר הישן נמצא השער לגן השורשים."]);return;}
   if(n.id==="fisher"){say("הדייג",P.planks<5?`לגשר המילים חסרים ${5-P.planks} קרשים. כל תשובה נכונה מחזירה קרש. באי שמעבר לגשר מחכה תיבה של המפקד.`:"תיקנתם את הגשר! עכשיו אפשר לדוג גם מהצד השני.");return;}
+  if(n.lesson&&!unlocked(L(n.lesson))){say(L(n.lesson).npc,lockMsg(L(n.lesson)));return;}
   if(n.lesson){const l=L(n.lesson),s=P.solved[l.id];
     say(l.npc,s&&s.done?`התיק ״${l.title}״ פוענח (${s.best}%). רוצים לחזור עליו ולשפר?`:l.intro,[{t:"לפתוח את התיק",f:()=>openCase(l.id,"world")},{t:"אחר כך"}]);}
 }
@@ -847,15 +916,16 @@ function caseKey(e){
   const k=e.key;if(k!=="Enter"&&k!=="ArrowRight"&&k!=="ArrowLeft")return;
   const a=document.activeElement;if(k==="Enter"&&a&&a.tagName==="BUTTON"&&a.closest("#case"))return;
   const click=id=>{const b=document.getElementById(id);if(b&&!b.disabled){e.preventDefault();b.click();return true;}return false;};
-  if(k==="Enter"){["tStep","check","nextQ","histNext","tNext","go1","done"].some(click);return;}
+  if(k==="Enter"){["tStep","explDone","check","nextQ","histNext","tNext","go1","done"].some(click);return;}
   if(k==="ArrowRight"){click("histBack")||click("histPrev");return;}
   if(k==="ArrowLeft"){click("histNext")||click("tNext");}
 }
 let C=null;
 function openCase(id,from){
   const l=L(id);if(!l)return;closeDlg();
+  if(!unlocked(l)){if(from==="world"&&running)say("🔒 "+l.building,lockMsg(l));else flash(`${l.building} נפתח אחרי ${LESSONS[LESSONS.indexOf(l)-1].building}`);return;}
   const lv=P.level[id]||1;
-  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,used:new Set(),cur:null,state:null,score:0,count:0,practiceN:6,newServed:0,pending:[],fails:{},hist:[],view:-1,confirmX:false};
+  C={l,from,phase:"cover",idx:0,teachIdx:0,level:lv,streak:0,used:new Set(),cur:null,state:null,score:0,count:0,practiceN:6,newServed:0,queue:[],fails:{},hist:[],view:-1,confirmX:false};
   $("#case").hidden=false;document.body.style.overflow="hidden";renderCase();
 }
 function openReview(){
@@ -866,6 +936,8 @@ function openReview(){
 }
 function closeCase(){$("#case").hidden=true;$("#case").innerHTML="";const from=C&&C.from;C=null;
   if(from==="world"&&running){document.body.style.overflow="hidden";updateHud();}else{document.body.style.overflow="";render();}}
+function meterHTML(){if(!["practice","judge"].includes(C.phase))return "";const has=C.count>0;const pct=has?Math.round(C.score/C.count*100):0;const ok=pct>=PASS;
+  return `<div class="meter ${has?(ok?"ok":"low"):""}"><div class="mtop"><span>ההצלחה שלכם בתיק</span><b>${has?pct+"%":"—"}</b><small>יעד: ${PASS}% · בונוס: 100%</small></div><div class="mbar"><i style="width:${pct}%"></i><em style="right:${PASS}%"></em></div></div>`;}
 function stepsBar(){const ph=["cover","exp","teach","practice","judge","result"];if(C.phase==="review")return "";const i=ph.indexOf(C.phase);return `<div class="steps">${ph.slice(1).map((p,k)=>`<i class="${k<i?"on":""}"></i>`).join("")}</div>`;}
 function phaseName(){return{cover:"תדריך",exp:"קודם מנסים לבד",teach:"לומדים את הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
 function npcCanvas(){return `<canvas class="npcc" width="12" height="16"></canvas>`;}
@@ -902,7 +974,7 @@ function renderCase(){
     ${moreSteps||needCheck?`<p class="muted" style="font-size:14px;text-align:center;margin:8px 0 0">${moreSteps?"לחצו ״הצעד הבא״ כדי לראות את כל הצעדים.":"ענו על שאלת הבדיקה כדי להמשיך."}</p>`:""}</div>`;
   }else if(C.phase==="result"){body=resultHTML();}
   else{body=itemHTML();}
-  $("#case").innerHTML=`<div class="case-top"><div class="wrap"><button class="xbtn" id="cx" aria-label="סגירת התיק">✕</button><div class="t"><small>${phaseName()}</small><b>${l.building} · ${l.title}</b></div></div><div class="wrap" style="padding-block:0">${stepsBar()}</div></div>
+  $("#case").innerHTML=`<div class="case-top"><div class="wrap"><button class="xbtn" id="cx" aria-label="סגירת התיק">✕</button><div class="t"><small>${phaseName()}</small><b>${l.building} · ${l.title}</b></div></div><div class="wrap" style="padding-block:0">${stepsBar()}${meterHTML()}</div></div>
   <div class="wrap" style="padding-bottom:40px">${C.confirmX?`<div class="confirm" style="margin-top:12px"><b>לצאת מהתיק?</b> ההתקדמות בתיק הזה לא תישמר.<div class="row" style="margin-top:8px"><button class="btn primary" id="cxYes" style="background:var(--stamp)">לצאת</button><button class="btn soft" id="cxNo">להמשיך בתיק</button></div></div>`:""}${body}</div>`;
   paintNpc();bindCase();
 }
@@ -930,7 +1002,7 @@ function innerHTML_(it,st,checked){
 }
 function fbHTML(it,st,phase,live){const ok=st.score>=.999;const part=!ok&&st.score>0;
   if(phase==="exp")return `<div class="fb ok"><b>${ok?"יפה מאוד!":"ניסיון טוב!"}</b>${esc(it.why||"")}</div>`;
-  return `<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}${live&&!ok&&C.retryNote==="soon"?"<br><small>עוד מעט תקבלו שאלה דומה, כדי לתרגל שוב.</small>":""}${live&&!ok&&C.retryNote==="later"?"<br><small>נחזור לזה ב״תיקים פתוחים״, ואפשר לשאול את המורה.</small>":""}${live&&!ok&&phase==="judge"&&C.judgeAgain?"<br><small>קראו שוב את ההסבר, ותקבלו ניסיון נוסף.</small>":""}</div>`;}
+  return `<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}${live&&!ok&&C.retryNote==="soon"?"<br><small>עכשיו נתרגל את זה: שאלה קלה יותר, הסבר קצר, ושאלה נוספת באותה רמה.</small>":""}${live&&!ok&&C.retryNote==="later"?"<br><small>נחזור לזה ב״תיקים פתוחים״, ואפשר לשאול את המורה.</small>":""}${live&&!ok&&phase==="judge"&&C.judgeAgain?"<br><small>קראו שוב את ההסבר, ותקבלו ניסיון נוסף.</small>":""}</div>`;}
 function pastHTML(){
   const h=C.hist[C.view];const last=C.view>=C.hist.length-1;
   return `<div class="folder" data-tab="${h.tab}"><div class="pastnote">צפייה בשאלה שכבר עניתם עליה · שאלה ${C.view+1} מתוך ${C.hist.length} ששאלתם עד עכשיו</div><div class="q">${esc(h.it.q)}</div>${innerHTML_(h.it,h.st,true)}${fbHTML(h.it,h.st,h.phase,false)}
@@ -939,12 +1011,15 @@ function pastHTML(){
 function itemHTML(){
   if(C.view>=0&&C.hist[C.view])return pastHTML();
   const it=C.cur,st=C.state||{};const checked=!!st.checked;
+  if(it.type==="explain"){const tip=tipFor(C.l.id,it.sk);C._tab="חיזוק · הסבר";
+    return `<div class="folder teach" data-tab="חיזוק · הסבר"><div class="saybub">${npcCanvas()}<div><b style="color:#2a7a6c;font-family:var(--display);font-weight:400">${C.l.npc}:</b> פתרתם שאלה קלה יותר. עכשיו נחזור רגע על הכלל, ואז תקבלו שאלה נוספת באותה רמה כמו קודם.</div></div><h3>${tip.h}</h3>${tip.html}${it.why?`<div class="hint">בשאלה שטעיתם בה: ${esc(it.why)}</div>`:""}<div class="case-actions">${C.hist.length?`<button class="btn soft" id="histBack">→ לשאלה הקודמת</button>`:""}<button class="btn primary" id="explDone">הבנתי, לשאלה הבאה ←</button></div></div>`;}
   let tab="",lead="";
   if(C.phase==="exp"){tab="התנסות";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עוד לא למדנו את הכלל, וזה בסדר. נסו לפי מה שנראה לכם, ואחר כך נלמד יחד.</div></div>`;}
   else if(C.phase==="judge"){tab="משימת שיפוט";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עכשיו אתם השופטים. בלש טוב הוא קודם כל חבר טוב: מוצאים את הטעות כדי לעזור.</div></div>`;}
   else if(C.phase==="review"){tab=`חזרה · ${C.idx}/${C.list.length}`;}
-  else{tab=it._retry==="similar"?"ניסיון נוסף · שאלה דומה":it._retry==="again"?"ניסיון נוסף · השאלה חוזרת":`שאלה ${C.newServed} מתוך ${C.practiceN}`;}
-  if(it._retry&&C.phase!=="review")lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> ${it._retry==="similar"?"קודם זה לא הצליח. הנה שאלה דומה, על אותה מיומנות.":"בואו ננסה שוב את השאלה הזאת. קראו לאט והשתמשו בכלי הבלשי."}</div></div>`;
+  else{tab=it._retry==="easier"?"חיזוק · שאלה קלה יותר":it._retry==="again"?"חיזוק · שאלה באותה רמה":`שאלה ${C.newServed} מתוך ${C.practiceN}`;}
+  if(it._retry&&C.phase==="practice")lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> ${it._retry==="easier"?"קודם זה לא הצליח, וזה בסדר. נתחיל משאלה קלה יותר על אותו כלל.":"ועכשיו שאלה באותה רמה כמו קודם, בניסוח אחר. השתמשו בכלי הבלשי."}</div></div>`;
+  if(it._retry&&C.phase==="judge")lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> בואו ננסה שוב את משימת השיפוט. קראו לאט את הדו״ח.</div></div>`;
   C._tab=tab;
   const lvl=C.phase==="practice"?`<span class="lvl">רמה ${["א","ב","ג"][it.lv-1]}</span>`:"";
   const inner=innerHTML_(it,st,checked);
@@ -961,6 +1036,7 @@ function bindItem(){
   const go_=v=>{C.view=v;renderCase();$("#case").scrollTop=0;};
   const on0=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
   on0("histBack",()=>go_(C.hist.length-1));on0("histPrev",()=>go_(C.view-1));on0("histNext",()=>go_(C.view>=C.hist.length-1?-1:C.view+1));
+  on0("explDone",()=>advance());
   if(C.view>=0)return;
   const it=C.cur;C.state=C.state||{};const st=C.state;
   document.querySelectorAll("#case [data-o]").forEach(b=>b.onclick=()=>{st.sel=+b.dataset.o;renderCase();});
@@ -983,8 +1059,9 @@ function afterCheck(it,sc){
     if(sc<.999&&it.k&&!P.review.some(r=>r.k===it.k))P.review.push({l:C.l.id,k:it.k});
     if(sc>=.999&&it.k)P.review=P.review.filter(r=>r.k!==it.k);
     if(C.phase==="practice"){if(sc>=.999){C.streak++;if(C.streak>=2&&C.level<3){C.level++;C.streak=0;C.lvlMsg="up";}}else{C.streak=0;if(sc<.5&&C.level>1){C.level--;C.lvlMsg="down";}
-      const sk=skill(it);C.fails[sk]=(C.fails[sk]||0)+1;
-      if(C.fails[sk]<=3){C.pending.push({sk,k:it.k,due:C.count+2});C.retryNote="soon";}else C.retryNote="later";}}
+      const sk=skill(it);C.fails[sk]=(C.fails[sk]||0)+1;const inChain=C.queue.some(q=>q.sk===sk);
+      if(!inChain&&C.fails[sk]<=3){const L0=it.lv||C.level;C.queue.unshift({t:"easier",sk,lv:Math.max(1,L0-1),k:it.k},{t:"explain",sk,why:it.why},{t:"again",sk,lv:L0,k:it.k});C.retryNote="soon";}
+      else if(!inChain)C.retryNote="later";}}
     if(C.phase==="judge"&&sc<.999&&!C.judgeRetried){C.judgeRetried=true;C.judgeAgain=true;}
     save();}
   if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);else P.points+=0;save();}
@@ -996,8 +1073,11 @@ function advance(){
   if(C.phase==="review"){nextReview();return;}
 }
 /* skills: a wrong answer brings back a similar question (same skill), or the same one reshuffled */
-const SK={v5:"time",v6:"time",v15:"time",v7:"body",v11:"body",a3:"agree",a6:"agree",a7:"agree",a8:"agree",a13:"agree",a10:"trait",a14:"trait",a15:"trait",a5:"rule",a16:"rule"};
+const SK=Object.assign(SK0,{a18:"trait",a19:"trait",v16:"body",v5:"time",v6:"time",v15:"time",v7:"body",v11:"body",a3:"agree",a6:"agree",a7:"agree",a8:"agree",a13:"agree",a10:"trait",a14:"trait",a15:"trait",a5:"rule",a16:"rule"});
 const skill=it=>SK[it.k]||it.type;
+const TIPS={noun:{_:1},adj:{_:3,agree:2,rule:1,tap:0,trait:"trait"},verb:{_:1,time:2,body:1},sort3:{_:0},nikud:{_:1}};
+const TRAIT={h:"תכונות אופי",html:`<p>תכונת אופי היא שם תואר שמתאר <b>איך אדם מתנהג בדרך כלל</b>.</p><div class="flow"><div><i>1</i>קוראים מה הדמות עושה שוב ושוב.</div><div><i>2</i>שואלים: איזה הוא? איך הוא מתנהג?</div><div><i>3</i>בוחרים את התכונה שמתאימה: לומד הרבה ← שקדן · מחזיר הכול למקום ← מסודר.</div></div>`};
+function tipFor(lid,sk){const m=TIPS[lid]||{_:0};const v=m[sk]!==undefined?m[sk]:m._;if(v==="trait")return TRAIT;return L(lid).teach[v]||L(lid).teach[0];}
 function shuffleArr(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function shuf(it){
   const c={...it};
@@ -1009,14 +1089,15 @@ function shuf(it){
 function serve(it,retry){if(C.cur&&C.state&&C.state.checked)C.hist.push({it:C.cur,st:C.state,tab:C._tab||"",phase:C.cur._phase||C.phase});C.view=-1;C.cur=shuf(it);C.cur._phase=C.phase;C.cur._retry=retry||"";C.state=null;renderCase();$("#case").scrollTop=0;}
 function nextPractice(){
   if(C.lvlMsg){const m=C.lvlMsg;C.lvlMsg=null;flash(m==="up"?`עליתם לרמה ${["א","ב","ג"][C.level-1]}!`:`עוברים לרמה ${["א","ב","ג"][C.level-1]}, עם עוד רמזים`);}
-  // a pending retry that is due (or the queue of new questions is over)
-  let pi=C.pending.findIndex(p=>p.due<=C.count);
-  if(pi<0&&C.newServed>=C.practiceN&&C.pending.length)pi=0;
-  if(pi>=0){const p=C.pending.splice(pi,1)[0];
-    const sim=C.l.pool.filter(i=>!C.used.has(i.k)&&skill(i)===p.sk);
-    let pick=sim.filter(i=>i.lv<=C.level);if(!pick.length)pick=sim;
-    if(pick.length){const it=pick[Math.floor(Math.random()*pick.length)];C.used.add(it.k);serve(it,"similar");}
-    else serve(C.l.pool.find(i=>i.k===p.k),"again");
+  // after a mistake: an easier question on the same rule, a short explanation, then a question at the original level
+  if(C.queue.length){const q=C.queue.shift();
+    if(q.t==="explain"){serve({type:"explain",sk:q.sk,why:q.why},"explain");return;}
+    const same=C.l.pool.filter(i=>!C.used.has(i.k)&&skill(i)===q.sk&&i.k!==q.k);
+    let pick=q.t==="easier"?same.filter(i=>i.lv<=q.lv):same.filter(i=>i.lv===q.lv);
+    if(pick.length&&q.t==="easier"){const top=Math.max(...pick.map(i=>i.lv));pick=pick.filter(i=>i.lv===top);}
+    if(!pick.length)pick=same.filter(i=>i.lv<=q.lv);if(!pick.length)pick=same;
+    if(pick.length){const it=pick[Math.floor(Math.random()*pick.length)];C.used.add(it.k);serve(it,q.t);}
+    else serve(C.l.pool.find(i=>i.k===q.k),q.t);
     return;}
   if(C.newServed>=C.practiceN){C.phase="judge";serve(C.l.judge[0]);return;}
   const pool=C.l.pool.filter(i=>!C.used.has(i.k));
@@ -1027,17 +1108,20 @@ function nextReview(){if(C.idx>=C.list.length){C.phase="result";C.reviewDone=tru
 function flash(t){const d=document.createElement("div");d.className="toast";d.style.position="fixed";d.style.zIndex=50;d.style.top="auto";d.style.bottom="calc(env(safe-area-inset-bottom,0px) + 24px)";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
 function finish(){
   const pct=Math.round(C.score/C.count*100);const l=C.l;const prev=P.solved[l.id];const wasDone=prev&&prev.done;
-  const done=pct>=PASS;P.solved[l.id]={best:Math.max(pct,prev?prev.best:0),done:done||!!wasDone};
-  if(done&&!wasDone)P.points+=50;P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;C.phase="result";renderCase();$("#case").scrollTop=0;
+  const done=pct>=PASS;const wasPerfect=!!(prev&&prev.perfect);const perfect=pct>=100;
+  P.solved[l.id]={best:Math.max(pct,prev?prev.best:0),done:done||!!wasDone,perfect:perfect||wasPerfect};
+  if(done&&!wasDone)P.points+=50;C.newPerfect=perfect&&!wasPerfect;if(C.newPerfect)P.points+=PERFECT_BONUS;P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;C.phase="result";renderCase();$("#case").scrollTop=0;
 }
 function resultHTML(){
   if(C.reviewDone){return `<div class="folder result" data-tab="חזרה"><div class="score">${Math.round(C.score)}/${C.list.length}</div><p>תשובות נכונות בחזרה. שאלות שענית עליהן נכון יצאו מהרשימה.</p><div class="case-actions"><button class="btn primary" id="done">סיום</button></div></div>`;}
-  const l=C.l,ok=C.pct>=PASS;
-  return `<div class="folder result" data-tab="סיכום התיק"><div class="score">${C.pct}%</div><div class="bigstamp ${ok?"":"retry"}">${ok?"פוענח!":"עוד לא"}</div>
+  const l=C.l,ok=C.pct>=PASS;const i=LESSONS.indexOf(l),nx=LESSONS[i+1];
+  const pass=ok?`<div class="passpop"><b>✓ עברתם את ה־${PASS}%!</b>${nx?(C.newDone?`הבית הבא נפתח: ${i+2}. ${nx.building} (${nx.title.split(":")[0]}). אפשר לעבור למשימה הבאה.`:`אפשר לעבור למשימה הבאה: ${nx.building}.`):`זה היה הבית האחרון ברובע. ${gateOpen()?"השער לאזור 2 נפתח!":""}`}</div>`:"";
+  const perf=C.newPerfect?`<div class="perfect"><b>★ מושלם! 100%</b>בונוס של ${PERFECT_BONUS} נקודות. הכוכב יופיע ליד הבית במפה.</div>`:(ok&&C.pct<100&&!(P.solved[l.id]&&P.solved[l.id].perfect)?`<div class="perfect"><b>★ אתגר: 100%</b>מי שמפענח את התיק בלי טעויות מקבל בונוס של ${PERFECT_BONUS} נקודות. אפשר לנסות שוב מתי שרוצים.</div>`:"");
+  return `<div class="folder result" data-tab="סיכום התיק"><div class="score">${C.pct}%</div><div class="bigstamp ${ok?"":"retry"}">${ok?"פוענח!":"עוד לא"}</div>${pass}${perf}
   <p>${ok?(C.newDone?`+50 נקודות על פענוח התיק. כרטיס ״${l.clue.h}״ נוסף למחברת הבלש.`:"כל הכבוד! התיק כבר היה מפוענח, והתרגול נשמר."):`תיק נחשב פוענח מ־${PASS}%. אפשר לנסות שוב עכשיו, והשאלות שטעיתם בהן מחכות גם ב״תיקים פתוחים״.`}</p>
   <p class="muted">רמה בסיום: ${["א","ב","ג"][C.level-1]}</p>
   <div class="sum">${Object.entries(l.sum).map(([k,v])=>`<div><b>${k}?</b>${esc(v)}</div>`).join("")}</div>
-  <div class="case-actions">${ok?"":`<button class="btn soft" id="again">לנסות שוב</button>`}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;
+  <div class="case-actions">${!ok||C.pct<100?`<button class="btn soft" id="again">${ok?"לנסות להגיע ל־100%":"לנסות שוב"}</button>`:""}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;
 }
 
 /* ============ onboarding ============ */
