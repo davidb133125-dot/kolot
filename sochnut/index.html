@@ -117,6 +117,21 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .act{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);width:104px;height:104px;border-radius:50%;background:#2a7a6c;color:#fff;border:4px solid #8fd8c8;font-family:var(--display);font-size:21px;line-height:1.1;padding:6px;box-shadow:0 4px 0 #1b5249}
 .act.left{left:max(22px,env(safe-area-inset-left,0px))}
 .act.right{right:max(22px,env(safe-area-inset-right,0px))}
+.dpad{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:168px;height:168px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);gap:4px;direction:ltr}
+.dpad.left{left:max(14px,env(safe-area-inset-left,0px))}.dpad.right{right:max(14px,env(safe-area-inset-right,0px))}
+.dpad button{border:0;border-radius:12px;background:#fffaf0;color:var(--navy);font-size:22px;box-shadow:0 3px 0 rgba(0,0,0,.25);touch-action:none}
+.dpad button.on{background:var(--brass-soft);transform:translateY(2px);box-shadow:none}
+.dpad [data-d=up]{grid-area:1/2}.dpad [data-d=left]{grid-area:2/1}.dpad [data-d=right]{grid-area:2/3}.dpad [data-d=down]{grid-area:3/2}
+.dpad.big{width:200px;height:200px}
+.gear{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 160px);width:52px;height:52px;border-radius:50%;border:0;background:rgba(25,32,44,.85);color:#fff;font-size:24px}
+.gear.left{left:max(48px,env(safe-area-inset-left,0px))}.gear.right{right:max(48px,env(safe-area-inset-right,0px))}
+.mini{position:absolute;top:calc(env(safe-area-inset-top,0px) + 122px);left:max(10px,env(safe-area-inset-left,0px));width:min(46vw,250px);aspect-ratio:4/3;border-radius:12px;border:3px solid #6fc7b5;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.35);background:#2b4a2a}
+.mini canvas{width:100%;height:100%;display:block}
+.minib{position:absolute;bottom:4px;right:4px;width:34px;height:34px;border-radius:8px;border:0;background:rgba(25,32,44,.85);color:#fff;font-size:18px}
+.minit{position:absolute;top:2px;left:50%;transform:translateX(-50%);background:rgba(25,32,44,.85);color:#fff;border-radius:0 0 6px 6px;padding:0 6px;font-size:12px;font-weight:800}
+.sheet{position:absolute;inset:0;background:rgba(15,20,28,.45);display:flex;align-items:flex-end;z-index:6}
+.sheet-in{background:var(--card);width:100%;border-radius:20px 20px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 18px) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:8px;max-width:640px;margin:0 auto;direction:rtl}
+.sheet-h{display:flex;justify-content:space-between;align-items:center}.sheet-h h3{font-size:24px;color:var(--navy)}
 .toast{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 120px);transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:12px;padding:10px 16px;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:90vw;text-align:center;z-index:3}
 .dlg{position:absolute;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);max-width:640px;margin:0 auto;background:var(--card);border:4px solid #1d2430;border-radius:16px;padding:16px 18px;box-shadow:0 0 0 3px var(--card),0 8px 24px rgba(0,0,0,.35);z-index:4}
 .dlg .who{font-family:var(--display);color:#2a7a6c;font-size:18px}
@@ -331,6 +346,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   </div>
   <button class="compass" id="compass" aria-label="החץ מראה את הדרך ליעד הבא"><svg viewBox="0 0 24 24"><path d="M12 2 19 20 12 16 5 20z" fill="#6fc7b5"/></svg><span>ליעד</span></button>
   <div class="joy left" id="joy"><i id="knob"></i></div>
+  <div class="dpad left" id="dpad" hidden><button data-d="up" aria-label="למעלה">▲</button><button data-d="left" aria-label="שמאלה">◀</button><button data-d="right" aria-label="ימינה">▶</button><button data-d="down" aria-label="למטה">▼</button></div>
+  <button class="gear right" id="gearBtn" aria-label="הגדרות שליטה">⚙</button>
+  <div class="mini" id="mini" hidden><canvas id="minicv"></canvas><button class="minib" id="miniFull" aria-label="מפה מלאה">⤢</button></div>
+  <div class="sheet" id="sheet" hidden><div class="sheet-in"><div class="sheet-h"><h3>הגדרות</h3><button class="xbtn" id="sheetX" aria-label="סגירה" style="background:var(--paper-2);color:var(--ink)">✕</button></div>
+    <b>הליכה</b><div class="seg"><button data-set="ctrl:joy">ג׳ויסטיק</button><button data-set="ctrl:arrows">חיצים</button></div>
+    <b>צד התנועה</b><div class="seg"><button data-set="side:left">שמאל</button><button data-set="side:right">ימין</button></div>
+    <b>גודל</b><div class="seg"><button data-set="big:0">רגיל</button><button data-set="big:1">גדול</button></div>
+    <b>מפה קטנה בפינה</b><div class="seg"><button data-set="mini:1">מוצגת</button><button data-set="mini:0">מוסתרת</button></div>
+    <p class="muted" style="margin:0;font-size:14px">נשמר במכשיר הזה. אפשר לשנות גם במסך ״אני״.</p></div></div>
   <button class="act right" id="actBtn" hidden>כניסה</button>
   <div class="toast" id="toast" hidden></div>
   <div class="dlg" id="dlg" hidden><div class="who" id="dlgWho"></div><p id="dlgText"></p><div class="row" id="dlgBtns"></div></div>
@@ -349,7 +373,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 const KEY="sochnut-v1";
 const ONLINE_MODE=!!window.SOCHNUT_CONFIG;
 const demoNote=()=>ONLINE_MODE?(window.ONLINE_ME?"":"מצב ניסיון: ההתקדמות נשמרת רק בדפדפן הזה."):"גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.";
-const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},settings:{side:"left",big:false},pos:null,teacher:{gate:"auto",unlockAll:false,tts:false},zoneExam:null});
+const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},settings:{side:"left",big:false,ctrl:"joy",mini:true},pos:null,teacher:{gate:"auto",unlockAll:false,tts:false},zoneExam:null});
 let P=fresh();
 function load(){try{const s=localStorage.getItem(KEY);if(s)P=Object.assign(fresh(),JSON.parse(s));}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
@@ -729,6 +753,7 @@ function meHTML(){
   ${window.onlineMeExtra?onlineMeExtra():""}
   <div class="section-title">הגדרות</div>
   <div class="card stack" style="padding-top:12px"><div><b>הג׳ויסטיק בצד</b><div class="seg" style="margin-top:6px"><button id="sideL" aria-pressed="${s.side==="left"}">שמאל</button><button id="sideR" aria-pressed="${s.side==="right"}">ימין</button></div></div>
+   <div><b>הליכה</b><div class="seg" style="margin-top:6px"><button id="ctlJ" aria-pressed="${(s.ctrl||"joy")==="joy"}">ג׳ויסטיק</button><button id="ctlA" aria-pressed="${s.ctrl==="arrows"}">חיצים</button></div></div>
    <div><b>גודל</b><div class="seg" style="margin-top:6px"><button id="sizeN" aria-pressed="${!s.big}">רגיל</button><button id="sizeB" aria-pressed="${s.big}">גדול</button></div></div>
 ${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">מפת מיומנויות, התקדמות בתיקים ו״במילים שלי״, עם תלמידים לדוגמה ועם הנתונים שלכם.</p><button class="btn primary" id="tDash" style="width:100%">לפתוח את לוח המורה</button>
     <button class="btn ghost" id="spNow" style="width:100%;margin-top:8px">להקדים את ״תעלומת היום״ להיום (לבדיקה)</button></div>
@@ -756,7 +781,7 @@ function bindScreen(){
   const mc=$("#meCv");if(mc){const c=mc.getContext("2d");drawChar(c,6,8,coatOf(P.coat),0,1);}
   const set=(k,v)=>{P.settings[k]=v;save();render();};
   if($("#gAuto")){const tset=(k,v)=>{P.teacher[k]=v;save();render();};$("#gAuto").onclick=()=>tset("gate","auto");$("#gOpen").onclick=()=>tset("gate","open");$("#gLock").onclick=()=>tset("gate","locked");$("#oSeq").onclick=()=>tset("unlockAll",false);$("#oAll").onclick=()=>tset("unlockAll",true);$("#tOff").onclick=()=>tset("tts",false);$("#tOn").onclick=()=>tset("tts",true);}
-  if($("#sideL")){$("#sideL").onclick=()=>set("side","left");$("#sideR").onclick=()=>set("side","right");$("#sizeN").onclick=()=>set("big",false);$("#sizeB").onclick=()=>set("big",true);
+  if($("#sideL")){$("#ctlJ").onclick=()=>set("ctrl","joy");$("#ctlA").onclick=()=>set("ctrl","arrows");$("#sideL").onclick=()=>set("side","left");$("#sideR").onclick=()=>set("side","right");$("#sizeN").onclick=()=>set("big",false);$("#sizeB").onclick=()=>set("big",true);
    if($("#resetBtn"))$("#resetBtn").onclick=()=>{$("#resetBox").innerHTML=`<div class="confirm"><b>למחוק את כל ההתקדמות?</b><div class="row" style="margin-top:8px"><button class="btn primary" id="resetYes" style="background:var(--stamp)">כן, למחוק</button><button class="btn soft" id="resetNo">ביטול</button></div></div>`;
     $("#resetYes").onclick=()=>{P=fresh();save();buildMap();startOnboarding();};$("#resetNo").onclick=()=>{$("#resetBox").innerHTML="";};};}
 }
@@ -890,10 +915,15 @@ function openWorld(){
   if(!mapCv)buildMap();
   $("#world").hidden=false;document.body.style.overflow="hidden";
   if(P.pos){pl.x=P.pos.x;pl.y=P.pos.y;}
-  const side=P.settings.side;$("#joy").className="joy "+side+(P.settings.big?" big":"");$("#actBtn").className="act "+(side==="left"?"right":"left");
+  applyControls();
   resize();running=true;last=performance.now();requestAnimationFrame(loop);updateHud();
   if(!P.tutorial){setTimeout(()=>talk(npcs.find(n=>n.id==="chief")),350);}
 }
+function applyControls(){const st=P.settings,side=st.side||"left",other=side==="left"?"right":"left",arrows=st.ctrl==="arrows";
+  $("#joy").className="joy "+side+(st.big?" big":"");$("#joy").hidden=arrows;$("#dpad").className="dpad "+side+(st.big?" big":"");$("#dpad").hidden=!arrows;
+  $("#actBtn").className="act "+other;$("#gearBtn").className="gear "+other;$("#mini").hidden=st.mini===false;
+  document.querySelectorAll("#sheet [data-set]").forEach(b=>{const [k,v]=b.dataset.set.split(":");const cur=k==="big"?(st.big?"1":"0"):k==="mini"?(st.mini===false?"0":"1"):(k==="ctrl"?(st.ctrl||"joy"):st[k]);b.setAttribute("aria-pressed",String(cur===v));});
+  resize();}
 function closeWorld(){running=false;P.pos={x:pl.x,y:pl.y};save();$("#world").hidden=true;document.body.style.overflow="";closeDlg();screen="home";render();}
 $("#exitBtn").addEventListener("click",closeWorld);
 
@@ -907,12 +937,12 @@ function blocked(x,y){const r=.28;for(const[dx,dy]of[[-r,-.05],[r,-.05],[-r,.3],
 
 function loop(now){
   if(!running)return;const dt=Math.min(.05,(now-last)/1000);last=now;t0+=dt;
-  let ix=input.x,iy=input.y;
+  let ix=input.x,iy=input.y;if(dp.left||dp.right||dp.up||dp.down){ix=(dp.right?1:0)-(dp.left?1:0);iy=(dp.down?1:0)-(dp.up?1:0);}
   if(keys.ArrowLeft||keys.a)ix=-1;if(keys.ArrowRight||keys.d)ix=1;if(keys.ArrowUp||keys.w)iy=-1;if(keys.ArrowDown||keys.s)iy=1;
   const mag=Math.hypot(ix,iy);pl.moving=false;
   if(mag>.15&&!dlgOpen&&!mapOpen){const sp=4.2*dt/Math.max(1,mag);const nx=pl.x+ix*sp,ny=pl.y+iy*sp;
     if(!blocked(nx,pl.y))pl.x=nx;if(!blocked(pl.x,ny))pl.y=ny;pl.moving=true;pl.anim+=dt*8;}
-  checkNear();draw();
+  checkNear();draw();drawMini();
   if(toastT>0){toastT-=dt;if(toastT<=0)$("#toast").hidden=true;}
   requestAnimationFrame(loop);
 }
@@ -952,6 +982,25 @@ window.addEventListener("keydown",e=>{if(!$("#case").hidden){caseKey(e);return;}
   if(k.startsWith("Arrow"))e.preventDefault();});
 window.addEventListener("keyup",e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false;});
 
+// settings sheet
+$("#gearBtn").addEventListener("click",()=>{mapOpen=true;$("#sheet").hidden=false;applyControls();});
+const closeSheet=()=>{mapOpen=false;$("#sheet").hidden=true;};
+$("#sheetX").addEventListener("click",closeSheet);$("#sheet").addEventListener("click",e=>{if(e.target.id==="sheet")closeSheet();});
+document.querySelectorAll("#sheet [data-set]").forEach(b=>b.addEventListener("click",()=>{const [k,v]=b.dataset.set.split(":");P.settings[k]=(k==="big"||k==="mini")?v==="1":v;save();applyControls();}));
+// arrows (d-pad)
+const dp={};document.querySelectorAll("#dpad [data-d]").forEach(b=>{const d=b.dataset.d;
+  const on=e=>{e.preventDefault();dp[d]=true;b.classList.add("on");try{b.setPointerCapture(e.pointerId);}catch(_){}};const off=()=>{dp[d]=false;b.classList.remove("on");};
+  b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointercancel",off);b.addEventListener("lostpointercapture",off);b.addEventListener("contextmenu",e=>e.preventDefault());});
+// minimap: stays open while walking
+$("#miniFull").addEventListener("click",toggleMap);
+function drawMini(){const m=$("#mini");if(m.hidden)return;const c=$("#minicv"),r=m.getBoundingClientRect();const w=Math.round(r.width*DPR),h=Math.round(r.height*DPR);if(!w)return;if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+  const x=c.getContext("2d");x.imageSmoothingEnabled=false;const vw=26,vh=vw*h/w;let ox=pl.x-vw/2,oy=pl.y-vh/2;ox=Math.max(0,Math.min(MW-vw,ox));oy=Math.max(0,Math.min(MH-vh,oy));const k=w/vw;
+  x.drawImage(mapCv,ox*T,oy*T,vw*T,vh*T,0,0,w,h);const X=wx=>(wx-ox)*k,Y=wy=>(wy-oy)*k;
+  CLUES.forEach(cl=>{if(P.clues.includes(cl.id))return;x.fillStyle=clueReady(cl)?"#fff8dc":"#9a958a";x.fillRect(X(cl.x+.2),Y(cl.y+.1),k*.6,k*.8);x.strokeStyle="#b8322a";x.lineWidth=Math.max(1,k*.08);x.strokeRect(X(cl.x+.2),Y(cl.y+.1),k*.6,k*.8);});
+  STARS.forEach(st=>{if(P.stars.includes(st.id))return;const cx=X(st.x+.5),cy=Y(st.y+.5),R=k*.55;x.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?R*.45:R;x.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr);}x.closePath();x.fillStyle="#ffd21f";x.fill();x.strokeStyle="#5a3d00";x.lineWidth=Math.max(1,k*.1);x.stroke();});
+  buildings.forEach(b=>{if(!b.lesson)return;const l=L(b.lesson),i=LESSONS.indexOf(l),d=isDone(l),u=unlocked(l);const cx=X(b.x+b.w/2),cy=Y(b.y+b.h/2);x.beginPath();x.arc(cx,cy,k*.8,0,7);x.fillStyle=d?"#2f7d4f":u?"#22344f":"#7a6f5c";x.fill();x.fillStyle="#fff";x.font=`bold ${Math.round(k)}px Assistant,sans-serif`;x.textAlign="center";x.textBaseline="middle";x.fillText(d?"✓":String(i+1),cx,cy+1);});
+  const tg=target();const pulse=1+.25*Math.sin(t0*5);x.beginPath();x.arc(X(tg.x),Y(tg.y),k*.9*pulse,0,7);x.strokeStyle="#6fc7b5";x.lineWidth=Math.max(2,k*.18);x.stroke();
+  x.beginPath();x.arc(X(pl.x),Y(pl.y),k*.55,0,7);x.fillStyle="#d9534f";x.fill();x.strokeStyle="#fff";x.lineWidth=Math.max(1.5,k*.15);x.stroke();}
 // joystick
 (function(){const j=$("#joy"),kn=$("#knob");let id=null,cx=0,cy=0;
   const upd=(x,y)=>{const R=j.offsetWidth/2-20;let dx=x-cx,dy=y-cy;const d=Math.hypot(dx,dy);if(d>R){dx*=R/d;dy*=R/d;}kn.style.transform=`translate(${dx}px,${dy}px)`;input.x=dx/R;input.y=dy/R;};
@@ -1091,7 +1140,7 @@ function toggleMap(){mapOpen=!mapOpen;$("#mapov").hidden=!mapOpen;if(mapOpen){co
     return `<button class="mlrow ${u?"":"locked"}" data-nav="${l.id}" ${u?"":"disabled"}><span class="mln ${d?"d":u?"u":""}">${d?"✓":i+1}</span><span class="mlt"><b>${l.building}</b><small>${l.title.split(":")[0]}</small></span>${st}</button>`;}).join("");
   document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>{P.navTo=b.dataset.nav;save();toggleMap();updateHud();toast(`החץ מוביל עכשיו אל ${L(b.dataset.nav).building}`);});}}
 $("#compass").addEventListener("click",()=>toast(`החץ הירוק מצביע אל: ${target().name}. לכו בכיוון שלו.`));
-$("#mapBtn").addEventListener("click",toggleMap);$("#nbBtn").addEventListener("click",openNotebook);$("#nbClose").addEventListener("click",closeNotebook);$("#mapClose").addEventListener("click",toggleMap);
+$("#mapBtn").addEventListener("click",()=>{P.settings.mini=P.settings.mini===false;save();applyControls();if(P.settings.mini)toast("המפה הקטנה פתוחה. אפשר להמשיך ללכת. ⤢ פותח את המפה המלאה.");});$("#nbBtn").addEventListener("click",openNotebook);$("#nbClose").addEventListener("click",closeNotebook);$("#mapClose").addEventListener("click",toggleMap);
 
 /* ============ case file (lesson engine) ============ */
 function caseKey(e){
