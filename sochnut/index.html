@@ -755,7 +755,7 @@ async function fillBoard(){const box=$("#boardBox");if(!box)return;let rows,demo
   if(!$("#boardBox"))return;$("#boardBox").innerHTML=`${demo?`<p class="demonote" style="margin-bottom:10px">בגרסת ההדגמה שאר התלמידים הם לדוגמה. במשחק המחובר יופיעו כאן חברי הכיתה.</p>`:""}<div class="stack" style="padding:0">${boardHTML(rows,"week","השבוע","נקודות שנצברו מיום ראשון")}${boardHTML(rows,"points","כל הזמנים","כל הנקודות")}</div>`;}
 /* shop */
 function shopHTML(){return `<div class="wrap stack"><button class="btn ghost mini" data-back="1" style="align-self:flex-start">→ חזרה</button><h2 style="font-size:28px;color:var(--navy)">החנות של הסוכנות</h2>
-  <p style="margin:0">כל נקודה היא גם מטבע. צוברים מטבעות מהלמידה עצמה, וקונים כאן מראה חדש לבלש. הקניות הן למראה בלבד: הן לא משנות ציון ולא עוזרות בתיקים, והדרגה לא יורדת כשקונים.</p>
+  <p style="margin:0">כל נקודה היא גם מטבע. צוברים מטבעות מהלמידה עצמה, וקונים כאן מראה חדש לבלש. הקניות הן למראה בלבד: הן לא משנות ציון ולא עוזרות בתיקים, והדרגה לא יורדת כשקונים. המעיל נשאר תמיד בצבע שבחרתם, והדמות מוסיפה לו כובע, אביזרים וסגנון.</p>
   <div class="card" style="display:flex;align-items:center;gap:12px;background:var(--brass-soft)"><span class="coin big">${coins()}</span><div><b>מטבעות</b><div class="muted" style="font-size:14px">נצברו ${P.points} · הוצאו ${P.spent||0}</div></div></div>
   <div class="section-title">מראה הבלש בעולם</div><div class="shop">${OUTFITS.map(o=>{const own=(P.owned||["o0"]).includes(o.id),wear=(P.outfit||"o0")===o.id,miss=o.price-coins();
     return `<div class="item ${wear?"wear":""}"><canvas data-oc="${o.id}" width="12" height="16"></canvas><b>${o.name}</b><small>${o.desc}</small>${wear?`<span class="pill ok">✓ לובשים עכשיו</span>`:own?`<button class="btn soft mini" data-wear="${o.id}">ללבוש</button>`:miss>0?`<button class="btn soft mini" disabled>${o.price} מטבעות</button><small class="muted">חסרים ${miss}</small>`:`<button class="btn primary mini" data-buy="${o.id}">לקנות · ${o.price}</button>`}</div>`;}).join("")}</div></div>`;}
@@ -810,6 +810,7 @@ function meHTML(){
   ${window.onlineMeExtra?onlineMeExtra():""}
   <div class="section-title">הגדרות</div>
   <div class="card stack" style="padding-top:12px"><div><b>הג׳ויסטיק בצד</b><div class="seg" style="margin-top:6px"><button id="sideL" aria-pressed="${s.side==="left"}">שמאל</button><button id="sideR" aria-pressed="${s.side==="right"}">ימין</button></div></div>
+   <div><b>צבע המעיל</b><div class="coats" style="margin-top:6px">${COATS.map((c,i)=>`<button class="coat" data-coat="${i}" aria-pressed="${i===P.coat}" aria-label="מעיל ${i+1}"><canvas data-cc="${i}" width="12" height="16"></canvas></button>`).join("")}</div></div>
    <div><b>הליכה</b><div class="seg" style="margin-top:6px"><button id="ctlJ" aria-pressed="${(s.ctrl||"joy")==="joy"}">ג׳ויסטיק</button><button id="ctlA" aria-pressed="${s.ctrl==="arrows"}">חיצים</button></div></div>
    <div><b>גודל</b><div class="seg" style="margin-top:6px"><button id="sizeN" aria-pressed="${!s.big}">רגיל</button><button id="sizeB" aria-pressed="${s.big}">גדול</button></div></div>
 ${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">מפת מיומנויות, התקדמות בתיקים ו״במילים שלי״, עם תלמידים לדוגמה ועם הנתונים שלכם.</p><button class="btn primary" id="tDash" style="width:100%">לפתוח את לוח המורה</button>
@@ -823,8 +824,10 @@ ${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה
   <p class="demo">${demoNote()}</p></div>`;
 }
 function bindScreen(){
+  document.querySelectorAll("canvas[data-cc]").forEach(c=>{const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,outfitCol(P.outfit,+c.dataset.cc),0,1);});
+  document.querySelectorAll("[data-coat]").forEach(b=>b.onclick=()=>{P.coat=+b.dataset.coat;save();render();});
   document.querySelectorAll("[data-back]").forEach(b=>b.addEventListener("click",()=>go(prevScreen&&prevScreen!==screen?prevScreen:"home")));
-  document.querySelectorAll("canvas[data-oc]").forEach(c=>{const o=OUTFITS.find(x=>x.id===c.dataset.oc);const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,o.col?{...coatOf(P.coat),...o.col}:coatOf(P.coat),0,1);});
+  document.querySelectorAll("canvas[data-oc]").forEach(c=>{const o=OUTFITS.find(x=>x.id===c.dataset.oc);const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,outfitCol(o.id,P.coat),0,1);});
   document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const o=OUTFITS.find(x=>x.id===b.dataset.buy);if(coins()<o.price)return;P.spent=(P.spent||0)+o.price;P.owned=[...(P.owned||["o0"]),o.id];P.outfit=o.id;save();flash(`קניתם: ${o.name}! הבלש לובש אותו עכשיו.`);render();});
   document.querySelectorAll("[data-wear]").forEach(b=>b.onclick=()=>{P.outfit=b.dataset.wear;save();render();});
   if($("#zGo"))$("#zGo").onclick=openZoneExam;
@@ -848,12 +851,13 @@ function bindScreen(){
 }
 const OUTFITS=[
  {id:"o0",name:"בלש מתלמד",desc:"המעיל שאיתו מצטרפים לסוכנות.",price:0},
- {id:"o1",name:"חוקר בגשם",desc:"מעיל גשם ירוק־זית. שום רמז לא נשטף.",price:30,col:{hat:"#3a3a2a",band:"#2b2b20",coat:"#5b6b3a",coatD:"#46532c",pants:"#2f3440"}},
- {id:"o2",name:"סוכן חשאי",desc:"חליפה שחורה וסרט אדום. אף אחד לא שם לב.",price:60,col:{hat:"#111111",band:"#b8322a",coat:"#1f2430",coatD:"#151922",pants:"#1a1d24"}},
- {id:"o3",name:"שומר הארכיון",desc:"מעיל חום עם כפתורי נחושת, מהספרייה העתיקה.",price:90,col:{hat:"#4a3020",band:"#c08a2d",coat:"#7a5230",coatD:"#5e3e22",pants:"#3a2e24"}},
- {id:"o4",name:"קצין המילון",desc:"מדים כחולים וסרט זהב. יודע כל ערך.",price:130,col:{hat:"#22344f",band:"#f4c26b",coat:"#2f5d8a",coatD:"#244a6e",pants:"#22344f"}},
- {id:"o5",name:"מפקד הסוכנות",desc:"המעיל של המפקד עצמו. רק לבלשים הוותיקים.",price:200,col:{hat:"#16243a",band:"#f4c26b",coat:"#22344f",coatD:"#16243a",pants:"#16243a",boots:"#3a2618"}}];
-function playerCol(){const o=OUTFITS.find(x=>x.id===P.outfit);const base=coatOf(P.coat);return o&&o.col?{...base,...o.col}:base;}
+ {id:"o1",name:"חוקר בגשם",desc:"כובע רחב וצווארון מורם. שום רמז לא נשטף בגשם.",price:30,col:{hat:"#3a3a2a",band:"#2b2b20",boots:"#4a3020",acc:["collar"],accent:"#2b2b20"}},
+ {id:"o2",name:"סוכן חשאי",desc:"משקפי שמש, עניבה וכובע שחור. אף אחד לא שם לב.",price:60,col:{hat:"#111111",band:"#b8322a",pants:"#1a1d24",acc:["shades","tie"],accent:"#b8322a"}},
+ {id:"o3",name:"שומר הארכיון",desc:"משקפי קריאה וצעיף נחושת, מהספרייה העתיקה.",price:90,col:{hat:"#4a3020",band:"#c08a2d",pants:"#3a2e24",acc:["glasses","scarf"],accent:"#c08a2d"}},
+ {id:"o4",name:"קצין המילון",desc:"תג זהב וחגורה עם אבזם. יודע כל ערך.",price:130,col:{hat:"#22344f",band:"#f4c26b",pants:"#22344f",acc:["badge","belt"],accent:"#f4c26b"}},
+ {id:"o5",name:"מפקד הסוכנות",desc:"כותפות, תג ועניבה מזהב. רק לבלשים הוותיקים.",price:200,col:{hat:"#16243a",band:"#f4c26b",pants:"#16243a",boots:"#3a2618",acc:["epaulets","badge","tie"],accent:"#f4c26b"}}];
+function outfitCol(id,coat){const o=OUTFITS.find(x=>x.id===id);const base=coatOf(coat);return o&&o.col?{...base,...o.col}:base;}
+function playerCol(){return outfitCol(P.outfit,P.coat);}
 function coatOf(i){const c=COATS[i]||COATS[0];return{hat:"#2b2320",band:"#7a2a22",skin:"#f1c9a0",coat:c[0],coatD:c[1],pants:"#2f3440",boots:"#1c1c1c"};}
 
 /* ============ pixel art ============ */
@@ -958,6 +962,16 @@ function drawChar(c,x,y,col,frame,s){
   s=s||1;const P_=["...hhhhhh...","..hhhhhhhh..","..HHHHHHHH..","hhhhhhhhhhhh","...ssssss...","...sesses...","...ssssss...","..cccccccc..",".cccCccCccc.",".ccccCCcccc.",".scccCCcccs.","..cccccccc..","..pppppppp..",frame?"..pp...pp...":"...pp..pp...",frame?"..pp...pp...":"...pp..pp...",frame?"..bb...bb...":"...bb..bb..."];
   const m={h:col.hat,H:col.band,s:col.skin,e:"#1d1d1d",c:col.coat,C:col.coatD,p:col.pants,b:col.boots};
   for(let r=0;r<16;r++)for(let k=0;k<12;k++){const ch=P_[r][k];if(ch!=="."){c.fillStyle=m[ch];c.fillRect(x+k*s,y+r*s,s,s);}}
+  if(col.acc){const a=col.accent||"#f4c26b",d=(k,r,w,h,cl)=>{c.fillStyle=cl;c.fillRect(x+k*s,y+r*s,w*s,h*s);};
+    col.acc.forEach(t=>{
+      if(t==="tie"){d(5,7,2,1,a);d(5,8,2,2,a);d(5,10,2,1,col.coatD);}
+      if(t==="shades"){d(3,5,3,1,"#111");d(6,5,3,1,"#111");}
+      if(t==="glasses"){d(3,5,6,1,"#c9a26b");d(4,5,1,1,"#1d1d1d");d(7,5,1,1,"#1d1d1d");}
+      if(t==="scarf"){d(2,7,8,1,a);d(7,8,1,2,a);}
+      if(t==="badge"){d(3,8,1,1,a);d(3,9,1,1,"#c08a2d");}
+      if(t==="belt"){d(2,11,8,1,"#2b2320");d(5,11,2,1,a);}
+      if(t==="epaulets"){d(1,8,2,1,a);d(9,8,2,1,a);}
+      if(t==="collar"){d(2,7,1,1,a);d(9,7,1,1,a);d(1,8,1,1,a);d(10,8,1,1,a);}});}
 }
 function npcCol(n){return{hat:"#2b2320",band:"#3a3a3a",skin:"#e8bf96",coat:n.colors[0],coatD:n.colors[1],pants:"#33363f",boots:"#1c1c1c"};}
 
@@ -1519,7 +1533,7 @@ function startOnboarding(){
   const o=$("#onb");o.hidden=false;let coat=P.coat||0;
   const draw=()=>{o.innerHTML=`<div class="wrap"><div><div class="eyebrow" style="color:#f4c26b">רובע המילים · תיק ראשון</div><h2>סוכנות הבלשים</h2><p style="margin:6px 0 0;color:#dfe7f3;font-size:18px">פותרים תעלומות בלשון: מוצאים רמזים, מתקנים גשרים ומפענחים תיקים.</p></div>
   <div class="card stack"><div><label for="nameInput">איך קוראים לבלש?</label><input id="nameInput" maxlength="20" autocomplete="off" value="${esc(P.name)}" placeholder="השם שלך"></div>
-  <div><label>צבע המעיל</label><div class="coats">${COATS.map((c,i)=>`<button class="coat" data-c="${i}" aria-pressed="${i===coat}" aria-label="מעיל ${i+1}"><canvas width="12" height="16"></canvas></button>`).join("")}</div></div>
+  <div><label>צבע המעיל</label><p class="muted" style="margin:-2px 0 8px;font-size:15px">זה הצבע האישי של הבלש שלכם. הוא נשאר גם בדמויות שתקנו בחנות.</p><div class="coats">${COATS.map((c,i)=>`<button class="coat" data-c="${i}" aria-pressed="${i===coat}" aria-label="מעיל ${i+1}"><canvas width="12" height="16"></canvas></button>`).join("")}</div></div>
   <button class="btn primary" id="startBtn" style="width:100%">להצטרף לסוכנות ▶</button><p class="demo" style="margin:0">גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.</p></div></div>`;
    o.querySelectorAll(".coat canvas").forEach((c,i)=>drawChar(c.getContext("2d"),0,0,coatOf(i),0,1));
    o.querySelectorAll(".coat").forEach(b=>b.onclick=()=>{P.name=$("#nameInput").value;coat=+b.dataset.c;draw();});
