@@ -344,7 +344,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="brand-badge" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f4c26b" stroke-width="2.4" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5 20 20"/></svg></div>
       <h1>סוכנות הבלשים</h1>
     </div>
-    <div style="display:flex;gap:8px;align-items:center"><button class="bell" id="bellBtn" aria-label="הכיתה והציון שלי"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="avatar" id="avatarBtn" aria-label="הפרופיל שלי">ב</button></div>
+    <div style="display:flex;gap:8px;align-items:center"><button class="bell" id="bellBtn" aria-label="טבלת הכיתה" title="טבלת הכיתה"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6M10 17h4"/></svg></button><button class="avatar" id="avatarBtn" aria-label="הפרופיל שלי">ב</button></div>
   </div></header>
   <main id="screen"></main>
   <nav class="nav" aria-label="ניווט ראשי"><div class="nav-in" style="grid-template-columns:repeat(5,1fr)">
@@ -744,7 +744,7 @@ const DEMO_CLASS=[["אריאל",118],["יוסף",96],["נועם",74],["איתי"
 function boardHTML(rows,key,title,sub){const me=rows.find(r=>r.me);const sorted=rows.slice().sort((a,b)=>b[key]-a[key]);const top=sorted.slice(0,5),myRank=sorted.indexOf(me)+1;
   const row=(r,i)=>`<li class="${r.me?"me":""}"><span class="rk r${i+1}">${i+1}</span><b>${esc(r.name)}${r.me?" (אני)":""}</b><span class="pts">${r[key]}</span></li>`;
   return `<div class="card"><b style="font-family:var(--display);font-weight:400;font-size:22px;color:var(--navy)">${title}</b><div class="muted" style="font-size:14px">${sub}</div><ol class="board">${top.map(row).join("")}${me&&myRank>5?`<li class="sep"></li>${row(me,myRank-1)}`:""}</ol></div>`;}
-function classHTML(){return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">🔔 הכיתה</h2>
+function classHTML(){return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">🏆 טבלת הכיתה</h2>
   <p style="margin:0">מי צבר הכי הרבה נקודות. טבלת השבוע מתחילה מאפס בכל יום ראשון, כך שכל אחד יכול להוביל.</p>
   <div id="boardBox"><p class="muted">טוען…</p></div>
 </div>`;}
@@ -803,7 +803,7 @@ function meHTML(){
    <div class="stamps" style="margin:14px 0">${["א","ב","ג","ד","ה","ו"].map((h,i)=>`<span class="stampc ${i===0&&z1?"on":""}">${h}</span>`).join("")}</div>
    <div style="background:var(--brass-soft);border-radius:12px;padding:12px;text-align:right"><div style="display:flex;justify-content:space-between;font-weight:800"><span style="font-family:var(--display);font-weight:400;font-size:20px;color:#6b4a12">${r.name}</span><span>${P.points} נקודות</span></div>
    <div class="bar" style="margin:8px 0"><i style="width:${pct}%"></i></div><small class="muted">${r.next?`עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:"הדרגה הגבוהה ביותר!"} · נקודות על תשובות נכונות, תיקים שפוענחו ורמזים</small></div></div>
-  <div class="card coinscard"><div class="ctop"><div><b>מטבעות</b><div class="muted" style="font-size:14px">לקניית מראה חדש לבלש</div></div><span class="coin big">${coins()}</span></div><div class="cbtns"><button class="btn primary" data-go2="shop">🛒 לחנות</button><button class="btn soft" data-go2="class">🔔 טבלת הכיתה</button></div></div>
+  <div class="card coinscard"><div class="ctop"><div><b>מטבעות</b><div class="muted" style="font-size:14px">לקניית מראה חדש לבלש</div></div><span class="coin big">${coins()}</span></div><div class="cbtns"><button class="btn primary" data-go2="shop">🛒 לחנות</button><button class="btn soft" data-go2="class">🏆 טבלת הכיתה</button></div></div>
   <div class="section-title">הציון שלי</div>${gradesHTML()}
   <div class="section-title">מחברת הבלש</div>
   ${notebookHTML()}<div style="display:none">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.src)} · ${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<CLUES.length+LESSONS.length?`<div class="note empty">כרטיסי תזכורת: דפי רמז שמוצאים בעולם, וכרטיס על כל תיק שמפענחים. נאספו ${notes.length} מתוך ${CLUES.length+LESSONS.length}.</div>`:""}</div>
