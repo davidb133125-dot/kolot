@@ -35,6 +35,8 @@ do $$ begin
   end if;
 end $$;
 
+alter table public.profiles add column if not exists tts boolean not null default false;  -- הקראה בקול לתלמיד
+
 create table if not exists public.progress (
   user_id     uuid primary key references public.profiles(id) on delete cascade,
   data        jsonb not null default '{}'::jsonb,
@@ -198,6 +200,15 @@ begin
   update public.profiles set gate_mode = p_gate, unlock_all = p_unlock where id = p_user;
 end $$;
 
+create or replace function public.set_student_tts(p_user uuid, p_on boolean)
+returns void language plpgsql security definer set search_path = '' as $$
+declare v_class uuid;
+begin
+  select class_id into v_class from public.profiles where id = p_user and role = 'student';
+  if not (public.my_role() = 'admin' or public.teaches(v_class)) then raise exception 'אין הרשאה לתלמיד הזה'; end if;
+  update public.profiles set tts = coalesce(p_on, false) where id = p_user;
+end $$;
+
 -- ---------- מי רשאי להפעיל מה ----------
 revoke execute on function public._create_user(text,text,text,uuid,text) from public, anon, authenticated;
 revoke execute on function public.bootstrap_admin(text,text,text)          from public, anon, authenticated;
@@ -215,6 +226,8 @@ grant execute on function public.admin_save_class(uuid,text,text,uuid)     to au
 grant execute on function public.admin_delete_class(uuid)                  to authenticated;
 grant execute on function public.set_class_settings(uuid,text,boolean)     to authenticated;
 grant execute on function public.set_student_settings(uuid,text,boolean)   to authenticated;
+revoke execute on function public.set_student_tts(uuid,boolean)            from public, anon;
+grant execute on function public.set_student_tts(uuid,boolean)             to authenticated;
 
 -- =====================================================================
 --  שלב אחרון: יצירת חשבון המנהל הראשון (שלכם).

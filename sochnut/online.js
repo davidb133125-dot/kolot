@@ -53,8 +53,8 @@ async function loadStudent(){
 }
 async function loadSettings(){
   let c=null;if(me.class_id){const r=await sb.from("classes").select("name,gate_mode,unlock_all").eq("id",me.class_id).maybeSingle();c=r.data;}
-  const {data:p}=await sb.from("profiles").select("gate_mode,unlock_all").eq("id",me.id).single();
-  cls=c;P.teacher={gate:(p&&p.gate_mode)||(c&&c.gate_mode)||"auto",unlockAll:(p&&p.unlock_all!=null)?p.unlock_all:!!(c&&c.unlock_all)};
+  const {data:p}=await sb.from("profiles").select("gate_mode,unlock_all,tts").eq("id",me.id).single();
+  cls=c;P.teacher={gate:(p&&p.gate_mode)||(c&&c.gate_mode)||"auto",unlockAll:(p&&p.unlock_all!=null)?p.unlock_all:!!(c&&c.unlock_all),tts:!!(p&&p.tts)};
 }
 document.addEventListener("visibilitychange",()=>{if(!me||me.role!=="student")return;if(document.hidden)pushNow();else loadSettings().then(()=>{if(!document.getElementById("world").hidden)updateHud();else render();});});
 window.addEventListener("pagehide",()=>{if(me&&me.role==="student")pushNow();});
@@ -95,13 +95,13 @@ async function renderDash(){
   const {data:classes,error}=await sb.from("classes").select("*").order("name");if(error)throw error;
   if(!classes.length){body.innerHTML=`<div class="card"><p style="margin:0">${me.role==="admin"?"עוד אין כיתות. צרו כיתה בלשונית ״ניהול״.":"עוד לא שויכה אליכם כיתה. פנו למנהל."}</p></div>`;return;}
   if(!dashClass||!classes.some(c=>c.id===dashClass))dashClass=classes[0].id;const c=classes.find(x=>x.id===dashClass);
-  const {data:studs}=await sb.from("profiles").select("id,full_name,username,gate_mode,unlock_all").eq("class_id",c.id).eq("role","student").order("full_name");
+  const {data:studs}=await sb.from("profiles").select("id,full_name,username,gate_mode,unlock_all,tts").eq("class_id",c.id).eq("role","student").order("full_name");
   const ids=(studs||[]).map(x=>x.id);let prog=[];if(ids.length){const r=await sb.from("progress").select("user_id,data,updated_at").in("user_id",ids);prog=r.data||[];}
   const pm=Object.fromEntries(prog.map(p=>[p.user_id,p]));const cols=skillCols();
   const rows=(studs||[]).map(st=>{const d=(pm[st.id]||{}).data||{};const sk={},cases={},words={};
     Object.entries(d.skill||{}).forEach(([k,r])=>{if(r.n)sk[k]=Math.round(r.s/r.n*100);});LESSONS.forEach(l=>{if(d.solved&&d.solved[l.id])cases[l.id]=d.solved[l.id];});
     Object.entries(d.words||{}).forEach(([k,v])=>{if(v&&v.length)words[k]=v[v.length-1].t;});
-    return{st,sk,cases,words,pts:d.points||0,last:(pm[st.id]||{}).updated_at,solvedN:LESSONS.filter(l=>d.solved&&d.solved[l.id]&&d.solved[l.id].done).length};});
+    return{st,sk,cases,words,zx:d.zoneExam||null,pts:d.points||0,last:(pm[st.id]||{}).updated_at,solvedN:LESSONS.filter(l=>d.solved&&d.solved[l.id]&&d.solved[l.id].done).length};});
   const avg=cols.map(col=>{const v=rows.map(x=>x.sk[col.l+":"+col.sk]).filter(v=>v!=null);return{col,a:v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null,n:v.length};}).filter(x=>x.a!=null).sort((a,b)=>a.a-b.a);
   const ago=t=>{if(!t)return "עוד לא נכנס";const m=Math.round((Date.now()-new Date(t))/60000);return m<60?`לפני ${Math.max(1,m)} דק׳`:m<1440?`לפני ${Math.round(m/60)} שע׳`:`לפני ${Math.round(m/1440)} ימים`;};
   const caseCell=v=>v==null?`<td class="hc none">—</td>`:`<td class="hc ${v.done?"g":v.best>=60?"y":"r"}">${v.perfect?"★ ":""}${v.best}%${v.done?"":" ✗"}</td>`;
@@ -112,14 +112,14 @@ async function renderDash(){
   <div class="section-title">קצב הכיתה</div><div class="card stack" style="padding-top:12px">
    <div><b>השער לאזור 2</b><div class="seg" style="margin-top:6px">${["auto","open","locked"].map(g=>`<button data-cg="${g}" aria-pressed="${c.gate_mode===g}">${{auto:"אוטומטי (אחרי כל הבתים)",open:"פתוח לכולם",locked:"נעול לכולם"}[g]}</button>`).join("")}</div></div>
    <div><b>סדר הבתים</b><div class="seg" style="margin-top:6px"><button data-cu="0" aria-pressed="${!c.unlock_all}">סדר מחייב</button><button data-cu="1" aria-pressed="${c.unlock_all}">פתיחה חופשית</button></div>
-   <p class="muted" style="margin:6px 0 0;font-size:14px">״סדר מחייב״: כל בית נפתח אחרי הקודם. ״פתיחה חופשית״: כל הבתים פתוחים, למשל לחזרה לפני מבחן. אפשר לקבוע חריגה לתלמיד מסוים בטבלה למטה.</p></div></div>
-  <div class="section-title">התקדמות בתיקים</div><div class="tscroll"><table class="htable"><tr><th>תלמיד</th><th>נכנס</th><th>תיקים</th><th>נקודות</th>${LESSONS.map((l,i)=>`<th>${i+1}. ${l.title.split(":")[0]}</th>`).join("")}</tr>
-   ${rows.map(x=>`<tr><th>${esc(x.st.full_name)}</th><td class="muted">${ago(x.last)}</td><td>${x.solvedN}/${LESSONS.length}</td><td>${x.pts}</td>${LESSONS.map(l=>caseCell(x.cases[l.id])).join("")}</tr>`).join("")||`<tr><td colspan="9">אין עדיין תלמידים בכיתה.</td></tr>`}</table></div>
+   <p class="muted" style="margin:6px 0 0;font-size:14px">״אוטומטי״: השער נפתח אחרי שהתלמיד מפענח את כל הבתים ועובר את מבחן הכניסה לשלב הבא. ״סדר מחייב״: כל בית נפתח אחרי הקודם. ״פתיחה חופשית״: כל הבתים פתוחים, למשל לחזרה לפני מבחן. אפשר לקבוע חריגה לתלמיד מסוים בטבלה למטה.</p></div></div>
+  <div class="section-title">התקדמות בתיקים</div><div class="tscroll"><table class="htable"><tr><th>תלמיד</th><th>נכנס</th><th>תיקים</th><th>נקודות</th><th>מבחן מעבר</th>${LESSONS.map((l,i)=>`<th>${i+1}. ${l.title.split(":")[0]}</th>`).join("")}</tr>
+   ${rows.map(x=>`<tr><th>${esc(x.st.full_name)}</th><td class="muted">${ago(x.last)}</td><td>${x.solvedN}/${LESSONS.length}</td><td>${x.pts}</td>${x.zx?`<td class="hc ${x.zx.passed?"g":"r"}">${x.zx.passed?"עבר":"עוד לא"} · ${x.zx.best}%</td>`:`<td class="hc none">—</td>`}${LESSONS.map(l=>caseCell(x.cases[l.id])).join("")}</tr>`).join("")||`<tr><td colspan="10">אין עדיין תלמידים בכיתה.</td></tr>`}</table></div>
   <div class="section-title">מפת מיומנויות</div><p class="muted" style="margin:0;font-size:14px">ירוק — 80% ומעלה, צהוב — 60–79%, אדום — מתחת ל־60%.</p>
   <div class="tscroll"><table class="htable"><tr><th>תלמיד</th>${cols.map(col=>`<th><small>${L(col.l).title.split(":")[0]}</small>${col.h}</th>`).join("")}</tr>${rows.map(x=>`<tr><th>${esc(x.st.full_name)}</th>${cols.map(col=>heat(x.sk[col.l+":"+col.sk]??null)).join("")}</tr>`).join("")}</table></div>
   <div class="section-title">במילים שלי</div><div class="list">${rows.flatMap(x=>Object.entries(x.words).map(([lid,t])=>`<div class="li" style="display:block"><b>${esc(x.st.full_name)}</b> · <small class="muted">${L(lid)?L(lid).title.split(":")[0]:lid}</small><p style="margin:4px 0 0">״${esc(t)}״</p></div>`)).join("")||`<p class="muted">עוד אין תשובות.</p>`}</div>
-  <div class="section-title">תלמידים: חריגות וסיסמאות</div><div class="tscroll"><table class="htable"><tr><th>תלמיד</th><th>שם משתמש</th><th>שער לאזור 2</th><th>סדר הבתים</th><th>סיסמה</th></tr>
-   ${rows.map(x=>`<tr><th>${esc(x.st.full_name)}</th><td dir="ltr">${esc(x.st.username)}</td><td>${gsel(x.st.id,x.st.gate_mode,true)}</td><td><select data-u="${x.st.id}"><option value="" ${x.st.unlock_all==null?"selected":""}>כמו הכיתה</option><option value="0" ${x.st.unlock_all===false?"selected":""}>סדר מחייב</option><option value="1" ${x.st.unlock_all===true?"selected":""}>פתיחה חופשית</option></select></td><td><button class="btn soft mini" data-rp="${x.st.id}" data-nm="${esc(x.st.full_name)}">איפוס</button></td></tr>`).join("")}</table></div>`;
+  <div class="section-title">תלמידים: חריגות וסיסמאות</div><div class="tscroll"><table class="htable"><tr><th>תלמיד</th><th>שם משתמש</th><th>הקראה 🔊</th><th>שער לאזור 2</th><th>סדר הבתים</th><th>סיסמה</th></tr>
+   ${rows.map(x=>`<tr><th>${esc(x.st.full_name)}</th><td dir="ltr">${esc(x.st.username)}</td><td><label class="ttsl"><input type="checkbox" data-tts="${x.st.id}" ${x.st.tts?"checked":""}> ${x.st.tts?"מופעלת":"כבויה"}</label></td><td>${gsel(x.st.id,x.st.gate_mode,true)}</td><td><select data-u="${x.st.id}"><option value="" ${x.st.unlock_all==null?"selected":""}>כמו הכיתה</option><option value="0" ${x.st.unlock_all===false?"selected":""}>סדר מחייב</option><option value="1" ${x.st.unlock_all===true?"selected":""}>פתיחה חופשית</option></select></td><td><button class="btn soft mini" data-rp="${x.st.id}" data-nm="${esc(x.st.full_name)}">איפוס</button></td></tr>`).join("")}</table></div>`;
   const sel=document.getElementById("dashSel");if(sel)sel.onchange=()=>{dashClass=sel.value;renderStaff();};
   const setC=async(g,u)=>{const {error}=await sb.rpc("set_class_settings",{p_class:c.id,p_gate:g,p_unlock:u});flashMsg=error?errMsg(error):"ההגדרה נשמרה. התלמידים יראו אותה בכניסה הבאה למשחק.";renderStaff();};
   body.querySelectorAll("[data-cg]").forEach(b=>b.onclick=()=>setC(b.dataset.cg,c.unlock_all));
@@ -129,6 +129,8 @@ async function renderDash(){
   body.querySelectorAll("[data-g],[data-u]").forEach(x=>x.onchange=()=>setS(x.dataset.g||x.dataset.u));
   body.querySelectorAll("[data-rp]").forEach(b=>b.onclick=async()=>{const np=genPass();const {error}=await sb.rpc("reset_password",{p_user:b.dataset.rp,p_password:np});
     flashMsg=error?errMsg(error):`הסיסמה החדשה של ${b.dataset.nm}: ${np}`;renderStaff();});
+  body.querySelectorAll("[data-tts]").forEach(x=>x.onchange=async()=>{const {error}=await sb.rpc("set_student_tts",{p_user:x.dataset.tts,p_on:x.checked});
+    flashMsg=error?errMsg(error):(x.checked?"ההקראה בקול הופעלה לתלמיד. היא תופיע בכניסה הבאה שלו למשחק.":"ההקראה בקול כובתה לתלמיד.");renderStaff();});
 }
 
 /* ---------- admin ---------- */

@@ -283,6 +283,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .btn.mini{min-height:38px;padding:6px 12px;font-size:15px;flex:0 0 auto}
 .staffback{position:fixed;z-index:70;top:calc(env(safe-area-inset-top,0px) + 8px);left:max(8px,env(safe-area-inset-left,0px));min-height:40px;padding:6px 14px}
 @media print{body *{visibility:hidden}#printArea,#printArea *{visibility:visible}#printArea{position:absolute;inset:0;border:0}.noprint{display:none!important}}
+.spk{float:left;margin:-2px 8px 4px 0;width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--card);font-size:20px;line-height:1;display:inline-grid;place-items:center;flex:0 0 auto}
+.spk:active{background:var(--brass-soft)}
+.ttsl{display:inline-flex;align-items:center;gap:6px;font-weight:700;white-space:nowrap}.ttsl input{width:20px;height:20px}
 .confirm{margin-top:10px;background:var(--bad-soft);border-radius:12px;padding:12px}
 
 /* onboarding */
@@ -346,7 +349,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 const KEY="sochnut-v1";
 const ONLINE_MODE=!!window.SOCHNUT_CONFIG;
 const demoNote=()=>ONLINE_MODE?(window.ONLINE_ME?"":"מצב ניסיון: ההתקדמות נשמרת רק בדפדפן הזה."):"גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.";
-const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},settings:{side:"left",big:false},pos:null,teacher:{gate:"auto",unlockAll:false}});
+const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},settings:{side:"left",big:false},pos:null,teacher:{gate:"auto",unlockAll:false,tts:false},zoneExam:null});
 let P=fresh();
 function load(){try{const s=localStorage.getItem(KEY);if(s)P=Object.assign(fresh(),JSON.parse(s));}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
@@ -580,6 +583,16 @@ const MODEL={
 const SKL={noun:{tap:"סימון במשפט",sort:"מיון",choice:"בדיקה: ה___ ומשפט",judge:"שיפוט"},adj:{tap:"זיהוי במשפט",agree:"התאמה",trait:"תכונות אופי",rule:"מקום ו־ה",sort:"מיון",judge:"שיפוט"},verb:{tap:"זיהוי במשפט",choice:"פועל או לא",sort:"מיון",time:"זמן",body:"גוף",judge:"שיפוט"},sort3:{sort:"מיון לשלוש",tap:"סימון",choice:"קביעת תפקיד",judge:"שיפוט"},nikud:{choice:"בחירת ניקוד",judge:"שיפוט"}};
 function recSkill(lid,sk,sc){if(!SKL[lid])return;const k=lid+":"+sk;const r=P.skill[k]||(P.skill[k]={s:0,n:0});r.s+=sc;r.n++;}
 const DAY=86400000,SPACE=[2,5,12];
+/* read aloud: only for students the teacher turned it on for */
+const ttsOn=()=>!!(P.teacher&&P.teacher.tts)&&"speechSynthesis" in window;
+const plain=h=>{const d=document.createElement("div");d.innerHTML=String(h).replace(/<br\s*\/?>/g,". ").replace(/<\/(div|p|li|td|span)>/g,"$&. ");return d.textContent.replace(/\s+/g," ").replace(/(\.\s*){2,}/g,". ").trim();};
+const spk=text=>ttsOn()?`<button class="spk" data-say="${esc(plain(text))}" aria-label="הקראה בקול" title="הקראה בקול">🔊</button>`:"";
+let heVoice=null;function pickVoice(){const v=speechSynthesis.getVoices();heVoice=v.find(x=>/^he|^iw/i.test(x.lang))||null;}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function speak(t){if(!("speechSynthesis" in window))return;speechSynthesis.cancel();if(!heVoice)pickVoice();
+  const u=new SpeechSynthesisUtterance(t.replace(/״/g,'"').replace(/[←→✓★🔒]/g," "));u.lang="he-IL";if(heVoice)u.voice=heVoice;u.rate=.9;
+  if(!heVoice)flash("אם לא שומעים: במכשיר הזה אולי אין קול בעברית.");speechSynthesis.speak(u);}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-say]");if(b){e.preventDefault();e.stopPropagation();speak(b.dataset.say);}},true);
 const clueReady=c=>!c.l||isDone(L(c.l));
 const STARS=[
  {id:"st1",x:14,y:11,req:["noun"],pts:20,tier:1,title:"אתגר ★: שמות עצם מוסתרים",items:[{k:"x1",type:"tap",q:"סמנו את כל שמות העצם במשפט (4).",words:["בבוקר","הקר","יצאו","הדייגים","עם","סירותיהם","אל","הים","הסוער."],targets:[0,3,5,7],why:"בוקר, דייגים, סירותיהם, ים — גם עם תוספות בהתחלה ובסוף."}]},
@@ -646,6 +659,7 @@ function homeHTML(){
    <div class="row"><button class="btn primary" data-act="world">להיכנס לעולם ▶</button>${nl?`<button class="btn soft" data-open="${nl.id}">לפתוח את התיק</button>`:""}</div></div></div>
   ${(()=>{const now=Date.now(),due=P.spaced.filter(x=>x.due<=now),next=P.spaced.filter(x=>x.due>now).sort((a,b)=>a.due-b.due)[0];
     if(!P.spaced.length)return "";return `<div class="card mystery"><div class="section-title">🔎 תעלומת היום</div>${due.length?`<p style="margin:6px 0 10px">חזרה קצרה על בית שפענחתם לפני כמה ימים, כדי שהכלל לא יישכח. 3 שאלות בלבד.</p><div class="list">${due.map(x=>`<button class="li" data-spaced="${x.l}"><span class="ic">🔎</span><span class="tx"><b>${L(x.l).building}</b><small>${L(x.l).title.split(":")[0]} · חזרה ${x.step+1} מתוך ${SPACE.length}</small></span><span class="pill todo">לפתור</span></button>`).join("")}</div>`:`<p class="muted" style="margin:6px 0 0">אין תעלומה היום. החזרה הבאה: ${L(next.l).building} בעוד ${Math.max(1,Math.round((next.due-now)/DAY))} ימים.</p>`}</div>`;})()}
+  ${solvedCount()>=LESSONS.length&&!(P.zoneExam&&P.zoneExam.passed)&&P.teacher.gate==="auto"?`<div class="card mystery"><div class="section-title">🎓 מבחן הכניסה לשלב הבא</div><p style="margin:6px 0 10px">פענחתם את כל הבתים! לפני שעוברים לגן השורשים: ${LESSONS.length} שאלות, אחת מכל בית, כדי לוודא שאתם בלשים מומחים. עוברים מ־${PASS}%.</p><button class="btn primary" id="zGo" style="width:100%">להתחיל את המבחן</button></div>`:""}
   <div class="card"><div class="section-title">הדרך ברובע המילים</div><p class="muted" style="margin:4px 0 10px">פותרים לפי הסדר. כל בית נפתח אחרי שמפענחים את הקודם מ־${PASS}%.</p>
    <ol class="path">${LESSONS.map((l,i)=>{const d=isDone(l),u=unlocked(l),cur=nl&&nl.id===l.id;return `<li class="${d?"done":cur?"cur":u?"":"lock"}"><span>${d?"✓":u?i+1:"🔒"}</span><b>${l.building}</b><small>${l.title.split(":")[0]}</small></li>`;}).join("")}</ol></div>
   <div class="card"><div class="section-title">המסע</div><p class="muted" style="margin:4px 0 10px">שבעה אזורים בעולם אחד. כדי לעבור לאזור הבא מפענחים את כל התיקים באזור, כל תיק מ־${PASS}%.</p>
@@ -720,11 +734,14 @@ ${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה
     <button class="btn ghost" id="spNow" style="width:100%;margin-top:8px">להקדים את ״תעלומת היום״ להיום (לבדיקה)</button></div>
    <div class="teachbox"><b>מצב מורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">במשחק האמיתי זה יופיע בלוח המורה, לכל הכיתה או לתלמיד מסוים. כאן אפשר לנסות את זה בדפדפן הזה.</p>
     <div style="font-weight:700">השער לאזור 2</div><div class="seg" style="margin:6px 0 10px"><button id="gAuto" aria-pressed="${P.teacher.gate==="auto"}">אוטומטי</button><button id="gOpen" aria-pressed="${P.teacher.gate==="open"}">פתוח עכשיו</button><button id="gLock" aria-pressed="${P.teacher.gate==="locked"}">נעול</button></div>
-    <div style="font-weight:700">סדר הבתים</div><div class="seg" style="margin-top:6px"><button id="oSeq" aria-pressed="${!P.teacher.unlockAll}">לפי הסדר</button><button id="oAll" aria-pressed="${P.teacher.unlockAll}">כל הבתים פתוחים</button></div></div>
+    <div style="font-weight:700">סדר הבתים</div><div class="seg" style="margin-top:6px"><button id="oSeq" aria-pressed="${!P.teacher.unlockAll}">סדר מחייב</button><button id="oAll" aria-pressed="${P.teacher.unlockAll}">פתיחה חופשית</button></div>
+    <div style="font-weight:700;margin-top:10px">הקראה בקול 🔊</div><div class="seg" style="margin-top:6px"><button id="tOff" aria-pressed="${!P.teacher.tts}">כבויה</button><button id="tOn" aria-pressed="${!!P.teacher.tts}">מופעלת לתלמיד הזה</button></div>
+    <p class="muted" style="margin:6px 0 0;font-size:14px">כשההקראה מופעלת, ליד שאלות, הסברים ודברי הדמויות מופיע כפתור 🔊. בלוח המורה מפעילים אותה רק לתלמידים שצריכים.</p></div>
    <div><button class="btn ghost" id="resetBtn" style="width:100%">לאפס את ההתקדמות</button><div id="resetBox"></div></div>`}</div>
   <p class="demo">${demoNote()}</p></div>`;
 }
 function bindScreen(){
+  if($("#zGo"))$("#zGo").onclick=openZoneExam;
   document.querySelectorAll("[data-go2]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go2)));
   document.querySelectorAll("[data-spaced]").forEach(b=>b.addEventListener("click",()=>openSpaced(b.dataset.spaced)));
   if($("#tDash"))$("#tDash").onclick=()=>go("teacher");if($("#spNow"))$("#spNow").onclick=()=>{P.spaced.forEach(x=>x.due=Date.now()-1);save();flash("החזרות הוקדמו להיום. ראו במסך הבית.");};
@@ -738,7 +755,7 @@ function bindScreen(){
   const hc=$("#heroCv");if(hc)drawHero(hc);
   const mc=$("#meCv");if(mc){const c=mc.getContext("2d");drawChar(c,6,8,coatOf(P.coat),0,1);}
   const set=(k,v)=>{P.settings[k]=v;save();render();};
-  if($("#gAuto")){const tset=(k,v)=>{P.teacher[k]=v;save();render();};$("#gAuto").onclick=()=>tset("gate","auto");$("#gOpen").onclick=()=>tset("gate","open");$("#gLock").onclick=()=>tset("gate","locked");$("#oSeq").onclick=()=>tset("unlockAll",false);$("#oAll").onclick=()=>tset("unlockAll",true);}
+  if($("#gAuto")){const tset=(k,v)=>{P.teacher[k]=v;save();render();};$("#gAuto").onclick=()=>tset("gate","auto");$("#gOpen").onclick=()=>tset("gate","open");$("#gLock").onclick=()=>tset("gate","locked");$("#oSeq").onclick=()=>tset("unlockAll",false);$("#oAll").onclick=()=>tset("unlockAll",true);$("#tOff").onclick=()=>tset("tts",false);$("#tOn").onclick=()=>tset("tts",true);}
   if($("#sideL")){$("#sideL").onclick=()=>set("side","left");$("#sideR").onclick=()=>set("side","right");$("#sizeN").onclick=()=>set("big",false);$("#sizeB").onclick=()=>set("big",true);
    if($("#resetBtn"))$("#resetBtn").onclick=()=>{$("#resetBox").innerHTML=`<div class="confirm"><b>למחוק את כל ההתקדמות?</b><div class="row" style="margin-top:8px"><button class="btn primary" id="resetYes" style="background:var(--stamp)">כן, למחוק</button><button class="btn soft" id="resetNo">ביטול</button></div></div>`;
     $("#resetYes").onclick=()=>{P=fresh();save();buildMap();startOnboarding();};$("#resetNo").onclick=()=>{$("#resetBox").innerHTML="";};};}
@@ -884,7 +901,7 @@ function solid(tx,ty){const v=(map[ty]||[])[tx];if(v===undefined)return true;
   if(v==="G")return !gateOpen();return "wtBFkf".includes(v)||v==="s";}
 function missingList(){return LESSONS.filter(l=>!(P.solved[l.id]&&P.solved[l.id].done)).map(l=>l.building).join(", ");}
 function starReady(st){return st.req.every(id=>isDone(L(id)));}
-function gateOpen(){const g=P.teacher.gate;if(g==="open")return true;if(g==="locked")return false;return solvedCount()>=LESSONS.length;}
+function gateOpen(){const g=P.teacher.gate;if(g==="open")return true;if(g==="locked")return false;return solvedCount()>=LESSONS.length&&!!(P.zoneExam&&P.zoneExam.passed);}
 function blocked(x,y){const r=.28;for(const[dx,dy]of[[-r,-.05],[r,-.05],[-r,.3],[r,.3]]){if(solid(Math.floor(x+dx),Math.floor(y+dy)))return true;}
   for(const n of npcs){if(Math.abs(n.x-x)<.5&&Math.abs(n.y-y)<.35)return true;}return false;}
 
@@ -921,7 +938,7 @@ function act(){const o=nearObj;if(!o||dlgOpen)return;
   if(o.kind==="door"){if(o.b.hq)say("המפקד","המטה סגור כרגע לשיפוצים. המפקד מחכה לכם בכיכר.");else openCase(o.b.lesson,"world");}
   else if(o.kind==="npc")talk(o.n);
   else if(o.kind==="bridge")bridgePuzzle();
-  else if(o.kind==="gate"){if(P.teacher.gate==="locked")say("שומר השער","המורה נעל את השער לזמן מה, כדי שכל הכיתה תתקדם יחד. בינתיים אפשר לחזור על התיקים ולאסוף דפי רמז.");else if(gateOpen())say("שומר השער","השער פתוח! גן השורשים עדיין בבנייה. בקרוב תוכלו להיכנס ולגלות את סוד עץ המילים.");else say("שומר השער",`השער לגן השורשים נפתח רק אחרי שמפענחים את כל ${LESSONS.length} התיקים ברובע המילים, כל אחד מ־${PASS}%. פוענחו עד עכשיו: ${solvedCount()}. עוד חסרים: ${missingList()}.`);}
+  else if(o.kind==="gate"){if(P.teacher.gate!=="locked"&&P.teacher.gate!=="open"&&solvedCount()>=LESSONS.length&&!(P.zoneExam&&P.zoneExam.passed)){examIntro();return;}if(P.teacher.gate==="locked")say("שומר השער","המורה נעל את השער לזמן מה, כדי שכל הכיתה תתקדם יחד. בינתיים אפשר לחזור על התיקים ולאסוף דפי רמז.");else if(gateOpen())say("שומר השער","השער פתוח! גן השורשים עדיין בבנייה. בקרוב תוכלו להיכנס ולגלות את סוד עץ המילים.");else say("שומר השער",`השער לגן השורשים נפתח רק אחרי שמפענחים את כל ${LESSONS.length} התיקים ברובע המילים, כל אחד מ־${PASS}%. פוענחו עד עכשיו: ${solvedCount()}. עוד חסרים: ${missingList()}.`);}
   else if(o.kind==="clue"){const c=o.c;if(!clueReady(c))say("דף רמז נעול",`הדף הזה שייך לנושא ״${L(c.l).title}״. הוא ייפתח אחרי שתלמדו ותפענחו את ${L(c.l).building}, כי רק אז הוא יעזור לכם באמת.`);else openClue(c);}
   else if(o.kind==="chest")openChest();
   else if(o.kind==="star"){const st=o.st;if(!starReady(st))say("כוכב אתגר נעול",`${st.title}\nשווה ${st.pts} נקודות. הכוכב נפתח אחרי שמפענחים: ${st.req.map(id=>L(id).building).join(", ")}.\nעוד חסרים: ${st.req.filter(id=>!isDone(L(id))).map(id=>L(id).building).join(", ")}.`);
@@ -992,6 +1009,7 @@ function target(){
   if(P.navTo){const l=L(P.navTo);if(l&&!isDone(l)&&unlocked(l)){const b=buildings.find(b=>b.lesson===l.id);return{x:b.door.x+.5,y:b.door.y+1.2,name:b.name};}P.navTo=null;}
   if(!P.tutorial){const c=npcs.find(n=>n.id==="chief");return{x:c.x,y:c.y,name:"המפקד בכיכר"};}
   const nl=nextLesson();if(nl){const b=buildings.find(b=>b.lesson===nl.id);return{x:b.door.x+.5,y:b.door.y+1.2,name:b.name};}
+  if(P.teacher.gate==="auto"&&!(P.zoneExam&&P.zoneExam.passed))return{x:10,y:29.3,name:"מבחן הכניסה בשער"};
   if(P.planks<5)return{x:35,y:24.4,name:"גשר המילים"};
   if(!P.chest)return{x:37.5,y:29.9,name:"התיבה באי"};
   return{x:10,y:29.3,name:"השער לגן השורשים"};
@@ -1002,7 +1020,7 @@ function updateHud(){
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;toastT=2.6;}
 
 /* dialog */
-function say(who,text,btns){dlgOpen=true;dlgAt=performance.now();$("#dlg").hidden=false;$("#dlgWho").textContent=who;$("#dlgText").textContent=text;$("#dlgText").style.whiteSpace="pre-line";
+function say(who,text,btns){dlgOpen=true;dlgAt=performance.now();setTimeout(()=>{const w=$("#dlgWho");if(ttsOn())w.insertAdjacentHTML("afterbegin",spk(text));},0);$("#dlg").hidden=false;$("#dlgWho").textContent=who;$("#dlgText").textContent=text;$("#dlgText").style.whiteSpace="pre-line";
   const bx=$("#dlgBtns");bx.innerHTML="";(btns||[{t:"סגור"}]).forEach((b,i)=>{const e=document.createElement("button");e.className="btn "+(i===0?"primary":"soft");e.style.flex="0 1 auto";e.textContent=b.t;e.onclick=()=>{closeDlg();b.f&&b.f();};bx.appendChild(e);});
   setTimeout(()=>{const f=bx.querySelector("button");f&&f.focus();},30);}
 function closeDlg(){dlgOpen=false;$("#dlg").hidden=true;}
@@ -1119,6 +1137,14 @@ function openSpaced(lid){const l=L(lid);const list=shuffleArr(l.pool).slice(0,3)
 function nextSpaced(){if(C.idx>=C.list.length){const e=P.spaced.find(x=>x.l===C.sl);const ok=C.score>=2-.001;
     if(e){if(ok){e.step++;if(e.step>=SPACE.length)P.spaced=P.spaced.filter(x=>x!==e);else e.due=Date.now()+SPACE[e.step]*DAY;}else e.due=Date.now()+DAY;}
     P.points+=Math.round(C.score*5);save();C.spOk=ok;C.spNext=e&&P.spaced.includes(e)?Math.round((e.due-Date.now())/DAY):0;C.phase="result";C.spDone=true;renderCase();return;}serve(C.list[C.idx++]);}
+function examIntro(){chain("שומר השער",["כל הכבוד, פענחתם את כל הבתים ברובע המילים!","רגע לפני שעוברים לגן השורשים: אנחנו רוצים לוודא שאתם באמת סגורים על מה שלמדתם, ושאתם בלשים מומחים מספיק לשלב הבא.",`זה ״מבחן הכניסה לשלב הבא״: ${LESSONS.length} שאלות, אחת מכל בית. עוברים מ־${PASS}%. מי שלא עובר חוזר על הבתים שצריך, ומנסה שוב.`],()=>say("שומר השער","מוכנים?",[{t:"להתחיל את המבחן",f:openZoneExam},{t:"עוד לא, אני רוצה לחזור על החומר"}]));}
+function openZoneExam(){closeDlg();
+  const list=LESSONS.map(l=>{const p=l.pool.filter(i=>i.lv>=2);const it=shuffleArr(p.length?p:l.pool)[0];return{...it,_l:l.id};});
+  C={l:{id:"zexam",num:"מבחן",title:"מבחן הכניסה לשלב הבא",building:"שער גן השורשים",npc:"שומר השער",npcColors:["#5a4a2a","#3f341d"]},from:running?"world":"screen",phase:"zexam",idx:0,list,per:{},cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
+  $("#case").hidden=false;document.body.style.overflow="hidden";nextZoneExam();}
+function nextZoneExam(){if(C.idx>=C.list.length){const pct=Math.round(C.score/C.count*100),ok=pct>=PASS;const prev=P.zoneExam||{};
+    P.zoneExam={passed:ok||!!prev.passed,best:Math.max(pct,prev.best||0),tries:(prev.tries||0)+1};if(ok&&!prev.passed)P.points+=50;save();
+    C.zPct=pct;C.zOk=ok;C.phase="result";C.zDone=true;renderCase();$("#case").scrollTop=0;if(running)updateHud();return;}serve(C.list[C.idx++]);}
 function openReview(){
   const items=[];P.review.slice(0,5).forEach(r=>{const l=L(r.l);if(!l)return;const it=[...l.pool,...l.judge].find(i=>i.k===r.k);if(it)items.push({...it,_l:l.id});});
   if(!items.length)return;
@@ -1127,10 +1153,10 @@ function openReview(){
 }
 function closeCase(){$("#case").hidden=true;$("#case").innerHTML="";const from=C&&C.from;C=null;
   if(from==="world"&&running){document.body.style.overflow="hidden";updateHud();}else{document.body.style.overflow="";render();}}
-function meterHTML(){if(!["practice","judge","exam"].includes(C.phase))return "";const has=C.count>0;const pct=has?Math.round(C.score/C.count*100):0;const ok=pct>=PASS;
+function meterHTML(){if(!["practice","judge","exam","zexam"].includes(C.phase))return "";const has=C.count>0;const pct=has?Math.round(C.score/C.count*100):0;const ok=pct>=PASS;
   return `<div class="meter ${has?(ok?"ok":"low"):""}"><div class="mtop"><span>ההצלחה שלכם בתיק</span><b>${has?pct+"%":"—"}</b><small>יעד: ${PASS}% · בונוס: 100%</small></div><div class="mbar"><i style="width:${pct}%"></i><em style="right:${PASS}%"></em></div></div>`;}
 function stepsBar(){const ph=["cover","exp","teach","model","practice","judge","words","result"];if(C.phase==="review")return "";const i=ph.indexOf(C.phase);return `<div class="steps">${ph.slice(1).map((p,k)=>`<i class="${k<i?"on":""}"></i>`).join("")}</div>`;}
-function phaseName(){return{model:"צפו בבלש פותר",words:"במילים שלי",spaced:"תעלומת היום",clue:"קוראים דף רמז",challenge:"כוכב אתגר",exam:"לקראת מבחן · תרגול מעורב",cover:"תדריך",exp:"קודם מנסים לבד",teach:"לומדים את הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
+function phaseName(){return{zexam:"מבחן הכניסה לשלב הבא",model:"צפו בבלש פותר",words:"במילים שלי",spaced:"תעלומת היום",clue:"קוראים דף רמז",challenge:"כוכב אתגר",exam:"לקראת מבחן · תרגול מעורב",cover:"תדריך",exp:"קודם מנסים לבד",teach:"לומדים את הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
 function npcCanvas(){return `<canvas class="npcc" width="12" height="16"></canvas>`;}
 function paintNpc(){document.querySelectorAll("#case .npcc").forEach(c=>{const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,npcCol({colors:C.l.npcColors}),0,1);});}
 function renderCase(){
@@ -1158,14 +1184,14 @@ function renderCase(){
     const ck=C.tcheck;
     const needCheck=lc.check&&!ck.done;
     const last=C.teachIdx>=l.teach.length-1;
-    body=`<div class="folder teach" data-tab="שיעור · ${C.teachIdx+1} מתוך ${l.teach.length}">${lc.say?`<div class="saybub">${npcCanvas()}<div><b style="color:#2a7a6c;font-family:var(--display);font-weight:400">${l.npc}:</b> ${lc.say}</div></div>`:""}<h3>${t.h}</h3>${tw.innerHTML}
+    body=`<div class="folder teach" data-tab="שיעור · ${C.teachIdx+1} מתוך ${l.teach.length}">${lc.say?`<div class="saybub">${npcCanvas()}<div><b style="color:#2a7a6c;font-family:var(--display);font-weight:400">${l.npc}:</b> ${lc.say}</div></div>`:""}<h3>${spk((lc.say||"")+". "+t.h+". "+t.html)}${t.h}</h3>${tw.innerHTML}
     ${moreSteps?`<button class="btn soft" id="tStep" style="width:100%">הצעד הבא (${C.stepShown}/${steps.length})</button>`:""}
     ${lc.check&&!moreSteps?`<div class="checkbox"><b>בדקו שהבנתם</b><div class="q">${esc(ck.it.q)}</div><div class="opts">${ck.it.opts.map((o,i)=>{let cls="";if(ck.sel===i)cls=i===ck.it.a?"right":"wrong";return `<button class="opt ${cls}" data-tc="${i}" ${ck.done?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>${ck.sel!==undefined?(ck.done?`<div class="fb ok"><b>נכון!</b>${esc(ck.it.why||"")}</div>`:`<div class="fb no"><b>עוד לא.</b>נסו תשובה אחרת. ${ck.tries>=2?esc(ck.it.why||""):"קראו שוב את ההסבר שלמעלה."}</div>`):""}</div>`:""}
     <div class="case-actions">${C.teachIdx>0?`<button class="btn soft" id="tPrev">→ הקודם</button>`:""}<button class="btn primary" id="tNext" ${moreSteps||needCheck?"disabled":""}>${!last?"ממשיכים ←":(C.readOnly?"סיום השיעור":"מתחילים לתרגל ←")}</button></div>
     ${moreSteps||needCheck?`<p class="muted" style="font-size:14px;text-align:center;margin:8px 0 0">${moreSteps?"לחצו ״הצעד הבא״ כדי לראות את כל הצעדים.":"ענו על שאלת הבדיקה כדי להמשיך."}</p>`:""}</div>`;
   }else if(C.phase==="model"){const m=MODEL[l.id];const all=C.mShown>=m.steps.length;
     body=`<div class="folder teach" data-tab="צפו בבלש פותר"><div class="saybub">${npcCanvas()}<div><b style="color:#2a7a6c;font-family:var(--display);font-weight:400">${l.npc}:</b> לפני שתתרגלו, תראו איך אני פותר שאלה. אני חושב בקול, צעד אחרי צעד.</div></div>
-    <div class="modelq">${esc(m.q)}</div><ol class="think">${m.steps.slice(0,C.mShown).map(t=>`<li>${esc(t)}</li>`).join("")}</ol>
+    <div class="modelq">${spk(m.q+". "+m.steps.slice(0,C.mShown).join(". ")+(all?". "+m.answer:""))}${esc(m.q)}</div><ol class="think">${m.steps.slice(0,C.mShown).map(t=>`<li>${esc(t)}</li>`).join("")}</ol>
     ${all?`<div class="fb ok"><b>הפתרון</b>${esc(m.answer)}</div>`:`<button class="btn soft" id="mStep" style="width:100%">מה הבלש חושב עכשיו? (${C.mShown}/${m.steps.length})</button>`}
     <div class="case-actions"><button class="btn soft" id="mBack">→ חזרה לשיעור</button><button class="btn primary" id="mDone" ${all?"":"disabled"}>${C.readOnly?"סיום":"עכשיו תורכם! ←"}</button></div></div>`;
   }else if(C.phase==="words"){
@@ -1197,7 +1223,7 @@ function bindCase(){
   on("mDone",()=>{if(C.readOnly){closeCase();return;}C.phase="practice";nextPractice();});
   on("wSave",()=>{const t=($("#myWords").value||"").trim();if(t.split(/\s+/).length<3){$("#wErr").hidden=false;return;}
     (P.words[C.l.id]=P.words[C.l.id]||[]).push({t,at:Date.now(),pct:C.pct});save();C.phase="result";renderCase();$("#case").scrollTop=0;});
-  on("again",()=>openCase(C.l.id,C.from));on("chalAgain",()=>openChallenge(C.star));on("examAgain",()=>openExam([...examSel],examLen));
+  on("again",()=>openCase(C.l.id,C.from));on("zAgain",openZoneExam);on("chalAgain",()=>openChallenge(C.star));on("examAgain",()=>openExam([...examSel],examLen));
   document.querySelectorAll("[data-learn2]").forEach(b=>b.onclick=()=>openLearn(b.dataset.learn2));on("done",closeCase);
   bindItem();
 }
@@ -1227,7 +1253,8 @@ function itemHTML(){
   if(C.phase==="exp"){tab="התנסות";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עוד לא למדנו את הכלל, וזה בסדר. נסו לפי מה שנראה לכם, ואחר כך נלמד יחד.</div></div>`;}
   else if(C.phase==="judge"){tab="משימת שיפוט";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עכשיו אתם השופטים. בלש טוב הוא קודם כל חבר טוב: מוצאים את הטעות כדי לעזור.</div></div>`;}
   else if(C.phase==="review"){tab=`חזרה · ${C.idx}/${C.list.length}`;}
-  else if(C.phase==="clue"){const c=C.clue,x=CLUEX[c.id]||{};tab="דף רמז";lead=`<div class="notecard"><small>${c.l?`דף רמז · נושא: ${L(c.l).title}`:"דף רמז · כללי בלש"}</small><b>${esc(c.h)}</b><p>${esc(c.t)}</p>${x.ex?`<p class="noteex">${esc(x.ex)}</p>`:""}</div><p style="margin:12px 0 4px;font-weight:800;color:var(--navy)">קראתם? עכשיו השתמשו ברמז:</p>`;}
+  else if(C.phase==="clue"){const c=C.clue,x=CLUEX[c.id]||{};tab="דף רמז";lead=`<div class="notecard">${spk(c.h+". "+c.t+". "+(x.ex||""))}<small>${c.l?`דף רמז · נושא: ${L(c.l).title}`:"דף רמז · כללי בלש"}</small><b>${esc(c.h)}</b><p>${esc(c.t)}</p>${x.ex?`<p class="noteex">${esc(x.ex)}</p>`:""}</div><p style="margin:12px 0 4px;font-weight:800;color:var(--navy)">קראתם? עכשיו השתמשו ברמז:</p>`;}
+  else if(C.phase==="zexam"){tab=`מבחן הכניסה לשלב הבא · שאלה ${C.idx} מתוך ${C.list.length} · ${L(it._l).building}`;}
   else if(C.phase==="spaced"){tab=`תעלומת היום · ${C.idx} מתוך ${C.list.length} · ${L(C.sl).title.split(":")[0]}`;if(C.idx===1)lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> לפני כמה ימים פענחתם את ${L(C.sl).building}. בואו נבדוק שהכלל עוד זכור לכם: 3 שאלות קצרות.</div></div>`;}
   else if(C.phase==="challenge"){tab=`כוכב אתגר · שאלה ${C.idx} מתוך ${C.list.length}`;lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>המפקד:</b> שאלת אתגר: היא משלבת כמה דברים שלמדתם. קראו לאט.</div></div>`;}
   else if(C.phase==="exam"){tab=`${it._again?"שאלה דומה":"שאלה"} ${C.idx} מתוך ${C.list.length} · ${L(it._l).title.split(":")[0]}`;}
@@ -1244,7 +1271,7 @@ function itemHTML(){
   const nextLabel=C.phase==="exp"?"לכלי הבלשי ←":C.phase==="clue"?(st.score>=.999?"נשמר במחברת · חזרה לעולם ←":"לנסות שוב"):"לשאלה הבאה ←";
   const actions=checked?`${back}<button class="btn primary" id="nextQ">${nextLabel}</button>`:
     `${back}${it.type==="sort"&&(st.placed||[]).length?`<button class="btn soft" id="undo">ביטול אחרון</button>`:""}${it.hint&&!showHint?`<button class="btn soft" id="hintB">רמז</button>`:""}<button class="btn primary" id="check" ${canCheck?"":"disabled"}>בדיקה</button>`;
-  return `<div class="folder" data-tab="${tab}">${lead}<div class="q">${esc(it.q)}${lvl}</div>${inner}${showHint?`<div class="hint">💡 ${esc(it.hint)}</div>`:""}${fb}<div class="case-actions">${actions}</div><p class="kbd">במחשב: Enter לבדיקה ולמעבר לשאלה הבאה</p></div>`;
+  return `<div class="folder" data-tab="${tab}">${lead}<div class="q">${spk(it.q+(it.type==="choice"?". האפשרויות: "+it.opts.join(". "):it.type==="tap"?(it.grid?". המילים: "+it.words.join(", "):". המשפט: "+it.words.join(" ")):""))}${esc(it.q)}${lvl}</div>${inner}${showHint?`<div class="hint">💡 ${esc(it.hint)}</div>`:""}${fb}<div class="case-actions">${actions}</div><p class="kbd">במחשב: Enter לבדיקה ולמעבר לשאלה הבאה</p></div>`;
 }
 function bindItem(){
   if(!C||!C.cur||C.phase==="result"||C.phase==="cover"||C.phase==="teach")return;
@@ -1285,6 +1312,7 @@ function afterCheck(it,sc){
       if(!it._again&&C.extra<6){const sim=shuffleArr(L(it._l).pool.filter(i=>!C.usedK.has(i.k)&&skill(i)===skill(it)));if(sim.length){C.usedK.add(sim[0].k);C.list.push({...sim[0],_l:it._l,_again:true});C.extra++;C.retryNote="exam";}}}
     save();}
   if(C.phase==="challenge"||C.phase==="spaced"){C.score+=sc;C.count++;}
+  if(C.phase==="zexam"){C.score+=sc;C.count++;C.per[it._l]=sc;recSkill(it._l,skill(it),sc);}
   if(C.phase==="clue"&&sc>=.999&&!P.clues.includes(C.clue.id)){P.clues.push(C.clue.id);P.points+=10;save();}
   if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);else P.points+=0;save();}
 }
@@ -1296,6 +1324,7 @@ function advance(){
   if(C.phase==="exam"){C.retryNote=null;nextExam();return;}
   if(C.phase==="challenge"){nextChallenge();return;}
   if(C.phase==="spaced"){nextSpaced();return;}
+  if(C.phase==="zexam"){nextZoneExam();return;}
   if(C.phase==="clue"){if(C.state&&C.state.score>=.999){closeCase();}else serve(C.list[0]);return;}
 }
 /* skills: a wrong answer brings back a similar question (same skill), or the same one reshuffled */
@@ -1339,6 +1368,11 @@ function finish(){
   if(done&&!wasDone)P.points+=50;C.newPerfect=perfect&&!wasPerfect;if(C.newPerfect)P.points+=PERFECT_BONUS;P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;if(C.newDone)P.spaced.push({l:l.id,due:Date.now()+SPACE[0]*DAY,step:0});save();C.phase="words";renderCase();$("#case").scrollTop=0;
 }
 function resultHTML(){
+  if(C.zDone){const weak=LESSONS.filter(l=>(C.per[l.id]??1)<.999);
+    return `<div class="folder result" data-tab="מבחן הכניסה לשלב הבא"><div class="score">${C.zPct}%</div><div class="bigstamp ${C.zOk?"":"retry"}">${C.zOk?"בלשים מומחים!":"עוד לא"}</div>
+    <p>${C.zOk?`עברתם את מבחן הכניסה. השער לגן השורשים נפתח לפניכם! (+50 נקודות)`:`כדי לעבור צריך ${PASS}%. חזרו על הבתים שבהם טעיתם, ונסו שוב עם שאלות חדשות.`}</p>
+    ${weak.length?`<div class="perfect" style="text-align:right"><b>${C.zOk?"כדאי לרענן:":"לחזור על:"}</b>${weak.map(l=>`<button class="btn soft" style="margin-top:8px;width:100%" data-learn2="${l.id}">${l.building} · ${l.title.split(":")[0]}</button>`).join("")}</div>`:""}
+    <div class="case-actions">${C.zOk?"":`<button class="btn soft" id="zAgain">לנסות שוב</button>`}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;}
   if(C.spDone){return `<div class="folder result" data-tab="תעלומת היום"><div class="score">${Math.round(C.score)}/3</div><div class="bigstamp ${C.spOk?"":"retry"}">${C.spOk?"זכור!":"נחזור מחר"}</div>
     <p>${C.spOk?(C.spNext?`מצוין, הכלל זכור. החזרה הבאה על ${L(C.sl).building} תהיה בעוד ${C.spNext} ימים.`:`מצוין! ${L(C.sl).building} זכור לכם היטב, ואין צורך בעוד חזרות.`):`כדאי לרענן את הכלל. אפשר לקרוא שוב את השיעור, ומחר תקבלו שוב 3 שאלות.`}</p>
     <div class="case-actions">${C.spOk?"":`<button class="btn soft" data-learn2="${C.sl}">לקרוא שוב את השיעור</button>`}<button class="btn primary" id="done">סיום</button></div></div>`;}
