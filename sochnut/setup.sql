@@ -43,6 +43,21 @@ create table if not exists public.progress (
   updated_at  timestamptz not null default now()
 );
 
+create table if not exists public.notices (
+  id          uuid primary key default gen_random_uuid(),
+  class_id    uuid not null references public.classes(id) on delete cascade,
+  student_id  uuid references public.profiles(id) on delete cascade,   -- ריק = לכל הכיתה
+  kind        text not null check (kind in ('message','bonus')),
+  title       text not null,
+  body        text not null default '',
+  lesson_id   text,
+  n           int,
+  pts         int,
+  ends_at     timestamptz,
+  created_by  uuid references public.profiles(id) on delete set null,
+  created_at  timestamptz not null default now()
+);
+
 -- ---------- פונקציות עזר להרשאות ----------
 create or replace function public.my_role() returns text
 language sql stable security definer set search_path = '' as $$
@@ -91,6 +106,25 @@ create policy "progress insert own" on public.progress for insert to authenticat
 drop policy if exists "progress update own" on public.progress;
 create policy "progress update own" on public.progress for update to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- הודעות ומשימות בונוס: תלמיד רואה מה שנשלח לכיתה שלו או אליו; מורה שולח ומוחק בכיתות שלו
+alter table public.notices enable row level security;
+revoke all on public.notices from anon;
+grant select, insert, delete on public.notices to authenticated;
+
+drop policy if exists "notices read" on public.notices;
+create policy "notices read" on public.notices for select to authenticated
+  using (public.my_role() = 'admin' or public.teaches(class_id)
+         or (class_id = public.my_class() and (student_id is null or student_id = auth.uid())));
+
+drop policy if exists "notices insert" on public.notices;
+create policy "notices insert" on public.notices for insert to authenticated
+  with check ((public.my_role() = 'admin' or public.teaches(class_id)) and created_by = auth.uid()
+              and (student_id is null or exists (select 1 from public.profiles p where p.id = student_id and p.class_id = notices.class_id)));
+
+drop policy if exists "notices delete" on public.notices;
+create policy "notices delete" on public.notices for delete to authenticated
+  using (public.my_role() = 'admin' or public.teaches(class_id));
 
 -- ---------- יצירת משתמש (פנימי, רק דרך הפונקציות שלמטה) ----------
 create or replace function public._create_user(p_username text, p_full_name text, p_role text, p_class uuid, p_password text)

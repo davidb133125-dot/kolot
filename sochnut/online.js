@@ -50,15 +50,17 @@ async function loadStudent(){
   const server=data&&data.data&&Object.keys(data.data).length?data.data:null;
   const pick=(local&&server)?((local._t||0)>(server._t||0)?local:server):(server||local);
   P=Object.assign(fresh(),pick||{});P.name=P.name||me.full_name.split(" ")[0];P.tutorial=!!P.tutorial;
-  await loadSettings();buildMap();screen="home";render();
+  await loadSettings();await fetchNotices();buildMap();screen="home";render();
   if(!server||(pick===local&&local))pushSoon();
 }
+async function fetchNotices(){if(!me||me.role!=="student")return;const {data}=await sb.from("notices").select("*").order("created_at",{ascending:false});
+  NOTICES=(data||[]).map(n=>({id:n.id,kind:n.kind,title:n.title,body:n.body,lesson:n.lesson_id,n:n.n,pts:n.pts,ends:n.ends_at?new Date(n.ends_at).getTime():null,at:new Date(n.created_at).getTime(),from:"המורה"}));updateBadge();}
 async function loadSettings(){
   let c=null;if(me.class_id){const r=await sb.from("classes").select("name,gate_mode,unlock_all").eq("id",me.class_id).maybeSingle();c=r.data;}
   const {data:p}=await sb.from("profiles").select("gate_mode,unlock_all,tts").eq("id",me.id).single();
   cls=c;P.teacher={gate:(p&&p.gate_mode)||(c&&c.gate_mode)||"auto",unlockAll:(p&&p.unlock_all!=null)?p.unlock_all:!!(c&&c.unlock_all),tts:!!(p&&p.tts)};
 }
-document.addEventListener("visibilitychange",()=>{if(!me||me.role!=="student")return;if(document.hidden)pushNow();else loadSettings().then(()=>{if(!document.getElementById("world").hidden)updateHud();else render();});});
+document.addEventListener("visibilitychange",()=>{if(!me||me.role!=="student")return;if(document.hidden)pushNow();else Promise.all([loadSettings(),fetchNotices()]).then(()=>{if(!document.getElementById("world").hidden)updateHud();else render();});});
 window.addEventListener("pagehide",()=>{if(me&&me.role==="student")pushNow();});
 function pushSoon(){clearTimeout(pushT);pushT=setTimeout(pushNow,1500);setSync("שומר…");}
 async function pushNow(){clearTimeout(pushT);if(!me||me.role!=="student")return;
@@ -73,17 +75,17 @@ window.onlineMeExtra=function(){if(!me)return "";return `<div class="card stack"
 document.addEventListener("click",e=>{if(e.target&&e.target.id==="logoutBtn")logout();});
 
 /* ---------- staff shell ---------- */
-function showStaff(){document.querySelector(".nav").hidden=true;document.getElementById("app").style.paddingBottom="16px";renderStaff();}
+function showStaff(){document.querySelector(".nav").hidden=true;["noteBtn","bellBtn"].forEach(id=>{const b=document.getElementById(id);if(b)b.hidden=true;});document.getElementById("app").style.paddingBottom="16px";renderStaff();}
 async function renderStaff(){
   const el=document.getElementById("screen");$("#avatarBtn").textContent=me.full_name.charAt(0);
-  const tabs=[["dash","לוח המורה"],...(me.role==="admin"?[["admin","ניהול"]]:[]),["play","לנסות את המשחק"]];
+  const tabs=[["dash","לוח המורה"],["notes","הודעות ומשימות"],...(me.role==="admin"?[["admin","ניהול"]]:[]),["play","לנסות את המשחק"]];
   el.innerHTML=`<div class="wrap stack"><div class="staffbar"><div><b>${esc(me.full_name)}</b> <span class="muted">· ${me.role==="admin"?"מנהל":"מורה"}</span></div><button class="btn ghost" id="stOut" style="min-height:40px;padding:6px 14px">יציאה</button></div>
   <div class="seg">${tabs.map(([k,h])=>`<button data-st="${k}" aria-pressed="${staffTab===k}">${h}</button>`).join("")}</div>
   ${flashMsg?`<p class="fb ok" style="margin:0">${esc(flashMsg)}</p>`:""}<div id="staffBody"><p class="muted">טוען…</p></div></div>`;
   flashMsg="";
   document.getElementById("stOut").onclick=logout;
   el.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{staffTab=b.dataset.st;renderStaff();});
-  try{if(staffTab==="dash")await renderDash();else if(staffTab==="admin")await renderAdmin();else renderPlay();}
+  try{if(staffTab==="dash")await renderDash();else if(staffTab==="notes")await renderNotes();else if(staffTab==="admin")await renderAdmin();else renderPlay();}
   catch(err){document.getElementById("staffBody").innerHTML=`<p class="fb no">שגיאה: ${esc(err.message||err)}</p>`;}
 }
 const errMsg=e=>(e&&(e.message||e.details))||"שגיאה";
@@ -133,6 +135,41 @@ async function renderDash(){
     flashMsg=error?errMsg(error):`הסיסמה החדשה של ${b.dataset.nm}: ${np}`;renderStaff();});
   body.querySelectorAll("[data-tts]").forEach(x=>x.onchange=async()=>{const {error}=await sb.rpc("set_student_tts",{p_user:x.dataset.tts,p_on:x.checked});
     flashMsg=error?errMsg(error):(x.checked?"ההקראה בקול הופעלה לתלמיד. היא תופיע בכניסה הבאה שלו למשחק.":"ההקראה בקול כובתה לתלמיד.");renderStaff();});
+}
+
+/* ---------- teacher: messages and bonus missions ---------- */
+let noteClass=null,noteKind="message";
+async function renderNotes(){
+  const body=document.getElementById("staffBody");
+  const {data:classes,error}=await sb.from("classes").select("id,name").order("name");if(error)throw error;
+  if(!classes.length){body.innerHTML=`<div class="card"><p style="margin:0">עוד אין כיתות.</p></div>`;return;}
+  if(!noteClass||!classes.some(c=>c.id===noteClass))noteClass=classes[0].id;
+  const [{data:studs},{data:notes}]=await Promise.all([sb.from("profiles").select("id,full_name").eq("class_id",noteClass).eq("role","student").order("full_name"),sb.from("notices").select("*").eq("class_id",noteClass).order("created_at",{ascending:false})]);
+  const ids=(studs||[]).map(x=>x.id);let prog=[];if(ids.length){const r=await sb.from("progress").select("user_id,data").in("user_id",ids);prog=r.data||[];}
+  const st=(nid)=>prog.map(p=>((p.data||{}).notices||{})[nid]).filter(Boolean);
+  const nm=Object.fromEntries((studs||[]).map(x=>[x.id,x.full_name]));const in7=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+  body.innerHTML=`${classes.length>1?`<div class="row" style="align-items:center"><b>כיתה:</b><select id="nSel">${classes.map(c=>`<option value="${c.id}" ${c.id===noteClass?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div>`:""}
+  <form class="card stack admform" id="nForm" style="padding-top:12px"><b>שליחה חדשה</b>
+   <div class="seg"><button type="button" data-k="message" aria-pressed="${noteKind==="message"}">💬 הודעה</button><button type="button" data-k="bonus" aria-pressed="${noteKind==="bonus"}">✉ משימת בונוס</button></div>
+   <label>למי?<select id="nTo"><option value="">כל הכיתה</option>${(studs||[]).map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join("")}</select></label>
+   <input id="nTitle" placeholder="${noteKind==="bonus"?"כותרת, למשל: תיק מיוחד בשמות תואר":"כותרת"}" required maxlength="80">
+   <textarea id="nBody" rows="3" placeholder="${noteKind==="bonus"?"כמה מילים לתלמידים (לא חובה)":"תוכן ההודעה"}"></textarea>
+   ${noteKind==="bonus"?`<label>נושא<select id="nLesson">${LESSONS.map(l=>`<option value="${l.id}">${l.title.split(":")[0]}</option>`).join("")}</select></label>
+   <div class="row"><label style="flex:1">מספר שאלות<select id="nN"><option>5</option><option>10</option></select></label><label style="flex:1">נקודות בונוס<input id="nPts" type="number" min="1" max="50" value="10"></label></div>
+   <label>פתוח עד<input id="nEnds" type="date" value="${in7}"></label><small class="muted">השאלות נבחרות מהמאגר לפי הנושא. מי שעובר מ־${PASS}% מקבל את הבונוס.</small>`:""}
+   <button class="btn primary" type="submit">לשלוח</button></form>
+  <div class="section-title">נשלחו לכיתה</div><div class="list">${(notes||[]).map(n=>{const s2=st(n.id),total=n.student_id?1:ids.length;
+    const stat=n.kind==="bonus"?`סיימו ${s2.filter(x=>x.done).length}/${total}${s2.length?` · ממוצע הכי טוב ${Math.round(s2.reduce((a,x)=>a+(x.best||0),0)/s2.length)}%`:""}`:`קראו ${s2.filter(x=>x.read).length}/${total}`;
+    return `<div class="card"><div class="nhead"><span class="ntag">${n.kind==="bonus"?"✉ משימת בונוס":"💬 הודעה"} · ${n.student_id?esc(nm[n.student_id]||"תלמיד"):"כל הכיתה"}</span><small class="muted">${new Date(n.created_at).toLocaleDateString("he-IL")}</small></div>
+    <b class="ntitle">${esc(n.title)}</b>${n.body?`<p style="margin:4px 0">${esc(n.body)}</p>`:""}<div class="muted" style="font-size:14px">${n.kind==="bonus"?`${L(n.lesson_id)?L(n.lesson_id).title.split(":")[0]:""} · ${n.n} שאלות · ${n.pts} נקודות · עד ${n.ends_at?new Date(n.ends_at).toLocaleDateString("he-IL"):"—"} · `:""}${stat}</div>
+    <button class="btn ghost mini" data-ndel="${n.id}" style="margin-top:8px">מחיקה</button></div>`;}).join("")||`<p class="muted">עוד לא נשלח כלום.</p>`}</div>`;
+  const $b=id=>document.getElementById(id);
+  if($b("nSel"))$b("nSel").onchange=()=>{noteClass=$b("nSel").value;renderStaff();};
+  body.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{noteKind=b.dataset.k;renderStaff();});
+  $b("nForm").onsubmit=async e=>{e.preventDefault();const row={class_id:noteClass,student_id:$b("nTo").value||null,kind:noteKind,title:$b("nTitle").value.trim(),body:$b("nBody").value.trim(),created_by:me.id};
+    if(noteKind==="bonus")Object.assign(row,{lesson_id:$b("nLesson").value,n:+$b("nN").value,pts:Math.max(1,Math.min(50,+$b("nPts").value||10)),ends_at:new Date($b("nEnds").value+"T23:59:00").toISOString()});
+    const {error}=await sb.from("notices").insert(row);flashMsg=error?errMsg(error):"נשלח! התלמידים יראו את זה בפעמון בכניסה הבאה.";renderStaff();};
+  body.querySelectorAll("[data-ndel]").forEach(b=>b.onclick=async()=>{const {error}=await sb.from("notices").delete().eq("id",b.dataset.ndel);flashMsg=error?errMsg(error):"נמחק.";renderStaff();});
 }
 
 /* ---------- admin ---------- */

@@ -28,6 +28,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .brand{display:flex;align-items:center;gap:10px}
 .brand-badge{width:42px;height:42px;border-radius:10px;background:var(--navy);display:grid;place-items:center}
 .brand h1{font-size:22px;color:var(--navy)}
+.brand h1{white-space:nowrap}
+@media (max-width:420px){.brand h1{font-size:18px}.brand-badge{width:36px;height:36px}.avatar,.bell{width:38px!important;height:38px!important}.topbar .wrap{gap:8px}}
 .avatar{width:42px;height:42px;border-radius:50%;background:var(--navy-2);color:#fff;display:grid;place-items:center;font-family:var(--display);font-size:20px;border:0}
 
 /* bottom nav */
@@ -305,7 +307,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .coinscard .ctop{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .coinscard .cbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .coinscard .cbtns .btn{min-height:48px;font-size:16px;padding:10px}
-.bell{width:42px;height:42px;border-radius:50%;border:0;background:var(--paper-2);color:var(--navy);display:grid;place-items:center}
+.badge{position:absolute;top:-3px;left:-3px;min-width:20px;height:20px;border-radius:999px;background:var(--stamp);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;padding:0 5px;border:2px solid var(--paper)}
+.ncard p{margin:6px 0}.ncard.new{border-color:var(--navy);box-shadow:inset 3px 0 0 var(--navy)}
+.ncard.bonus{border:2px solid var(--brass);background:#fffaf0}.ncard.closed{opacity:.65}
+.nhead{display:flex;justify-content:space-between;align-items:center;gap:8px}.ntag{font-weight:800;font-size:14px;color:#6b4a12}
+.ntitle{display:block;font-family:var(--display);font-weight:400;font-size:20px;color:var(--navy);margin-top:4px}
+.introov{position:fixed;inset:0;z-index:80;background:rgba(15,20,28,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.introbox{background:var(--card);border-radius:18px;padding:18px;max-width:440px;width:100%;direction:rtl;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.introbox h3{font-size:24px;color:var(--navy);margin-bottom:6px}.introbox ul{padding-inline-start:20px;margin:6px 0}.introbox li{margin:4px 0}
+.dinput{width:100%;font:inherit;font-size:16px;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:#fff;margin-top:6px}
+.bell{position:relative;width:42px;height:42px;border-radius:50%;border:0;background:var(--paper-2);color:var(--navy);display:grid;place-items:center}
 .grade{font-family:var(--display);font-size:34px;color:var(--navy);font-variant-numeric:tabular-nums}
 .board{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
 .board li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px}
@@ -344,7 +355,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="brand-badge" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f4c26b" stroke-width="2.4" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5 20 20"/></svg></div>
       <h1>סוכנות הבלשים</h1>
     </div>
-    <div style="display:flex;gap:8px;align-items:center"><button class="bell" id="bellBtn" aria-label="טבלת הכיתה" title="טבלת הכיתה"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6M10 17h4"/></svg></button><button class="avatar" id="avatarBtn" aria-label="הפרופיל שלי">ב</button></div>
+    <div style="display:flex;gap:8px;align-items:center"><button class="bell" id="noteBtn" aria-label="הודעות ומשימות" title="הודעות ומשימות"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="badge" id="noteBadge" hidden></span></button><button class="bell" id="bellBtn" aria-label="טבלת הכיתה" title="טבלת הכיתה"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6M10 17h4"/></svg></button><button class="avatar" id="avatarBtn" aria-label="הפרופיל שלי">ב</button></div>
   </div></header>
   <main id="screen"></main>
   <nav class="nav" aria-label="ניווט ראשי"><div class="nav-in" style="grid-template-columns:repeat(5,1fr)">
@@ -393,7 +404,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 const KEY="sochnut-v1";
 const ONLINE_MODE=!!window.SOCHNUT_CONFIG;
 const demoNote=()=>ONLINE_MODE?(window.ONLINE_ME?"":"מצב ניסיון: ההתקדמות נשמרת רק בדפדפן הזה."):"גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.";
-const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},spent:0,owned:["o0"],outfit:"o0",wk:"",wkPts:0,settings:{side:"left",big:false,ctrl:"joy",mini:true},pos:null,teacher:{gate:"auto",unlockAll:false,tts:false},zoneExam:null});
+const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},spent:0,owned:["o0"],outfit:"o0",wk:"",wkPts:0,notices:{},seen:{},demoNotices:[],settings:{side:"left",big:false,ctrl:"joy",mini:true},pos:null,teacher:{gate:"auto",unlockAll:false,tts:false},zoneExam:null});
 let P=fresh();
 function load(){try{const s=localStorage.getItem(KEY);if(s)P=Object.assign(fresh(),JSON.parse(s));}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
@@ -674,12 +685,50 @@ const PLANKS=[
 
 /* ============ app shell ============ */
 let screen="home",prevScreen="home";
+/* ===== הודעות ומשימות בונוס מהמורה ===== */
+let NOTICES=[];
+const DAYMS=86400000;
+function demoNotices(){const now=Date.now();return[
+ {id:"d1",kind:"message",title:"ברוכים הבאים לסוכנות!",body:"זו הודעה לדוגמה מהמורה. כאן יופיעו הודעות על מה שלומדים בכיתה, מילים טובות ותזכורות.",from:"המורה (לדוגמה)",at:now-DAYMS},
+ {id:"d2",kind:"bonus",title:"תיק מיוחד: שמות תואר",body:"5 שאלות אתגר על שם תואר. מי שעובר מ־80% מקבל נקודות בונוס.",lesson:"adj",n:5,pts:10,ends:now+5*DAYMS,from:"המורה (לדוגמה)",at:now-DAYMS/2},
+ ...(P.demoNotices||[])];}
+function loadNotices(){if(!window.ONLINE_ME)NOTICES=demoNotices();updateBadge();}
+const nState=id=>(P.notices||{})[id]||{};
+const bonusOpen=n=>n.kind==="bonus"&&!nState(n.id).done&&(!n.ends||n.ends>Date.now());
+function unreadCount(){return NOTICES.filter(n=>n.kind==="message"?!nState(n.id).read:bonusOpen(n)).length;}
+function updateBadge(){const b=document.getElementById("noteBadge");if(!b)return;const c=unreadCount();b.hidden=!c;b.textContent=c>9?"9+":c;}
+function markRead(){let ch=false;NOTICES.forEach(n=>{if(n.kind==="message"&&!nState(n.id).read){P.notices[n.id]={...nState(n.id),read:true};ch=true;}});if(ch){save();updateBadge();}}
+const fmtDate=t=>new Date(t).toLocaleDateString("he-IL",{day:"numeric",month:"numeric"});
+function noticesHTML(){const list=NOTICES.slice().sort((a,b)=>(b.at||0)-(a.at||0));const bon=list.filter(n=>n.kind==="bonus"),msg=list.filter(n=>n.kind==="message");
+  const bcard=n=>{const st=nState(n.id),open=bonusOpen(n),l=L(n.lesson);const left=n.ends?Math.ceil((n.ends-Date.now())/DAYMS):null;
+    return `<div class="card ncard bonus ${open?"":"closed"}"><div class="nhead"><span class="ntag">✉ תיק מיוחד מהמפקד</span>${st.done?`<span class="pill ok">בוצע · ${st.best}%</span>`:open?`<span class="pill todo">${left!=null?`נשארו ${Math.max(0,left)} ימים`:"פתוח"}</span>`:`<span class="pill lock">הסתיים</span>`}</div>
+    <b class="ntitle">${esc(n.title)}</b><p>${esc(n.body||"")}</p><div class="muted" style="font-size:14px">${l?l.title.split(":")[0]+" · ":""}${n.n||5} שאלות · ${n.pts||10} נקודות${l&&!isDone(l)?" · הנושא עוד לא נלמד אצלכם במשחק":""}</div>
+    ${open?`<button class="btn primary" data-bonus="${n.id}" style="margin-top:10px;width:100%">${st.tries?"לנסות שוב":"לפתור"}</button>`:""}</div>`;};
+  const mcard=n=>`<div class="card ncard ${nState(n.id).read?"":"new"}"><div class="nhead"><span class="ntag">💬 הודעה${n.from?" · "+esc(n.from):""}</span><small class="muted">${n.at?fmtDate(n.at):""}</small></div><b class="ntitle">${esc(n.title)}</b><p>${esc(n.body||"")}</p></div>`;
+  return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">🔔 הודעות ומשימות</h2>
+  ${!window.ONLINE_ME?`<p class="demonote">בגרסת ההדגמה ההודעות הן לדוגמה. במשחק המחובר הן מגיעות מהמורה.</p>`:""}
+  ${bon.length?`<div class="section-title">משימות בונוס</div>${bon.map(bcard).join("")}`:""}
+  <div class="section-title">הודעות</div>${msg.length?msg.map(mcard).join(""):`<p class="muted">אין עדיין הודעות.</p>`}</div>`;}
+function openBonus(id){const n=NOTICES.find(x=>x.id===id);if(!n||!bonusOpen(n))return;const l=L(n.lesson)||LESSONS[0];
+  let pool=shuffleArr(l.pool.filter(i=>i.lv>=2));if(pool.length<(n.n||5))pool=pool.concat(shuffleArr(l.pool.filter(i=>i.lv<2)));
+  const list=pool.slice(0,n.n||5).map(it=>({...it,_l:l.id}));
+  C={l:{id:"bonus",num:"✉",title:n.title,building:"תיק מיוחד מהמפקד",npc:"המפקד",npcColors:["#22344f","#16243a"]},notice:n,from:running?"world":"screen",phase:"bonus",idx:0,list,cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
+  $("#case").hidden=false;document.body.style.overflow="hidden";nextBonus();}
+function nextBonus(){if(C.idx>=C.list.length){const pct=Math.round(C.score/C.count*100),ok=pct>=PASS,n=C.notice,st=nState(n.id);
+    P.notices[n.id]={...st,tries:(st.tries||0)+1,best:Math.max(pct,st.best||0),done:ok||!!st.done,at:Date.now()};if(ok&&!st.done)addPts(n.pts||10);save();updateBadge();
+    C.bPct=pct;C.bOk=ok;C.phase="result";C.bDone=true;renderCase();$("#case").scrollTop=0;return;}serve(C.list[C.idx++]);}
+/* first-time explanations for the top buttons */
+const INTRO={trophy:{t:"🏆 טבלת הכיתה",h:"<p>כאן רואים מי צבר הכי הרבה נקודות בכיתה.</p><ul><li><b>השבוע</b>: נקודות מיום ראשון. הטבלה מתאפסת כל שבוע, כך שכל אחד יכול להוביל.</li><li><b>כל הזמנים</b>: כל הנקודות מההתחלה.</li><li>השורה שלכם מודגשת, גם אם אתם לא בחמישייה הראשונה.</li></ul><p>נקודות מקבלים על תשובות נכונות, תיקים שפוענחו, דפי רמז וכוכבי אתגר.</p>"},
+ bell:{t:"🔔 הודעות ומשימות",h:"<p>כאן מגיעים דברים מהמורה:</p><ul><li><b>הודעות</b>: תזכורות, מה לומדים בכיתה, ומילים טובות.</li><li><b>משימות בונוס</b>: ״תיק מיוחד מהמפקד״, כמה שאלות אתגר על נושא אחד. מי שעובר מ־80% מקבל נקודות בונוס. לכל משימה יש תאריך סיום.</li></ul><p>כשיש משהו חדש, מופיע על הפעמון עיגול אדום עם מספר.</p>"}};
+function introOnce(k,then){if((P.seen||{})[k]){then();return;}const box=document.createElement("div");box.className="introov";box.setAttribute("dir","rtl");
+  box.innerHTML=`<div class="introbox" role="dialog" aria-modal="true"><h3>${INTRO[k].t}</h3>${INTRO[k].h}<button class="btn primary" style="width:100%">הבנתי, בואו נראה</button></div>`;
+  document.body.appendChild(box);const ok=box.querySelector("button");ok.focus();ok.onclick=()=>{P.seen={...(P.seen||{}),[k]:true};save();box.remove();then();};}
 function go(s){
   if(s==="world"){openWorld();return;}
   if(s!==screen)prevScreen=screen;screen=s;render();window.scrollTo(0,0);
 }
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
-$("#avatarBtn").addEventListener("click",()=>go("me"));$("#bellBtn").addEventListener("click",()=>go("class"));
+$("#avatarBtn").addEventListener("click",()=>go("me"));$("#bellBtn").addEventListener("click",()=>introOnce("trophy",()=>go("class")));$("#noteBtn").addEventListener("click",()=>introOnce("bell",()=>go("notices")));
 
 function isDone(l){return !!(P.solved[l.id]&&P.solved[l.id].done);}
 function unlocked(l){const i=LESSONS.indexOf(l);return i<=0||isDone(LESSONS[i-1])||P.teacher.unlockAll;}
@@ -689,7 +738,7 @@ function solvedCount(){return LESSONS.filter(l=>P.solved[l.id]&&P.solved[l.id].d
 function nextLesson(){return LESSONS.find(l=>!(P.solved[l.id]&&P.solved[l.id].done))||null;}
 
 function render(){
-  document.querySelectorAll("[data-go]").forEach(b=>b.setAttribute("aria-current",b.dataset.go===screen?"page":"false"));
+  document.querySelectorAll("[data-go]").forEach(b=>b.setAttribute("aria-current",b.dataset.go===screen?"page":"false"));updateBadge();
   $("#avatarBtn").textContent=(P.name||"ב").trim().charAt(0);
   const el=$("#screen");
   if(screen==="home")el.innerHTML=homeHTML();
@@ -698,6 +747,7 @@ function render(){
   else if(screen==="teacher")el.innerHTML=teacherHTML();
   else if(screen==="class"){el.innerHTML=classHTML();fillBoard();}
   else if(screen==="shop")el.innerHTML=shopHTML();
+  else if(screen==="notices"){el.innerHTML=noticesHTML();markRead();}
   else el.innerHTML=meHTML();
   bindScreen();
 }
@@ -815,6 +865,11 @@ function meHTML(){
    <div><b>גודל</b><div class="seg" style="margin-top:6px"><button id="sizeN" aria-pressed="${!s.big}">רגיל</button><button id="sizeB" aria-pressed="${s.big}">גדול</button></div></div>
 ${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">מפת מיומנויות, התקדמות בתיקים ו״במילים שלי״, עם תלמידים לדוגמה ועם הנתונים שלכם.</p><button class="btn primary" id="tDash" style="width:100%">לפתוח את לוח המורה</button>
     <button class="btn ghost" id="spNow" style="width:100%;margin-top:8px">להקדים את ״תעלומת היום״ להיום (לבדיקה)</button></div>
+   <div class="teachbox"><b>הודעה או משימת בונוס (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">כך המורה שולח הודעה או משימה. כאן היא מגיעה רק לדפדפן הזה.</p>
+    <div class="seg" style="margin-bottom:8px"><button id="dkM" aria-pressed="true">הודעה</button><button id="dkB" aria-pressed="false">משימת בונוס</button></div>
+    <input id="dnT" class="dinput" placeholder="כותרת"><textarea id="dnB" class="dinput" rows="2" placeholder="תוכן ההודעה"></textarea>
+    <select id="dnL" class="dinput" hidden>${LESSONS.map(l=>`<option value="${l.id}">${l.title.split(":")[0]}</option>`).join("")}</select>
+    <button class="btn primary" id="dnSend" style="width:100%;margin-top:8px">לשלוח</button></div>
    <div class="teachbox"><b>מצב מורה (הדגמה)</b><p class="muted" style="margin:4px 0 8px;font-size:15px">במשחק האמיתי זה יופיע בלוח המורה, לכל הכיתה או לתלמיד מסוים. כאן אפשר לנסות את זה בדפדפן הזה.</p>
     <div style="font-weight:700">השער לאזור 2</div><div class="seg" style="margin:6px 0 10px"><button id="gAuto" aria-pressed="${P.teacher.gate==="auto"}">אוטומטי</button><button id="gOpen" aria-pressed="${P.teacher.gate==="open"}">פתוח עכשיו</button><button id="gLock" aria-pressed="${P.teacher.gate==="locked"}">נעול</button></div>
     <div style="font-weight:700">סדר הבתים</div><div class="seg" style="margin-top:6px"><button id="oSeq" aria-pressed="${!P.teacher.unlockAll}">סדר מחייב</button><button id="oAll" aria-pressed="${P.teacher.unlockAll}">פתיחה חופשית</button></div>
@@ -824,6 +879,11 @@ ${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה
   <p class="demo">${demoNote()}</p></div>`;
 }
 function bindScreen(){
+  if($("#dnSend")){let kind="message";const setK=k=>{kind=k;$("#dkM").setAttribute("aria-pressed",k==="message");$("#dkB").setAttribute("aria-pressed",k==="bonus");$("#dnL").hidden=k!=="bonus";};
+    $("#dkM").onclick=()=>setK("message");$("#dkB").onclick=()=>setK("bonus");
+    $("#dnSend").onclick=()=>{const t=$("#dnT").value.trim();if(!t){$("#dnT").focus();return;}const n={id:"u"+Date.now(),kind,title:t,body:$("#dnB").value.trim(),from:"המורה (הדגמה)",at:Date.now()};
+      if(kind==="bonus")Object.assign(n,{lesson:$("#dnL").value,n:5,pts:10,ends:Date.now()+7*DAYMS});P.demoNotices=[...(P.demoNotices||[]),n];save();loadNotices();flash("נשלח! ראו את הפעמון למעלה.");render();};}
+  document.querySelectorAll("[data-bonus]").forEach(b=>b.addEventListener("click",()=>openBonus(b.dataset.bonus)));
   document.querySelectorAll("canvas[data-cc]").forEach(c=>{const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,outfitCol(P.outfit,+c.dataset.cc),0,1);});
   document.querySelectorAll("[data-coat]").forEach(b=>b.onclick=()=>{P.coat=+b.dataset.coat;save();render();});
   document.querySelectorAll("[data-back]").forEach(b=>b.addEventListener("click",()=>go(prevScreen&&prevScreen!==screen?prevScreen:"home")));
@@ -1121,7 +1181,9 @@ function draw(){
     ctx.fillStyle="#ffd21f";ctx.globalAlpha=ready?1:.8;ctx.fill();ctx.lineWidth=1.5*S;ctx.strokeStyle="#5a3d00";ctx.stroke();ctx.globalAlpha=1;if(!ready){ctx.fillStyle="#2b2b2b";ctx.fillRect(-2.5*S,-.5*S,5*S,4*S);ctx.strokeStyle="#2b2b2b";ctx.lineWidth=S;ctx.beginPath();ctx.arc(0,-.5*S,1.8*S,Math.PI,0);ctx.stroke();}
     if(ready&&Math.sin(t0*4+st.y)>.5){ctx.fillStyle="#fff";ctx.fillRect(R*.6,-R,2*S,2*S);}ctx.restore();});
   // entities sorted by y
-  const ents=npcs.map(n=>({y:n.y,d:()=>{drawShadow(sx(n.x),sy(n.y));drawChar(ctx,sx(n.x)-6*S,sy(n.y)-15*S,npcCol(n),0,S);}}));
+  const hasBonus=P.tutorial&&NOTICES.some(bonusOpen);
+  const ents=npcs.map(n=>({y:n.y,d:()=>{drawShadow(sx(n.x),sy(n.y));drawChar(ctx,sx(n.x)-6*S,sy(n.y)-15*S,npcCol(n),0,S);
+    if(n.id==="chief"&&hasBonus){const X=sx(n.x)+5*S,Y=sy(n.y)-24*S+Math.sin(t0*4)*S;ctx.fillStyle="#fff8dc";ctx.fillRect(X,Y,9*S,6*S);ctx.strokeStyle="#6b4a12";ctx.lineWidth=S*.7;ctx.strokeRect(X,Y,9*S,6*S);ctx.beginPath();ctx.moveTo(X,Y);ctx.lineTo(X+4.5*S,Y+3.5*S);ctx.lineTo(X+9*S,Y);ctx.stroke();ctx.fillStyle="#b8322a";ctx.fillRect(X+3.5*S,Y+3*S,2*S,2*S);}}}));
   ents.push({y:pl.y,d:()=>{drawShadow(sx(pl.x),sy(pl.y));drawChar(ctx,sx(pl.x)-6*S,sy(pl.y)-15*S,playerCol(),pl.moving&&Math.floor(pl.anim)%2,S);}});
   ents.sort((a,b)=>a.y-b.y).forEach(e=>e.d());
   // labels
@@ -1140,6 +1202,7 @@ function drawShadow(X,Y){ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.ell
 function target(){
   if(P.navTo){const l=L(P.navTo);if(l&&!isDone(l)&&unlocked(l)){const b=buildings.find(b=>b.lesson===l.id);return{x:b.door.x+.5,y:b.door.y+1.2,name:b.name};}P.navTo=null;}
   if(!P.tutorial){const c=npcs.find(n=>n.id==="chief");return{x:c.x,y:c.y,name:"המפקד בכיכר"};}
+  if(NOTICES.some(bonusOpen)){const c=npcs.find(n=>n.id==="chief");return{x:c.x,y:c.y+.3,name:"✉ תיק מיוחד אצל המפקד"};}
   const nl=nextLesson();if(nl){const b=buildings.find(b=>b.lesson===nl.id);return{x:b.door.x+.5,y:b.door.y+1.2,name:b.name};}
   if(P.teacher.gate==="auto"&&!(P.zoneExam&&P.zoneExam.passed))return{x:10,y:29.3,name:"מבחן הכניסה בשער"};
   if(P.planks<5)return{x:35,y:24.4,name:"גשר המילים"};
@@ -1158,6 +1221,7 @@ function say(who,text,btns){dlgOpen=true;dlgAt=performance.now();setTimeout(()=>
 function closeDlg(){dlgOpen=false;$("#dlg").hidden=true;}
 function chain(who,lines,end){let i=0;const show=()=>{const l=lines[i];const btns=[{t:i<lines.length-1?"המשך ←":"סגור",f:()=>{i++;if(i>=lines.length){end&&end();return;}show();}}];if(i>0)btns.push({t:"→ הקודם",f:()=>{i--;show();}});say(who+(lines.length>1?` · ${i+1}/${lines.length}`:""),l,btns);};show();}
 function talk(n){
+  if(n.id==="chief"&&P.tutorial){const bn=NOTICES.find(bonusOpen);if(bn){say("המפקד",`יש לי בשבילכם תיק מיוחד מהמורה: ״${bn.title}״. ${bn.n||5} שאלות, ${bn.pts||10} נקודות בונוס.`,[{t:"לפתוח את התיק",f:()=>openBonus(bn.id)},{t:"אחר כך"}]);return;}}
   if(n.id==="chief"){
     if(!P.tutorial){chain("המפקד",[`ברוכים הבאים לסוכנות הבלשים, בלש ${P.name}!`,"זה רובע המילים. בכל בניין כאן מחכה תיק חקירה, ובכל תיק לומדים כלי בלשי חדש.","בשטח פזורים 8 דפי רמז. כל דף שייך לנושא, והוא נפתח רק אחרי שלומדים את הבית שלו. קוראים את הדף, עונים על שאלה קטנה, והדף נשמר במחברת הבלש (הכפתור ״מחברת״ למעלה).","החץ הירוק מראה לאן ללכת. התיק הראשון מחכה בבית החפצים. בהצלחה!"],()=>{P.tutorial=true;save();updateHud();});return;}
     const sc=solvedCount();
@@ -1285,10 +1349,10 @@ function openReview(){
 }
 function closeCase(){$("#case").hidden=true;$("#case").innerHTML="";const from=C&&C.from;C=null;
   if(from==="world"&&running){document.body.style.overflow="hidden";updateHud();}else{document.body.style.overflow="";render();}}
-function meterHTML(){if(!["practice","judge","exam","zexam"].includes(C.phase))return "";const has=C.count>0;const pct=has?Math.round(C.score/C.count*100):0;const ok=pct>=PASS;
+function meterHTML(){if(!["practice","judge","exam","zexam","bonus"].includes(C.phase))return "";const has=C.count>0;const pct=has?Math.round(C.score/C.count*100):0;const ok=pct>=PASS;
   return `<div class="meter ${has?(ok?"ok":"low"):""}"><div class="mtop"><span>ההצלחה שלכם בתיק</span><b>${has?pct+"%":"—"}</b><small>יעד: ${PASS}% · בונוס: 100%</small></div><div class="mbar"><i style="width:${pct}%"></i><em style="right:${PASS}%"></em></div></div>`;}
 function stepsBar(){const ph=["cover","exp","teach","model","practice","judge","words","result"];if(C.phase==="review")return "";const i=ph.indexOf(C.phase);return `<div class="steps">${ph.slice(1).map((p,k)=>`<i class="${k<i?"on":""}"></i>`).join("")}</div>`;}
-function phaseName(){return{zexam:"מבחן הכניסה לשלב הבא",model:"צפו בבלש פותר",words:"במילים שלי",spaced:"תעלומת היום",clue:"קוראים דף רמז",challenge:"כוכב אתגר",exam:"לקראת מבחן · תרגול מעורב",cover:"תדריך",exp:"קודם מנסים לבד",teach:"לומדים את הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
+function phaseName(){return{bonus:"תיק מיוחד מהמפקד",zexam:"מבחן הכניסה לשלב הבא",model:"צפו בבלש פותר",words:"במילים שלי",spaced:"תעלומת היום",clue:"קוראים דף רמז",challenge:"כוכב אתגר",exam:"לקראת מבחן · תרגול מעורב",cover:"תדריך",exp:"קודם מנסים לבד",teach:"לומדים את הכלי הבלשי",practice:"תרגול",judge:"משימת שיפוט",result:"סיכום התיק",review:"חזרה"}[C.phase];}
 function npcCanvas(){return `<canvas class="npcc" width="12" height="16"></canvas>`;}
 function paintNpc(){document.querySelectorAll("#case .npcc").forEach(c=>{const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,npcCol({colors:C.l.npcColors}),0,1);});}
 function renderCase(){
@@ -1355,7 +1419,7 @@ function bindCase(){
   on("mDone",()=>{if(C.readOnly){closeCase();return;}C.phase="practice";nextPractice();});
   on("wSave",()=>{const t=($("#myWords").value||"").trim();if(t.split(/\s+/).length<3){$("#wErr").hidden=false;return;}
     (P.words[C.l.id]=P.words[C.l.id]||[]).push({t,at:Date.now(),pct:C.pct});save();C.phase="result";renderCase();$("#case").scrollTop=0;});
-  on("again",()=>openCase(C.l.id,C.from));on("zAgain",openZoneExam);on("chalAgain",()=>openChallenge(C.star));on("examAgain",()=>openExam([...examSel],examLen));
+  on("again",()=>openCase(C.l.id,C.from));on("bAgain",()=>openBonus(C.notice.id));on("zAgain",openZoneExam);on("chalAgain",()=>openChallenge(C.star));on("examAgain",()=>openExam([...examSel],examLen));
   document.querySelectorAll("[data-learn2]").forEach(b=>b.onclick=()=>openLearn(b.dataset.learn2));on("done",closeCase);
   bindItem();
 }
@@ -1386,6 +1450,7 @@ function itemHTML(){
   else if(C.phase==="judge"){tab="משימת שיפוט";lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> עכשיו אתם השופטים. בלש טוב הוא קודם כל חבר טוב: מוצאים את הטעות כדי לעזור.</div></div>`;}
   else if(C.phase==="review"){tab=`חזרה · ${C.idx}/${C.list.length}`;}
   else if(C.phase==="clue"){const c=C.clue,x=CLUEX[c.id]||{};tab="דף רמז";lead=`<div class="notecard">${spk(c.h+". "+c.t+". "+(x.ex||""))}<small>${c.l?`דף רמז · נושא: ${L(c.l).title}`:"דף רמז · כללי בלש"}</small><b>${esc(c.h)}</b><p>${esc(c.t)}</p>${x.ex?`<p class="noteex">${esc(x.ex)}</p>`:""}</div><p style="margin:12px 0 4px;font-weight:800;color:var(--navy)">קראתם? עכשיו השתמשו ברמז:</p>`;}
+  else if(C.phase==="bonus"){tab=`תיק מיוחד · שאלה ${C.idx} מתוך ${C.list.length}`;if(C.idx===1)lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>המפקד:</b> תיק מיוחד מהמורה: ${esc(C.notice.title)}. בהצלחה, בלשים!</div></div>`;}
   else if(C.phase==="zexam"){tab=`מבחן הכניסה לשלב הבא · שאלה ${C.idx} מתוך ${C.list.length} · ${L(it._l).building}`;}
   else if(C.phase==="spaced"){tab=`תעלומת היום · ${C.idx} מתוך ${C.list.length} · ${L(C.sl).title.split(":")[0]}`;if(C.idx===1)lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>${C.l.npc}:</b> לפני כמה ימים פענחתם את ${L(C.sl).building}. בואו נבדוק שהכלל עוד זכור לכם: 3 שאלות קצרות.</div></div>`;}
   else if(C.phase==="challenge"){tab=`כוכב אתגר · שאלה ${C.idx} מתוך ${C.list.length}`;lead=`<div class="npc-line">${npcCanvas()}<div class="bub"><b>המפקד:</b> שאלת אתגר: היא משלבת כמה דברים שלמדתם. קראו לאט.</div></div>`;}
@@ -1443,7 +1508,8 @@ function afterCheck(it,sc){
     if(sc<.999){if(it.k&&!P.review.some(x=>x.k===it.k))P.review.push({l:it._l,k:it.k});
       if(!it._again&&C.extra<6){const sim=shuffleArr(L(it._l).pool.filter(i=>!C.usedK.has(i.k)&&skill(i)===skill(it)));if(sim.length){C.usedK.add(sim[0].k);C.list.push({...sim[0],_l:it._l,_again:true});C.extra++;C.retryNote="exam";}}}
     save();}
-  if(C.phase==="challenge"||C.phase==="spaced"){C.score+=sc;C.count++;}
+  if(C.phase==="challenge"||C.phase==="spaced"||C.phase==="bonus"){C.score+=sc;C.count++;}
+  if(C.phase==="bonus")recSkill(it._l,skill(it),sc);
   if(C.phase==="zexam"){C.score+=sc;C.count++;C.per[it._l]=sc;recSkill(it._l,skill(it),sc);}
   if(C.phase==="clue"&&sc>=.999&&!P.clues.includes(C.clue.id)){P.clues.push(C.clue.id);addPts(PTS.clue);save();}
   if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);save();}
@@ -1456,6 +1522,7 @@ function advance(){
   if(C.phase==="exam"){C.retryNote=null;nextExam();return;}
   if(C.phase==="challenge"){nextChallenge();return;}
   if(C.phase==="spaced"){nextSpaced();return;}
+  if(C.phase==="bonus"){nextBonus();return;}
   if(C.phase==="zexam"){nextZoneExam();return;}
   if(C.phase==="clue"){if(C.state&&C.state.score>=.999){closeCase();}else serve(C.list[0]);return;}
 }
@@ -1500,6 +1567,9 @@ function finish(){
   if(done&&!wasDone)addPts(PTS.case);C.newPerfect=perfect&&!wasPerfect;if(C.newPerfect)addPts(PTS.perfect);P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;if(C.newDone)P.spaced.push({l:l.id,due:Date.now()+SPACE[0]*DAY,step:0});save();C.phase="words";renderCase();$("#case").scrollTop=0;
 }
 function resultHTML(){
+  if(C.bDone){const n=C.notice;return `<div class="folder result" data-tab="תיק מיוחד"><div class="score">${C.bPct}%</div><div class="bigstamp ${C.bOk?"":"retry"}">${C.bOk?"פוענח!":"עוד לא"}</div>
+    <p>${C.bOk?`כל הכבוד! קיבלתם ${n.pts||10} נקודות בונוס.`:`כדי לקבל את הבונוס צריך ${PASS}%. אפשר לנסות שוב עד שהמשימה נסגרת${n.ends?` (${fmtDate(n.ends)})`:""}.`}</p>
+    <div class="case-actions">${C.bOk?"":`<button class="btn soft" id="bAgain">לנסות שוב</button>`}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;}
   if(C.zDone){const weak=LESSONS.filter(l=>(C.per[l.id]??1)<.999);
     return `<div class="folder result" data-tab="מבחן הכניסה לשלב הבא"><div class="score">${C.zPct}%</div><div class="bigstamp ${C.zOk?"":"retry"}">${C.zOk?"בלשים מומחים!":"עוד לא"}</div>
     <p>${C.zOk?`עברתם את מבחן הכניסה. השער לגן השורשים נפתח לפניכם! (+${PTS.zone} נקודות)`:`כדי לעבור צריך ${PASS}%. חזרו על הבתים שבהם טעיתם, ונסו שוב עם שאלות חדשות.`}</p>
@@ -1543,6 +1613,6 @@ function startOnboarding(){
 
 /* ============ boot ============ */
 buildMap();
-if(!ONLINE_MODE){if(!P.name)startOnboarding();render();}
+if(!ONLINE_MODE){loadNotices();if(!P.name)startOnboarding();render();}
 </script>
 <script src="online.js"></script>
