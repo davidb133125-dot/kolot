@@ -669,10 +669,10 @@ const PLANKS=[
 ];
 
 /* ============ app shell ============ */
-let screen="home";
+let screen="home",prevScreen="home";
 function go(s){
   if(s==="world"){openWorld();return;}
-  screen=s;render();window.scrollTo(0,0);
+  if(s!==screen)prevScreen=screen;screen=s;render();window.scrollTo(0,0);
 }
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 $("#avatarBtn").addEventListener("click",()=>go("me"));$("#bellBtn").addEventListener("click",()=>go("class"));
@@ -740,7 +740,7 @@ const DEMO_CLASS=[["אריאל",118],["יוסף",96],["נועם",74],["איתי"
 function boardHTML(rows,key,title,sub){const me=rows.find(r=>r.me);const sorted=rows.slice().sort((a,b)=>b[key]-a[key]);const top=sorted.slice(0,5),myRank=sorted.indexOf(me)+1;
   const row=(r,i)=>`<li class="${r.me?"me":""}"><span class="rk r${i+1}">${i+1}</span><b>${esc(r.name)}${r.me?" (אני)":""}</b><span class="pts">${r[key]}</span></li>`;
   return `<div class="card"><b style="font-family:var(--display);font-weight:400;font-size:22px;color:var(--navy)">${title}</b><div class="muted" style="font-size:14px">${sub}</div><ol class="board">${top.map(row).join("")}${me&&myRank>5?`<li class="sep"></li>${row(me,myRank-1)}`:""}</ol></div>`;}
-function classHTML(){return `<div class="wrap stack"><button class="btn ghost mini" data-go2="me" style="align-self:flex-start">→ אני</button><h2 style="font-size:28px;color:var(--navy)">הכיתה</h2>
+function classHTML(){return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">🔔 הכיתה</h2>
   <p style="margin:0">מי צבר הכי הרבה נקודות. טבלת השבוע מתחילה מאפס בכל יום ראשון, כך שכל אחד יכול להוביל.</p>
   <div id="boardBox"><p class="muted">טוען…</p></div>
   <div class="section-title">הציון שלי</div>${gradesHTML()}
@@ -750,7 +750,7 @@ async function fillBoard(){const box=$("#boardBox");if(!box)return;let rows,demo
   if(!rows){demo=!window.ONLINE_ME;const wk=weekStart();rows=DEMO_CLASS.map(([n,p],i)=>({name:n,points:p,week:Math.round(p*(.2+.1*i))}));rows.push({name:P.name||"אני",me:true,points:P.points,week:P.wk===wk?P.wkPts:0});}
   if(!$("#boardBox"))return;$("#boardBox").innerHTML=`${demo?`<p class="demonote" style="margin-bottom:10px">בגרסת ההדגמה שאר התלמידים הם לדוגמה. במשחק המחובר יופיעו כאן חברי הכיתה.</p>`:""}<div class="stack" style="padding:0">${boardHTML(rows,"week","השבוע","נקודות שנצברו מיום ראשון")}${boardHTML(rows,"points","כל הזמנים","כל הנקודות")}</div>`;}
 /* shop */
-function shopHTML(){return `<div class="wrap stack"><button class="btn ghost mini" data-go2="me" style="align-self:flex-start">→ אני</button><h2 style="font-size:28px;color:var(--navy)">החנות של הסוכנות</h2>
+function shopHTML(){return `<div class="wrap stack"><button class="btn ghost mini" data-back="1" style="align-self:flex-start">→ חזרה</button><h2 style="font-size:28px;color:var(--navy)">החנות של הסוכנות</h2>
   <p style="margin:0">כל נקודה היא גם מטבע. צוברים מטבעות מהלמידה עצמה, וקונים כאן מראה חדש לבלש. הקניות הן למראה בלבד: הן לא משנות ציון ולא עוזרות בתיקים, והדרגה לא יורדת כשקונים.</p>
   <div class="card" style="display:flex;align-items:center;gap:12px;background:var(--brass-soft)"><span class="coin big">${coins()}</span><div><b>מטבעות</b><div class="muted" style="font-size:14px">נצברו ${P.points} · הוצאו ${P.spent||0}</div></div></div>
   <div class="section-title">מראה הבלש בעולם</div><div class="shop">${OUTFITS.map(o=>{const own=(P.owned||["o0"]).includes(o.id),wear=(P.outfit||"o0")===o.id,miss=o.price-coins();
@@ -819,6 +819,7 @@ ${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה
   <p class="demo">${demoNote()}</p></div>`;
 }
 function bindScreen(){
+  document.querySelectorAll("[data-back]").forEach(b=>b.addEventListener("click",()=>go(prevScreen&&prevScreen!==screen?prevScreen:"home")));
   document.querySelectorAll("canvas[data-oc]").forEach(c=>{const o=OUTFITS.find(x=>x.id===c.dataset.oc);const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,o.col?{...coatOf(P.coat),...o.col}:coatOf(P.coat),0,1);});
   document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const o=OUTFITS.find(x=>x.id===b.dataset.buy);if(coins()<o.price)return;P.spent=(P.spent||0)+o.price;P.owned=[...(P.owned||["o0"]),o.id];P.outfit=o.id;save();flash(`קניתם: ${o.name}! הבלש לובש אותו עכשיו.`);render();});
   document.querySelectorAll("[data-wear]").forEach(b=>b.onclick=()=>{P.outfit=b.dataset.wear;save();render();});
