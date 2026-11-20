@@ -747,8 +747,7 @@ function boardHTML(rows,key,title,sub){const me=rows.find(r=>r.me);const sorted=
 function classHTML(){return `<div class="wrap stack"><h2 style="font-size:28px;color:var(--navy)">🔔 הכיתה</h2>
   <p style="margin:0">מי צבר הכי הרבה נקודות. טבלת השבוע מתחילה מאפס בכל יום ראשון, כך שכל אחד יכול להוביל.</p>
   <div id="boardBox"><p class="muted">טוען…</p></div>
-  <div class="section-title">הציון שלי</div>${gradesHTML()}
-  <div class="card" style="display:flex;align-items:center;gap:12px"><span class="coin">${coins()}</span><div style="flex:1"><b>מטבעות</b><div class="muted" style="font-size:14px">כל נקודה היא גם מטבע לחנות.</div></div><button class="btn primary mini" data-go2="shop">לחנות</button></div></div>`;}
+</div>`;}
 async function fillBoard(){const box=$("#boardBox");if(!box)return;let rows,demo=false;
   if(window.ONLINE_ME&&window.onlineBoard){try{rows=await onlineBoard();}catch(e){rows=null;}}
   if(!rows){demo=!window.ONLINE_ME;const wk=weekStart();rows=DEMO_CLASS.map(([n,p],i)=>({name:n,points:p,week:Math.round(p*(.2+.1*i))}));rows.push({name:P.name||"אני",me:true,points:P.points,week:P.wk===wk?P.wkPts:0});}
@@ -805,6 +804,7 @@ function meHTML(){
    <div style="background:var(--brass-soft);border-radius:12px;padding:12px;text-align:right"><div style="display:flex;justify-content:space-between;font-weight:800"><span style="font-family:var(--display);font-weight:400;font-size:20px;color:#6b4a12">${r.name}</span><span>${P.points} נקודות</span></div>
    <div class="bar" style="margin:8px 0"><i style="width:${pct}%"></i></div><small class="muted">${r.next?`עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:"הדרגה הגבוהה ביותר!"} · נקודות על תשובות נכונות, תיקים שפוענחו ורמזים</small></div></div>
   <div class="card coinscard"><div class="ctop"><div><b>מטבעות</b><div class="muted" style="font-size:14px">לקניית מראה חדש לבלש</div></div><span class="coin big">${coins()}</span></div><div class="cbtns"><button class="btn primary" data-go2="shop">🛒 לחנות</button><button class="btn soft" data-go2="class">🔔 טבלת הכיתה</button></div></div>
+  <div class="section-title">הציון שלי</div>${gradesHTML()}
   <div class="section-title">מחברת הבלש</div>
   ${notebookHTML()}<div style="display:none">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.src)} · ${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<CLUES.length+LESSONS.length?`<div class="note empty">כרטיסי תזכורת: דפי רמז שמוצאים בעולם, וכרטיס על כל תיק שמפענחים. נאספו ${notes.length} מתוך ${CLUES.length+LESSONS.length}.</div>`:""}</div>
   ${window.onlineMeExtra?onlineMeExtra():""}
