@@ -125,8 +125,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .dpad.big{width:200px;height:200px}
 .gear{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 160px);width:52px;height:52px;border-radius:50%;border:0;background:rgba(25,32,44,.85);color:#fff;font-size:24px}
 .gear.left{left:max(48px,env(safe-area-inset-left,0px))}.gear.right{right:max(48px,env(safe-area-inset-right,0px))}
-.mini{position:absolute;top:calc(env(safe-area-inset-top,0px) + 122px);left:max(10px,env(safe-area-inset-left,0px));width:min(46vw,250px);aspect-ratio:4/3;border-radius:12px;border:3px solid #6fc7b5;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.35);background:#2b4a2a}
-.mini canvas{width:100%;height:100%;display:block}
+.minimap{position:absolute;top:calc(env(safe-area-inset-top,0px) + 122px);left:max(10px,env(safe-area-inset-left,0px));width:min(46vw,250px);aspect-ratio:4/3;border-radius:12px;border:3px solid #6fc7b5;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.35);background:#2b4a2a}
+.minimap canvas{width:100%;height:100%;display:block}
 .minib{position:absolute;bottom:4px;right:4px;width:34px;height:34px;border-radius:8px;border:0;background:rgba(25,32,44,.85);color:#fff;font-size:18px}
 .minit{position:absolute;top:2px;left:50%;transform:translateX(-50%);background:rgba(25,32,44,.85);color:#fff;border-radius:0 0 6px 6px;padding:0 6px;font-size:12px;font-weight:800}
 .sheet{position:absolute;inset:0;background:rgba(15,20,28,.45);display:flex;align-items:flex-end;z-index:6}
@@ -301,6 +301,22 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .spk{float:left;margin:-2px 8px 4px 0;width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--card);font-size:20px;line-height:1;display:inline-grid;place-items:center;flex:0 0 auto}
 .spk:active{background:var(--brass-soft)}
 .ttsl{display:inline-flex;align-items:center;gap:6px;font-weight:700;white-space:nowrap}.ttsl input{width:20px;height:20px}
+.bell{width:42px;height:42px;border-radius:50%;border:0;background:var(--paper-2);color:var(--navy);display:grid;place-items:center}
+.grade{font-family:var(--display);font-size:34px;color:var(--navy);font-variant-numeric:tabular-nums}
+.board{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.board li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px}
+.board li.me{background:#dfe7f3}.board li.sep{border-top:2px dashed var(--line);padding:0;margin:4px 0}
+.board b{flex:1}.board .pts{font-family:var(--display);font-size:20px;color:#6b4a12;font-variant-numeric:tabular-nums}
+.rk{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--paper-2);flex:0 0 auto}
+.rk.r1{background:#f4d27a}.rk.r2{background:#d9dde3}.rk.r3{background:#e8b98f}
+.coin{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:24px;color:#6b4a12}
+.coin::before{content:"";width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe7a0,#d9a53a 60%,#a8781c);box-shadow:inset 0 0 0 2px #a8781c}
+.coin.big{font-size:34px}.coin.big::before{width:32px;height:32px}
+.shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.item{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.item.wear{border-color:var(--good)}
+.item canvas{width:72px;height:96px;image-rendering:pixelated;background:var(--paper);border-radius:10px;padding:6px}
+.item small{font-size:14px;color:var(--muted)}
 .confirm{margin-top:10px;background:var(--bad-soft);border-radius:12px;padding:12px}
 
 /* onboarding */
@@ -324,7 +340,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="brand-badge" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f4c26b" stroke-width="2.4" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5 20 20"/></svg></div>
       <h1>סוכנות הבלשים</h1>
     </div>
-    <button class="avatar" id="avatarBtn" aria-label="הפרופיל שלי">ב</button>
+    <div style="display:flex;gap:8px;align-items:center"><button class="bell" id="bellBtn" aria-label="הכיתה והציון שלי"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button><button class="avatar" id="avatarBtn" aria-label="הפרופיל שלי">ב</button></div>
   </div></header>
   <main id="screen"></main>
   <nav class="nav" aria-label="ניווט ראשי"><div class="nav-in" style="grid-template-columns:repeat(5,1fr)">
@@ -348,7 +364,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <div class="joy left" id="joy"><i id="knob"></i></div>
   <div class="dpad left" id="dpad" hidden><button data-d="up" aria-label="למעלה">▲</button><button data-d="left" aria-label="שמאלה">◀</button><button data-d="right" aria-label="ימינה">▶</button><button data-d="down" aria-label="למטה">▼</button></div>
   <button class="gear right" id="gearBtn" aria-label="הגדרות שליטה">⚙</button>
-  <div class="mini" id="mini" hidden><canvas id="minicv"></canvas><button class="minib" id="miniFull" aria-label="מפה מלאה">⤢</button></div>
+  <div class="minimap" id="mini" hidden><canvas id="minicv"></canvas><button class="minib" id="miniFull" aria-label="מפה מלאה">⤢</button></div>
   <div class="sheet" id="sheet" hidden><div class="sheet-in"><div class="sheet-h"><h3>הגדרות</h3><button class="xbtn" id="sheetX" aria-label="סגירה" style="background:var(--paper-2);color:var(--ink)">✕</button></div>
     <b>הליכה</b><div class="seg"><button data-set="ctrl:joy">ג׳ויסטיק</button><button data-set="ctrl:arrows">חיצים</button></div>
     <b>צד התנועה</b><div class="seg"><button data-set="side:left">שמאל</button><button data-set="side:right">ימין</button></div>
@@ -373,7 +389,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 const KEY="sochnut-v1";
 const ONLINE_MODE=!!window.SOCHNUT_CONFIG;
 const demoNote=()=>ONLINE_MODE?(window.ONLINE_ME?"":"מצב ניסיון: ההתקדמות נשמרת רק בדפדפן הזה."):"גרסת הדגמה: ההתקדמות נשמרת בדפדפן הזה בלבד.";
-const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},settings:{side:"left",big:false,ctrl:"joy",mini:true},pos:null,teacher:{gate:"auto",unlockAll:false,tts:false},zoneExam:null});
+const fresh=()=>({name:"",coat:0,points:0,solved:{},clues:[],planks:0,review:[],level:{},tutorial:false,gateSeen:false,chest:false,stars:[],words:{},spaced:[],skill:{},spent:0,owned:["o0"],outfit:"o0",wk:"",wkPts:0,settings:{side:"left",big:false,ctrl:"joy",mini:true},pos:null,teacher:{gate:"auto",unlockAll:false,tts:false},zoneExam:null});
 let P=fresh();
 function load(){try{const s=localStorage.getItem(KEY);if(s)P=Object.assign(fresh(),JSON.parse(s));}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
@@ -382,8 +398,14 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ============ ranks ============ */
-const PASS=80, PERFECT_BONUS=30;
-const RANKS=[[0,"בלש מתלמד"],[150,"בלש"],[400,"בלש ראשי"],[800,"מפקד הסוכנות"]];
+const PASS=80;
+/* ===== נקודות (וגם מטבעות לחנות). משנים כאן בלבד ===== */
+const PTS={q:[1,2,3],case:10,perfect:5,clue:2,star:{1:5,2:10,3:20},zone:15,spaced:1,exam:1,bridge:1,chest:5};
+const PERFECT_BONUS=PTS.perfect;
+function weekStart(d){d=new Date(d||Date.now());d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.toISOString().slice(0,10);}
+function addPts(n){n=Math.max(0,Math.round(n));if(!n)return;P.points+=n;const w=weekStart();if(P.wk!==w){P.wk=w;P.wkPts=0;}P.wkPts=(P.wkPts||0)+n;}
+const coins=()=>Math.max(0,P.points-(P.spent||0));
+const RANKS=[[0,"בלש מתלמד"],[40,"בלש"],[120,"בלש ראשי"],[250,"מפקד הסוכנות"]];
 function rank(){let r=RANKS[0],nx=null;for(let i=0;i<RANKS.length;i++){if(P.points>=RANKS[i][0]){r=RANKS[i];nx=RANKS[i+1]||null;}}return{name:r[1],from:r[0],next:nx};}
 
 /* ============ content ============ */
@@ -619,11 +641,11 @@ function speak(t){if(!("speechSynthesis" in window))return;speechSynthesis.cance
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-say]");if(b){e.preventDefault();e.stopPropagation();speak(b.dataset.say);}},true);
 const clueReady=c=>!c.l||isDone(L(c.l));
 const STARS=[
- {id:"st1",x:14,y:11,req:["noun"],pts:20,tier:1,title:"אתגר ★: שמות עצם מוסתרים",items:[{k:"x1",type:"tap",q:"סמנו את כל שמות העצם במשפט (4).",words:["בבוקר","הקר","יצאו","הדייגים","עם","סירותיהם","אל","הים","הסוער."],targets:[0,3,5,7],why:"בוקר, דייגים, סירותיהם, ים — גם עם תוספות בהתחלה ובסוף."}]},
- {id:"st2",x:31,y:7,req:["noun","adj"],pts:30,tier:1,title:"אתגר ★: התאמה כפולה",items:[{k:"x2",type:"choice",q:"העוגיות ______ והעוגה ______ חיכו על השולחן. (טרי, טרי)",opts:["הטריות · הטרייה","הטריים · הטרי","טריות · טרייה","הטרייה · הטריות"],a:0,why:"העוגיות — נקבה, רבות, עם ה ← הטריות. העוגה — נקבה, יחידה, עם ה ← הטרייה."}]},
- {id:"st3",x:3,y:19,req:["noun","adj","verb"],pts:50,tier:2,title:"אתגר ★★: שלוש משפחות",items:[{k:"x3",type:"sort",q:"מילים מאותה משפחה, בתפקידים שונים. מיינו.",bins:["שם עצם","פועל","שם תואר"],items:[["שירה",0],["שרו",1],["מוזיקלי",2],["כתיבה",0],["כתבו",1],["כתוב",2],["זהירות",0],["נזהרו",1],["זהיר",2]],why:"שם עצם — מי/מה. פועל — פג״ז. שם תואר — איזה."}]},
- {id:"st4",x:41,y:22,req:["noun","adj","verb","sort3"],pts:60,tier:2,title:"אתגר ★★: תאומות מבלבלות",items:[{k:"x4",type:"choice",q:"״ההתרגשות של הילדים הנרגשים גברה כשהתרגשו מהמתנה.״ מה התפקיד של: ההתרגשות, הנרגשים, התרגשו — לפי הסדר?",opts:["שם עצם · שם תואר · פועל","פועל · שם עצם · שם תואר","שם תואר · פועל · שם עצם","שם עצם · פועל · שם תואר"],a:0,why:"ההתרגשות — מה? · הנרגשים — אילו ילדים? · התרגשו — פג״ז."}]},
- {id:"st5",x:31,y:29,req:["noun","adj","verb","sort3","nikud"],pts:100,tier:3,title:"אתגר ★★★: התיק הגדול של הרובע",items:[
+ {id:"st1",x:14,y:11,req:["noun"],pts:PTS.star[1],tier:1,title:"אתגר ★: שמות עצם מוסתרים",items:[{k:"x1",type:"tap",q:"סמנו את כל שמות העצם במשפט (4).",words:["בבוקר","הקר","יצאו","הדייגים","עם","סירותיהם","אל","הים","הסוער."],targets:[0,3,5,7],why:"בוקר, דייגים, סירותיהם, ים — גם עם תוספות בהתחלה ובסוף."}]},
+ {id:"st2",x:31,y:7,req:["noun","adj"],pts:PTS.star[1],tier:1,title:"אתגר ★: התאמה כפולה",items:[{k:"x2",type:"choice",q:"העוגיות ______ והעוגה ______ חיכו על השולחן. (טרי, טרי)",opts:["הטריות · הטרייה","הטריים · הטרי","טריות · טרייה","הטרייה · הטריות"],a:0,why:"העוגיות — נקבה, רבות, עם ה ← הטריות. העוגה — נקבה, יחידה, עם ה ← הטרייה."}]},
+ {id:"st3",x:3,y:19,req:["noun","adj","verb"],pts:PTS.star[2],tier:2,title:"אתגר ★★: שלוש משפחות",items:[{k:"x3",type:"sort",q:"מילים מאותה משפחה, בתפקידים שונים. מיינו.",bins:["שם עצם","פועל","שם תואר"],items:[["שירה",0],["שרו",1],["מוזיקלי",2],["כתיבה",0],["כתבו",1],["כתוב",2],["זהירות",0],["נזהרו",1],["זהיר",2]],why:"שם עצם — מי/מה. פועל — פג״ז. שם תואר — איזה."}]},
+ {id:"st4",x:41,y:22,req:["noun","adj","verb","sort3"],pts:PTS.star[2],tier:2,title:"אתגר ★★: תאומות מבלבלות",items:[{k:"x4",type:"choice",q:"״ההתרגשות של הילדים הנרגשים גברה כשהתרגשו מהמתנה.״ מה התפקיד של: ההתרגשות, הנרגשים, התרגשו — לפי הסדר?",opts:["שם עצם · שם תואר · פועל","פועל · שם עצם · שם תואר","שם תואר · פועל · שם עצם","שם עצם · פועל · שם תואר"],a:0,why:"ההתרגשות — מה? · הנרגשים — אילו ילדים? · התרגשו — פג״ז."}]},
+ {id:"st5",x:31,y:29,req:["noun","adj","verb","sort3","nikud"],pts:PTS.star[3],tier:3,title:"אתגר ★★★: התיק הגדול של הרובע",items:[
   {k:"x5",type:"choice",q:"ה______ ______ לנו על ה______ החדש שקרא.",opts:["סַפָּר · סִפֵּר · סֵפֶר","סֵפֶר · סִפֵּר · סַפָּר","סַפָּר · סֵפֶר · סִפֵּר","סִפֵּר · סַפָּר · סֵפֶר"],a:0,why:"הסַפָּר (האיש) סִפֵּר (פעולה) על הסֵפֶר (שקוראים)."},
   {k:"x6",type:"tap",q:"סמנו את כל שמות התואר (3).",words:["השכנים","הנדיבים","חילקו","עוגות","טעימות","לכל","הילדים","הרעבים."],targets:[1,4,7],why:"אילו שכנים? נדיבים. אילו עוגות? טעימות. אילו ילדים? רעבים."},
   {k:"x7",type:"choice",q:"הבלש המתלמד כתב: ״הספרים החדשה של הספרייה נקראו בהתלהבות.״ מה צריך לתקן?",opts:["החדשה ← החדשים","נקראו ← נקרא","בהתלהבות ← התלהבות","אין מה לתקן"],a:0,why:"הספרים — זכר, רבים ← החדשים."}]}
@@ -653,7 +675,7 @@ function go(s){
   screen=s;render();window.scrollTo(0,0);
 }
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
-$("#avatarBtn").addEventListener("click",()=>go("me"));
+$("#avatarBtn").addEventListener("click",()=>go("me"));$("#bellBtn").addEventListener("click",()=>go("class"));
 
 function isDone(l){return !!(P.solved[l.id]&&P.solved[l.id].done);}
 function unlocked(l){const i=LESSONS.indexOf(l);return i<=0||isDone(LESSONS[i-1])||P.teacher.unlockAll;}
@@ -670,6 +692,8 @@ function render(){
   else if(screen==="cases")el.innerHTML=casesHTML();
   else if(screen==="exam")el.innerHTML=examHTML();
   else if(screen==="teacher")el.innerHTML=teacherHTML();
+  else if(screen==="class"){el.innerHTML=classHTML();fillBoard();}
+  else if(screen==="shop")el.innerHTML=shopHTML();
   else el.innerHTML=meHTML();
   bindScreen();
 }
@@ -703,6 +727,34 @@ function casesHTML(){
   </div>`;
 }
 let examSel=null,examLen=10;
+/* half-year grades: Sep–Jan = half A, Feb–Aug = half B */
+const halfOf=t=>{const m=new Date(t).getMonth()+1;return(m>=9||m===1)?"a":"b";};
+function halfGrades(){const g={a:[],b:[]};LESSONS.forEach(l=>{const x=P.solved[l.id];if(x&&x.at)g[halfOf(x.at)].push({h:l.title.split(":")[0],v:x.best});});
+  if(P.zoneExam&&P.zoneExam.at)g[halfOf(P.zoneExam.at)].push({h:"מבחן הכניסה לשלב הבא",v:P.zoneExam.best});
+  const avg=a=>a.length?Math.round(a.reduce((s,x)=>s+x.v,0)/a.length):null;return{a:{items:g.a,v:avg(g.a)},b:{items:g.b,v:avg(g.b)}};}
+function gradesHTML(){const g=halfGrades();return ["a","b"].map(k=>{const x=g[k];return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><b style="font-family:var(--display);font-weight:400;font-size:22px;color:var(--navy)">מחצית ${k==="a"?"א׳":"ב׳"}</b><span class="grade">${x.v==null?"—":x.v}</span></div>
+  <p class="muted" style="margin:4px 0 0;font-size:15px">${x.v==null?"עוד אין כאן ציון. הוא ייבנה מהתיקים וממבחני המעבר של המחצית.":"ממוצע התיקים ומבחני המעבר של המחצית. משתנה עם כל מה שעושים."}</p>
+  ${x.items.length?`<div class="list" style="margin-top:8px">${x.items.map(i=>`<div class="trow"><b>${esc(i.h)}</b><div class="bar"><i style="width:${i.v}%"></i></div><span>${i.v}</span></div>`).join("")}</div>`:""}</div>`;}).join("");}
+/* class board */
+const DEMO_CLASS=[["אריאל",118],["יוסף",96],["נועם",74],["איתי",61],["משה",40],["אליה",22]];
+function boardHTML(rows,key,title,sub){const me=rows.find(r=>r.me);const sorted=rows.slice().sort((a,b)=>b[key]-a[key]);const top=sorted.slice(0,5),myRank=sorted.indexOf(me)+1;
+  const row=(r,i)=>`<li class="${r.me?"me":""}"><span class="rk r${i+1}">${i+1}</span><b>${esc(r.name)}${r.me?" (אני)":""}</b><span class="pts">${r[key]}</span></li>`;
+  return `<div class="card"><b style="font-family:var(--display);font-weight:400;font-size:22px;color:var(--navy)">${title}</b><div class="muted" style="font-size:14px">${sub}</div><ol class="board">${top.map(row).join("")}${me&&myRank>5?`<li class="sep"></li>${row(me,myRank-1)}`:""}</ol></div>`;}
+function classHTML(){return `<div class="wrap stack"><button class="btn ghost mini" data-go2="me" style="align-self:flex-start">→ אני</button><h2 style="font-size:28px;color:var(--navy)">הכיתה</h2>
+  <p style="margin:0">מי צבר הכי הרבה נקודות. טבלת השבוע מתחילה מאפס בכל יום ראשון, כך שכל אחד יכול להוביל.</p>
+  <div id="boardBox"><p class="muted">טוען…</p></div>
+  <div class="section-title">הציון שלי</div>${gradesHTML()}
+  <div class="card" style="display:flex;align-items:center;gap:12px"><span class="coin">${coins()}</span><div style="flex:1"><b>מטבעות</b><div class="muted" style="font-size:14px">כל נקודה היא גם מטבע לחנות.</div></div><button class="btn primary mini" data-go2="shop">לחנות</button></div></div>`;}
+async function fillBoard(){const box=$("#boardBox");if(!box)return;let rows,demo=false;
+  if(window.ONLINE_ME&&window.onlineBoard){try{rows=await onlineBoard();}catch(e){rows=null;}}
+  if(!rows){demo=!window.ONLINE_ME;const wk=weekStart();rows=DEMO_CLASS.map(([n,p],i)=>({name:n,points:p,week:Math.round(p*(.2+.1*i))}));rows.push({name:P.name||"אני",me:true,points:P.points,week:P.wk===wk?P.wkPts:0});}
+  if(!$("#boardBox"))return;$("#boardBox").innerHTML=`${demo?`<p class="demonote" style="margin-bottom:10px">בגרסת ההדגמה שאר התלמידים הם לדוגמה. במשחק המחובר יופיעו כאן חברי הכיתה.</p>`:""}<div class="stack" style="padding:0">${boardHTML(rows,"week","השבוע","נקודות שנצברו מיום ראשון")}${boardHTML(rows,"points","כל הזמנים","כל הנקודות")}</div>`;}
+/* shop */
+function shopHTML(){return `<div class="wrap stack"><button class="btn ghost mini" data-go2="me" style="align-self:flex-start">→ אני</button><h2 style="font-size:28px;color:var(--navy)">החנות של הסוכנות</h2>
+  <p style="margin:0">כל נקודה היא גם מטבע. צוברים מטבעות מהלמידה עצמה, וקונים כאן מראה חדש לבלש. הקניות הן למראה בלבד: הן לא משנות ציון ולא עוזרות בתיקים, והדרגה לא יורדת כשקונים.</p>
+  <div class="card" style="display:flex;align-items:center;gap:12px;background:var(--brass-soft)"><span class="coin big">${coins()}</span><div><b>מטבעות</b><div class="muted" style="font-size:14px">נצברו ${P.points} · הוצאו ${P.spent||0}</div></div></div>
+  <div class="section-title">מראה הבלש בעולם</div><div class="shop">${OUTFITS.map(o=>{const own=(P.owned||["o0"]).includes(o.id),wear=(P.outfit||"o0")===o.id,miss=o.price-coins();
+    return `<div class="item ${wear?"wear":""}"><canvas data-oc="${o.id}" width="12" height="16"></canvas><b>${o.name}</b><small>${o.desc}</small>${wear?`<span class="pill ok">✓ לובשים עכשיו</span>`:own?`<button class="btn soft mini" data-wear="${o.id}">ללבוש</button>`:miss>0?`<button class="btn soft mini" disabled>${o.price} מטבעות</button><small class="muted">חסרים ${miss}</small>`:`<button class="btn primary mini" data-buy="${o.id}">לקנות · ${o.price}</button>`}</div>`;}).join("")}</div></div>`;}
 function skillCols(){const cols=[];LESSONS.forEach(l=>{const seen=new Set([...l.pool.map(skill),"judge"]);Object.keys(SKL[l.id]).forEach(sk=>{if(seen.has(sk))cols.push({l:l.id,sk,h:SKL[l.id][sk]});});});return cols;}
 function demoStudents(){const names=["אריאל","יוסף","נועם","איתי","משה","אליה"];const cols=skillCols();
   return names.map((n,i)=>{const sk={},cases={};let solvedN=Math.max(1,5-((i*2)%5));
@@ -748,6 +800,7 @@ function meHTML(){
    <div class="stamps" style="margin:14px 0">${["א","ב","ג","ד","ה","ו"].map((h,i)=>`<span class="stampc ${i===0&&z1?"on":""}">${h}</span>`).join("")}</div>
    <div style="background:var(--brass-soft);border-radius:12px;padding:12px;text-align:right"><div style="display:flex;justify-content:space-between;font-weight:800"><span style="font-family:var(--display);font-weight:400;font-size:20px;color:#6b4a12">${r.name}</span><span>${P.points} נקודות</span></div>
    <div class="bar" style="margin:8px 0"><i style="width:${pct}%"></i></div><small class="muted">${r.next?`עוד ${r.next[0]-P.points} עד ״${r.next[1]}״`:"הדרגה הגבוהה ביותר!"} · נקודות על תשובות נכונות, תיקים שפוענחו ורמזים</small></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="coin">${coins()}</span><div style="flex:1;min-width:120px"><b>מטבעות</b><div class="muted" style="font-size:14px">לקניית מראה חדש לבלש</div></div><button class="btn primary mini" data-go2="shop">לחנות</button><button class="btn soft mini" data-go2="class">טבלת הכיתה</button></div>
   <div class="section-title">מחברת הבלש</div>
   ${notebookHTML()}<div style="display:none">${notes.length?notes.map(n=>`<div class="note"><b>${esc(n.src)} · ${esc(n.h)}</b>${esc(n.t)}</div>`).join(""):""}${notes.length<CLUES.length+LESSONS.length?`<div class="note empty">כרטיסי תזכורת: דפי רמז שמוצאים בעולם, וכרטיס על כל תיק שמפענחים. נאספו ${notes.length} מתוך ${CLUES.length+LESSONS.length}.</div>`:""}</div>
   ${window.onlineMeExtra?onlineMeExtra():""}
@@ -766,6 +819,9 @@ ${window.ONLINE_ME?"":`   <div class="teachbox"><b>לוח המורה (הדגמה
   <p class="demo">${demoNote()}</p></div>`;
 }
 function bindScreen(){
+  document.querySelectorAll("canvas[data-oc]").forEach(c=>{const o=OUTFITS.find(x=>x.id===c.dataset.oc);const x=c.getContext("2d");x.clearRect(0,0,12,16);drawChar(x,0,0,o.col?{...coatOf(P.coat),...o.col}:coatOf(P.coat),0,1);});
+  document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const o=OUTFITS.find(x=>x.id===b.dataset.buy);if(coins()<o.price)return;P.spent=(P.spent||0)+o.price;P.owned=[...(P.owned||["o0"]),o.id];P.outfit=o.id;save();flash(`קניתם: ${o.name}! הבלש לובש אותו עכשיו.`);render();});
+  document.querySelectorAll("[data-wear]").forEach(b=>b.onclick=()=>{P.outfit=b.dataset.wear;save();render();});
   if($("#zGo"))$("#zGo").onclick=openZoneExam;
   document.querySelectorAll("[data-go2]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go2)));
   document.querySelectorAll("[data-spaced]").forEach(b=>b.addEventListener("click",()=>openSpaced(b.dataset.spaced)));
@@ -778,13 +834,21 @@ function bindScreen(){
   document.querySelectorAll("[data-act=world]").forEach(b=>b.addEventListener("click",()=>go("world")));
   document.querySelectorAll("[data-act=review]").forEach(b=>b.addEventListener("click",()=>openReview()));
   const hc=$("#heroCv");if(hc)drawHero(hc);
-  const mc=$("#meCv");if(mc){const c=mc.getContext("2d");drawChar(c,6,8,coatOf(P.coat),0,1);}
+  const mc=$("#meCv");if(mc){const c=mc.getContext("2d");drawChar(c,6,8,playerCol(),0,1);}
   const set=(k,v)=>{P.settings[k]=v;save();render();};
   if($("#gAuto")){const tset=(k,v)=>{P.teacher[k]=v;save();render();};$("#gAuto").onclick=()=>tset("gate","auto");$("#gOpen").onclick=()=>tset("gate","open");$("#gLock").onclick=()=>tset("gate","locked");$("#oSeq").onclick=()=>tset("unlockAll",false);$("#oAll").onclick=()=>tset("unlockAll",true);$("#tOff").onclick=()=>tset("tts",false);$("#tOn").onclick=()=>tset("tts",true);}
   if($("#sideL")){$("#ctlJ").onclick=()=>set("ctrl","joy");$("#ctlA").onclick=()=>set("ctrl","arrows");$("#sideL").onclick=()=>set("side","left");$("#sideR").onclick=()=>set("side","right");$("#sizeN").onclick=()=>set("big",false);$("#sizeB").onclick=()=>set("big",true);
    if($("#resetBtn"))$("#resetBtn").onclick=()=>{$("#resetBox").innerHTML=`<div class="confirm"><b>למחוק את כל ההתקדמות?</b><div class="row" style="margin-top:8px"><button class="btn primary" id="resetYes" style="background:var(--stamp)">כן, למחוק</button><button class="btn soft" id="resetNo">ביטול</button></div></div>`;
     $("#resetYes").onclick=()=>{P=fresh();save();buildMap();startOnboarding();};$("#resetNo").onclick=()=>{$("#resetBox").innerHTML="";};};}
 }
+const OUTFITS=[
+ {id:"o0",name:"בלש מתלמד",desc:"המעיל שאיתו מצטרפים לסוכנות.",price:0},
+ {id:"o1",name:"חוקר בגשם",desc:"מעיל גשם ירוק־זית. שום רמז לא נשטף.",price:30,col:{hat:"#3a3a2a",band:"#2b2b20",coat:"#5b6b3a",coatD:"#46532c",pants:"#2f3440"}},
+ {id:"o2",name:"סוכן חשאי",desc:"חליפה שחורה וסרט אדום. אף אחד לא שם לב.",price:60,col:{hat:"#111111",band:"#b8322a",coat:"#1f2430",coatD:"#151922",pants:"#1a1d24"}},
+ {id:"o3",name:"שומר הארכיון",desc:"מעיל חום עם כפתורי נחושת, מהספרייה העתיקה.",price:90,col:{hat:"#4a3020",band:"#c08a2d",coat:"#7a5230",coatD:"#5e3e22",pants:"#3a2e24"}},
+ {id:"o4",name:"קצין המילון",desc:"מדים כחולים וסרט זהב. יודע כל ערך.",price:130,col:{hat:"#22344f",band:"#f4c26b",coat:"#2f5d8a",coatD:"#244a6e",pants:"#22344f"}},
+ {id:"o5",name:"מפקד הסוכנות",desc:"המעיל של המפקד עצמו. רק לבלשים הוותיקים.",price:200,col:{hat:"#16243a",band:"#f4c26b",coat:"#22344f",coatD:"#16243a",pants:"#16243a",boots:"#3a2618"}}];
+function playerCol(){const o=OUTFITS.find(x=>x.id===P.outfit);const base=coatOf(P.coat);return o&&o.col?{...base,...o.col}:base;}
 function coatOf(i){const c=COATS[i]||COATS[0];return{hat:"#2b2320",band:"#7a2a22",skin:"#f1c9a0",coat:c[0],coatD:c[1],pants:"#2f3440",boots:"#1c1c1c"};}
 
 /* ============ pixel art ============ */
@@ -897,7 +961,7 @@ function drawHero(cv){
   const nl=nextLesson();const b=nl?buildings.find(b=>b.lesson===nl.id):buildings[0];
   const cx=(b.x+b.w/2)*T,cy=(b.y+b.h/2+1)*T;const vw=160,vh=85;
   c.drawImage(mapCv,cx-vw/2,cy-vh/2,vw,vh,0,0,320,170);
-  drawChar(c,(b.door.x*T-(cx-vw/2))*2-6,((b.door.y+1)*T-(cy-vh/2))*2-12,coatOf(P.coat),0,2);
+  drawChar(c,(b.door.x*T-(cx-vw/2))*2-6,((b.door.y+1)*T-(cy-vh/2))*2-12,playerCol(),0,2);
 }
 
 /* ============ world ============ */
@@ -1039,7 +1103,7 @@ function draw(){
     if(ready&&Math.sin(t0*4+st.y)>.5){ctx.fillStyle="#fff";ctx.fillRect(R*.6,-R,2*S,2*S);}ctx.restore();});
   // entities sorted by y
   const ents=npcs.map(n=>({y:n.y,d:()=>{drawShadow(sx(n.x),sy(n.y));drawChar(ctx,sx(n.x)-6*S,sy(n.y)-15*S,npcCol(n),0,S);}}));
-  ents.push({y:pl.y,d:()=>{drawShadow(sx(pl.x),sy(pl.y));drawChar(ctx,sx(pl.x)-6*S,sy(pl.y)-15*S,coatOf(P.coat),pl.moving&&Math.floor(pl.anim)%2,S);}});
+  ents.push({y:pl.y,d:()=>{drawShadow(sx(pl.x),sy(pl.y));drawChar(ctx,sx(pl.x)-6*S,sy(pl.y)-15*S,playerCol(),pl.moving&&Math.floor(pl.anim)%2,S);}});
   ents.sort((a,b)=>a.y-b.y).forEach(e=>e.d());
   // labels
   const fs=Math.max(13,Math.round(5.2*S));ctx.font=`700 ${fs}px Assistant, sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.direction="rtl";
@@ -1086,10 +1150,10 @@ function talk(n){
   if(n.lesson){const l=L(n.lesson),s=P.solved[l.id];
     say(l.npc,s&&s.done?`התיק ״${l.title}״ פוענח (${s.best}%). רוצים לחזור עליו ולשפר?`:l.intro,[{t:"לפתוח את התיק",f:()=>openCase(l.id,"world")},{t:"אחר כך"}]);}
 }
-function collectClue(c){P.clues.push(c.id);P.points+=10;const first=!P.clueTip;P.clueTip=true;save();updateHud();
+function collectClue(c){P.clues.push(c.id);addPts(PTS.clue);const first=!P.clueTip;P.clueTip=true;save();updateHud();
   const head=`״${c.h}״ — ${c.t}${c.l?`\nהדף נכנס לפרק ״${L(c.l).title}״ במחברת.`:""}`;
-  if(first)chain("מצאתם דף רמז!",[head,"דף רמז הוא כרטיס תזכורת קטן על מה שלומדים. כל דף שמוצאים נשמר במחברת הבלש שלכם, כדי שתוכלו לחזור אליו כשאתם פותרים תיקים.",`את המחברת פותחים בכפתור ״מחברת״ למעלה, או במסך ״אני״. על כל דף מקבלים 10 נקודות, ונקודות מעלות אתכם בדרגה: מבלש מתלמד לבלש. נמצאו ${P.clues.length} מתוך ${CLUES.length} דפים.`]);
-  else say("מצאתם דף רמז!",`${head}\nהדף נשמר במחברת הבלש (+10 נקודות). נמצאו ${P.clues.length} מתוך ${CLUES.length}.`,[{t:"להמשיך לחקור"},{t:"לפתוח את המחברת",f:openNotebook}]);}
+  if(first)chain("מצאתם דף רמז!",[head,"דף רמז הוא כרטיס תזכורת קטן על מה שלומדים. כל דף שמוצאים נשמר במחברת הבלש שלכם, כדי שתוכלו לחזור אליו כשאתם פותרים תיקים.",`את המחברת פותחים בכפתור ״מחברת״ למעלה, או במסך ״אני״. על כל דף מקבלים ${PTS.clue} נקודות, ונקודות מעלות אתכם בדרגה: מבלש מתלמד לבלש. נמצאו ${P.clues.length} מתוך ${CLUES.length} דפים.`]);
+  else say("מצאתם דף רמז!",`${head}\nהדף נשמר במחברת הבלש (+${PTS.clue} נקודות). נמצאו ${P.clues.length} מתוך ${CLUES.length}.`,[{t:"להמשיך לחקור"},{t:"לפתוח את המחברת",f:openNotebook}]);}
 function notesList(){return [...LESSONS.filter(l=>P.solved[l.id]&&P.solved[l.id].done).map(l=>({...l.clue,src:"תיק "+l.num})),...CLUES.filter(c=>P.clues.includes(c.id)).map(c=>({...c,src:"דף רמז"}))];}
 function notebookHTML(){const r=rank();
   const clueCard=(c,teaser)=>`<div class="note ${teaser?"tease":""}"><b>דף רמז · ${esc(c.h)}</b>${esc(c.t)}${teaser?`<small>תבינו את הרמז הזה עד הסוף אחרי שתלמדו את הבית.</small>`:""}</div>`;
@@ -1114,13 +1178,13 @@ function bridgePuzzle(){
   dlgOpen=true;$("#dlg").hidden=false;$("#dlgWho").textContent=`גשר המילים · קרש ${P.planks+1} מתוך 5`;$("#dlgText").textContent=p.q;
   const bx=$("#dlgBtns");bx.innerHTML="";
   p.o.forEach((o,i)=>{const e=document.createElement("button");e.className="btn soft";e.style.flex="1 1 90px";e.textContent=o;
-    e.onclick=()=>{if(i===p.a){P.planks++;P.points+=10;save();updateHud();closeDlg();
-        if(P.planks>=5){buildMap();say("גשר המילים","הגשר תוקן! עכשיו אפשר לעבור לאי. +10 נקודות");}else{toast(`קרש ${P.planks} במקום! +10`);setTimeout(bridgePuzzle,500);}}
+    e.onclick=()=>{if(i===p.a){P.planks++;addPts(PTS.bridge);save();updateHud();closeDlg();
+        if(P.planks>=5){buildMap();say("גשר המילים","הגשר תוקן! עכשיו אפשר לעבור לאי. +"+PTS.bridge+" נקודות");}else{toast(`קרש ${P.planks} במקום! +${PTS.bridge}`);setTimeout(bridgePuzzle,500);}}
       else{e.disabled=true;e.style.textDecoration="line-through";toast("נסו שוב, בלש!");}};bx.appendChild(e);});
   const c=document.createElement("button");c.className="btn ghost";c.textContent="אחר כך";c.onclick=closeDlg;bx.appendChild(c);
 }
-function openChest(){P.chest=true;P.points+=50;save();buildMap();updateHud();
-  say("התיבה של המפקד","מצאתם את זכוכית המגדלת של המפקד! +50 נקודות. מי שמתקן גשרים יודע לחבר בין מילים.");}
+function openChest(){P.chest=true;addPts(PTS.chest);save();buildMap();updateHud();
+  say("התיבה של המפקד","מצאתם את זכוכית המגדלת של המפקד! +"+PTS.chest+" נקודות. מי שמתקן גשרים יודע לחבר בין מילים.");}
 
 /* map overlay */
 function toggleMap(){mapOpen=!mapOpen;$("#mapov").hidden=!mapOpen;if(mapOpen){const m=$("#mapcv");m.width=MW*T;m.height=MH*T;const c=m.getContext("2d");c.drawImage(mapCv,0,0);
@@ -1178,21 +1242,21 @@ function openChallenge(st){closeDlg();
   C={l:{id:"star",num:"★",title:st.title,building:"כוכב אתגר",npc:"המפקד",npcColors:["#22344f","#16243a"]},star:st,from:running?"world":"screen",phase:"challenge",idx:0,list:st.items.map(i=>({...i})),cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
   $("#case").hidden=false;document.body.style.overflow="hidden";nextChallenge();}
 function nextChallenge(){if(C.idx>=C.list.length){const ok=C.score>=C.list.length-.001;C.chalOk=ok;
-    if(ok&&!P.stars.includes(C.star.id)){P.stars.push(C.star.id);P.points+=C.star.pts;save();}
+    if(ok&&!P.stars.includes(C.star.id)){P.stars.push(C.star.id);addPts(C.star.pts);save();}
     C.phase="result";C.chalDone=true;renderCase();$("#case").scrollTop=0;return;}serve(C.list[C.idx++]);}
 function openSpaced(lid){const l=L(lid);const list=shuffleArr(l.pool).slice(0,3).map(it=>({...it,_l:lid}));
   C={l:{id:"spaced",num:"תעלומה",title:"תעלומת היום",building:l.building,npc:l.npc,npcColors:l.npcColors},sl:lid,from:"screen",phase:"spaced",idx:0,list,cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
   $("#case").hidden=false;document.body.style.overflow="hidden";nextSpaced();}
 function nextSpaced(){if(C.idx>=C.list.length){const e=P.spaced.find(x=>x.l===C.sl);const ok=C.score>=2-.001;
     if(e){if(ok){e.step++;if(e.step>=SPACE.length)P.spaced=P.spaced.filter(x=>x!==e);else e.due=Date.now()+SPACE[e.step]*DAY;}else e.due=Date.now()+DAY;}
-    P.points+=Math.round(C.score*5);save();C.spOk=ok;C.spNext=e&&P.spaced.includes(e)?Math.round((e.due-Date.now())/DAY):0;C.phase="result";C.spDone=true;renderCase();return;}serve(C.list[C.idx++]);}
+    addPts(C.score*PTS.spaced);save();C.spOk=ok;C.spNext=e&&P.spaced.includes(e)?Math.round((e.due-Date.now())/DAY):0;C.phase="result";C.spDone=true;renderCase();return;}serve(C.list[C.idx++]);}
 function examIntro(){chain("שומר השער",["כל הכבוד, פענחתם את כל הבתים ברובע המילים!","רגע לפני שעוברים לגן השורשים, נבדוק שאתם שולטים היטב בכל מה שלמדתם, ושאתם בלשים מומחים שמוכנים לשלב הבא.",`זה ״מבחן הכניסה לשלב הבא״: ${LESSONS.length} שאלות, אחת מכל בית. עוברים מ־${PASS}%. מי שלא עובר חוזר על הבתים שצריך, ומנסה שוב.`],()=>say("שומר השער","מוכנים?",[{t:"להתחיל את המבחן",f:openZoneExam},{t:"עוד לא, אני רוצה לחזור על החומר"}]));}
 function openZoneExam(){closeDlg();
   const list=LESSONS.map(l=>{const p=l.pool.filter(i=>i.lv>=2);const it=shuffleArr(p.length?p:l.pool)[0];return{...it,_l:l.id};});
   C={l:{id:"zexam",num:"מבחן",title:"מבחן הכניסה לשלב הבא",building:"שער גן השורשים",npc:"שומר השער",npcColors:["#5a4a2a","#3f341d"]},from:running?"world":"screen",phase:"zexam",idx:0,list,per:{},cur:null,state:null,score:0,count:0,hist:[],view:-1,confirmX:false};
   $("#case").hidden=false;document.body.style.overflow="hidden";nextZoneExam();}
 function nextZoneExam(){if(C.idx>=C.list.length){const pct=Math.round(C.score/C.count*100),ok=pct>=PASS;const prev=P.zoneExam||{};
-    P.zoneExam={passed:ok||!!prev.passed,best:Math.max(pct,prev.best||0),tries:(prev.tries||0)+1};if(ok&&!prev.passed)P.points+=50;save();
+    P.zoneExam={passed:ok||!!prev.passed,best:Math.max(pct,prev.best||0),tries:(prev.tries||0)+1,at:prev.at||Date.now()};if(ok&&!prev.passed)addPts(PTS.zone);save();
     C.zPct=pct;C.zOk=ok;C.phase="result";C.zDone=true;renderCase();$("#case").scrollTop=0;if(running)updateHud();return;}serve(C.list[C.idx++]);}
 function openReview(){
   const items=[];P.review.slice(0,5).forEach(r=>{const l=L(r.l);if(!l)return;const it=[...l.pool,...l.judge].find(i=>i.k===r.k);if(it)items.push({...it,_l:l.id});});
@@ -1285,7 +1349,7 @@ function innerHTML_(it,st,checked){
     ${!done?`<p class="muted" style="margin:0;font-size:15px;text-align:center">לאיזה תא שייכת המילה? (${curI+1}/${it.items.length})</p>`:""}</div>`;
 }
 function fbHTML(it,st,phase,live){const ok=st.score>=.999;const part=!ok&&st.score>0;
-  if(phase==="clue")return ok?`<div class="fb ok"><b>נכון! הרמז נשמר במחברת הבלש.</b>${esc(it.why||"")} (+10 נקודות)</div>`:`<div class="fb no"><b>עוד לא.</b>קראו שוב את דף הרמז שלמעלה, ונסו שוב.</div>`;
+  if(phase==="clue")return ok?`<div class="fb ok"><b>נכון! הרמז נשמר במחברת הבלש.</b>${esc(it.why||"")} (+${PTS.clue} נקודות)</div>`:`<div class="fb no"><b>עוד לא.</b>קראו שוב את דף הרמז שלמעלה, ונסו שוב.</div>`;
   if(phase==="exp")return `<div class="fb ok"><b>${ok?"יפה מאוד!":"ניסיון טוב!"}</b>${esc(it.why||"")}</div>`;
   return `<div class="fb ${ok?"ok":"no"}"><b>${ok?"פוענח!":(part?"כמעט!":"לא בדיוק")}</b>${esc(it.why||"")}${live&&!ok&&C.retryNote==="soon"?"<br><small>עכשיו נתרגל את זה: שאלה קלה יותר, הסבר קצר, ושאלה נוספת באותה רמה.</small>":""}${live&&!ok&&C.retryNote==="exam"?"<br><small>בסוף התרגול תקבלו עוד שאלה דומה על אותו כלל.</small>":""}${live&&!ok&&C.retryNote==="later"?"<br><small>נחזור לזה ב״תיקים פתוחים״, ואפשר לשאול את המורה.</small>":""}${live&&!ok&&phase==="judge"&&C.judgeAgain?"<br><small>קראו שוב את ההסבר, ותקבלו ניסיון נוסף.</small>":""}</div>`;}
 function pastHTML(){
@@ -1347,7 +1411,7 @@ function grade(it,st){
 }
 function afterCheck(it,sc){
   {const lid=(C.phase==="practice"||C.phase==="judge")?C.l.id:it._l;if(["practice","judge","exam","review","spaced"].includes(C.phase)&&lid)recSkill(lid,C.phase==="judge"||it.judge?"judge":skill(it),sc);}
-  if(C.phase==="practice"||C.phase==="judge"){C.score+=sc;C.count++;P.points+=Math.round(sc*10*(it.lv||2));
+  if(C.phase==="practice"||C.phase==="judge"){C.score+=sc;C.count++;addPts(sc*PTS.q[(it.lv||2)-1]);
     if(sc<.999&&it.k&&!P.review.some(r=>r.k===it.k))P.review.push({l:C.l.id,k:it.k});
     if(sc>=.999&&it.k)P.review=P.review.filter(r=>r.k!==it.k);
     if(C.phase==="practice"){if(sc>=.999){C.streak++;if(C.streak>=2&&C.level<3){C.level++;C.streak=0;C.lvlMsg="up";}}else{C.streak=0;if(sc<.5&&C.level>1){C.level--;C.lvlMsg="down";}
@@ -1356,14 +1420,14 @@ function afterCheck(it,sc){
       else if(!inChain)C.retryNote="later";}}
     if(C.phase==="judge"&&sc<.999&&!C.judgeRetried){C.judgeRetried=true;C.judgeAgain=true;}
     save();}
-  if(C.phase==="exam"){C.score+=sc;C.count++;const r=C.per[it._l]||(C.per[it._l]={s:0,c:0});r.s+=sc;r.c++;P.points+=Math.round(sc*5);
+  if(C.phase==="exam"){C.score+=sc;C.count++;const r=C.per[it._l]||(C.per[it._l]={s:0,c:0});r.s+=sc;r.c++;addPts(sc*PTS.exam);
     if(sc<.999){if(it.k&&!P.review.some(x=>x.k===it.k))P.review.push({l:it._l,k:it.k});
       if(!it._again&&C.extra<6){const sim=shuffleArr(L(it._l).pool.filter(i=>!C.usedK.has(i.k)&&skill(i)===skill(it)));if(sim.length){C.usedK.add(sim[0].k);C.list.push({...sim[0],_l:it._l,_again:true});C.extra++;C.retryNote="exam";}}}
     save();}
   if(C.phase==="challenge"||C.phase==="spaced"){C.score+=sc;C.count++;}
   if(C.phase==="zexam"){C.score+=sc;C.count++;C.per[it._l]=sc;recSkill(it._l,skill(it),sc);}
-  if(C.phase==="clue"&&sc>=.999&&!P.clues.includes(C.clue.id)){P.clues.push(C.clue.id);P.points+=10;save();}
-  if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);else P.points+=0;save();}
+  if(C.phase==="clue"&&sc>=.999&&!P.clues.includes(C.clue.id)){P.clues.push(C.clue.id);addPts(PTS.clue);save();}
+  if(C.phase==="review"){C.score+=sc;if(sc>=.999)P.review=P.review.filter(r=>r.k!==it.k);save();}
 }
 function advance(){
   if(C.phase==="exp"){C.phase="teach";C.teachIdx=0;C.stepShown=null;C.tcheck=null;renderCase();$("#case").scrollTop=0;return;}
@@ -1413,13 +1477,13 @@ function flash(t){const d=document.createElement("div");d.className="toast";d.st
 function finish(){
   const pct=Math.round(C.score/C.count*100);const l=C.l;const prev=P.solved[l.id];const wasDone=prev&&prev.done;
   const done=pct>=PASS;const wasPerfect=!!(prev&&prev.perfect);const perfect=pct>=100;
-  P.solved[l.id]={best:Math.max(pct,prev?prev.best:0),done:done||!!wasDone,perfect:perfect||wasPerfect};
-  if(done&&!wasDone)P.points+=50;C.newPerfect=perfect&&!wasPerfect;if(C.newPerfect)P.points+=PERFECT_BONUS;P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;if(C.newDone)P.spaced.push({l:l.id,due:Date.now()+SPACE[0]*DAY,step:0});save();C.phase="words";renderCase();$("#case").scrollTop=0;
+  P.solved[l.id]={best:Math.max(pct,prev?prev.best:0),done:done||!!wasDone,perfect:perfect||wasPerfect,at:(prev&&prev.at)||Date.now()};
+  if(done&&!wasDone)addPts(PTS.case);C.newPerfect=perfect&&!wasPerfect;if(C.newPerfect)addPts(PTS.perfect);P.level[l.id]=C.level;save();C.pct=pct;C.newDone=done&&!wasDone;if(C.newDone)P.spaced.push({l:l.id,due:Date.now()+SPACE[0]*DAY,step:0});save();C.phase="words";renderCase();$("#case").scrollTop=0;
 }
 function resultHTML(){
   if(C.zDone){const weak=LESSONS.filter(l=>(C.per[l.id]??1)<.999);
     return `<div class="folder result" data-tab="מבחן הכניסה לשלב הבא"><div class="score">${C.zPct}%</div><div class="bigstamp ${C.zOk?"":"retry"}">${C.zOk?"בלשים מומחים!":"עוד לא"}</div>
-    <p>${C.zOk?`עברתם את מבחן הכניסה. השער לגן השורשים נפתח לפניכם! (+50 נקודות)`:`כדי לעבור צריך ${PASS}%. חזרו על הבתים שבהם טעיתם, ונסו שוב עם שאלות חדשות.`}</p>
+    <p>${C.zOk?`עברתם את מבחן הכניסה. השער לגן השורשים נפתח לפניכם! (+${PTS.zone} נקודות)`:`כדי לעבור צריך ${PASS}%. חזרו על הבתים שבהם טעיתם, ונסו שוב עם שאלות חדשות.`}</p>
     ${weak.length?`<div class="perfect" style="text-align:right"><b>${C.zOk?"כדאי לרענן:":"לחזור על:"}</b>${weak.map(l=>`<button class="btn soft" style="margin-top:8px;width:100%" data-learn2="${l.id}">${l.building} · ${l.title.split(":")[0]}</button>`).join("")}</div>`:""}
     <div class="case-actions">${C.zOk?"":`<button class="btn soft" id="zAgain">לנסות שוב</button>`}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;}
   if(C.spDone){return `<div class="folder result" data-tab="תעלומת היום"><div class="score">${Math.round(C.score)}/3</div><div class="bigstamp ${C.spOk?"":"retry"}">${C.spOk?"זכור!":"נחזור מחר"}</div>
@@ -1437,9 +1501,9 @@ function resultHTML(){
   if(C.reviewDone){return `<div class="folder result" data-tab="חזרה"><div class="score">${Math.round(C.score)}/${C.list.length}</div><p>תשובות נכונות בחזרה. שאלות שענית עליהן נכון יצאו מהרשימה.</p><div class="case-actions"><button class="btn primary" id="done">סיום</button></div></div>`;}
   const l=C.l,ok=C.pct>=PASS;const i=LESSONS.indexOf(l),nx=LESSONS[i+1];
   const pass=ok?`<div class="passpop"><b>✓ עברתם את ה־${PASS}%!</b>${nx?(C.newDone?`הבית הבא נפתח: ${i+2}. ${nx.building} (${nx.title.split(":")[0]}). אפשר לעבור למשימה הבאה.`:`אפשר לעבור למשימה הבאה: ${nx.building}.`):`זה היה הבית האחרון ברובע. ${gateOpen()?"השער לאזור 2 נפתח!":""}`}</div>`:"";
-  const perf=C.newPerfect?`<div class="perfect"><b>★ מושלם! 100%</b>בונוס של ${PERFECT_BONUS} נקודות. הכוכב יופיע ליד הבית במפה.</div>`:(ok&&C.pct<100&&!(P.solved[l.id]&&P.solved[l.id].perfect)?`<div class="perfect"><b>★ אתגר: 100%</b>מי שמפענח את התיק בלי טעויות מקבל בונוס של ${PERFECT_BONUS} נקודות. אפשר לנסות שוב מתי שרוצים.</div>`:"");
+  const perf=C.newPerfect?`<div class="perfect"><b>★ מושלם! 100%</b>בונוס של ${PTS.perfect} נקודות. הכוכב יופיע ליד הבית במפה.</div>`:(ok&&C.pct<100&&!(P.solved[l.id]&&P.solved[l.id].perfect)?`<div class="perfect"><b>★ אתגר: 100%</b>מי שמפענח את התיק בלי טעויות מקבל בונוס של ${PTS.perfect} נקודות. אפשר לנסות שוב מתי שרוצים.</div>`:"");
   return `<div class="folder result" data-tab="סיכום התיק"><div class="score">${C.pct}%</div><div class="bigstamp ${ok?"":"retry"}">${ok?"פוענח!":"עוד לא"}</div>${pass}${perf}
-  <p>${ok?(C.newDone?`+50 נקודות על פענוח התיק. כרטיס ״${l.clue.h}״ נוסף למחברת הבלש.`:"כל הכבוד! התיק כבר היה מפוענח, והתרגול נשמר."):`תיק נחשב פוענח מ־${PASS}%. אפשר לנסות שוב עכשיו, והשאלות שטעיתם בהן מחכות גם ב״תיקים פתוחים״.`}</p>
+  <p>${ok?(C.newDone?`+${PTS.case} נקודות על פענוח התיק. כרטיס ״${l.clue.h}״ נוסף למחברת הבלש.`:"כל הכבוד! התיק כבר היה מפוענח, והתרגול נשמר."):`תיק נחשב פוענח מ־${PASS}%. אפשר לנסות שוב עכשיו, והשאלות שטעיתם בהן מחכות גם ב״תיקים פתוחים״.`}</p>
   <p class="muted">רמה בסיום: ${["א","ב","ג"][C.level-1]}</p>
   <div class="sum">${Object.entries(l.sum).map(([k,v])=>`<div><b>${k}?</b>${esc(v)}</div>`).join("")}</div>
   <div class="case-actions">${!ok||C.pct<100?`<button class="btn soft" id="again">${ok?"לנסות להגיע ל־100%":"לנסות שוב"}</button>`:""}<button class="btn primary" id="done">${C.from==="world"?"חזרה לעולם":"סיום"}</button></div></div>`;

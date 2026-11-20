@@ -39,6 +39,8 @@ async function afterLogin(){
 }
 async function logout(){try{await pushNow();}catch(e){}await sb.auth.signOut();me=null;location.reload();}
 window.onlineLogout=logout;
+window.onlineBoard=async function(){const {data,error}=await sb.rpc("class_board");if(error)throw error;const wk=weekStart();
+  return (data||[]).map(r=>({name:r.is_me?(P.name||r.full_name):r.full_name,me:r.is_me,points:r.is_me?P.points:r.points,week:r.is_me?(P.wk===wk?P.wkPts:0):(r.wk===wk?r.wk_pts:0)}));};
 
 /* ---------- student: progress & settings ---------- */
 const LKEY=()=>KEY+":"+me.id;

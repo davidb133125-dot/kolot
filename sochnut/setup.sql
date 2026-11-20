@@ -209,6 +209,16 @@ begin
   update public.profiles set tts = coalesce(p_on, false) where id = p_user;
 end $$;
 
+-- ---------- טבלת הכיתה: שם ונקודות של חברי הכיתה בלבד ----------
+create or replace function public.class_board()
+returns table (full_name text, is_me boolean, points int, wk text, wk_pts int)
+language sql stable security definer set search_path = '' as $$
+  select p.full_name, p.id = auth.uid(),
+         coalesce((g.data->>'points')::int, 0), g.data->>'wk', coalesce((g.data->>'wkPts')::int, 0)
+  from public.profiles p left join public.progress g on g.user_id = p.id
+  where p.role = 'student' and public.my_class() is not null and p.class_id = public.my_class()
+$$;
+
 -- ---------- מי רשאי להפעיל מה ----------
 revoke execute on function public._create_user(text,text,text,uuid,text) from public, anon, authenticated;
 revoke execute on function public.bootstrap_admin(text,text,text)          from public, anon, authenticated;
@@ -227,6 +237,8 @@ grant execute on function public.admin_delete_class(uuid)                  to au
 grant execute on function public.set_class_settings(uuid,text,boolean)     to authenticated;
 grant execute on function public.set_student_settings(uuid,text,boolean)   to authenticated;
 revoke execute on function public.set_student_tts(uuid,boolean)            from public, anon;
+revoke execute on function public.class_board()                            from public, anon;
+grant execute on function public.class_board()                             to authenticated;
 grant execute on function public.set_student_tts(uuid,boolean)             to authenticated;
 
 -- =====================================================================
